@@ -1,0 +1,23 @@
+name: Fork SWATPlus from Bitbucket repo to Github
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '8 4 2 */1 *' # runs at 4:08 UTC on 2nd day in every month
+
+jobs:
+  fork:
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: checkout repo content
+        uses: actions/checkout@v3
+        
+      - name: Fork repo
+        env:
+          SWATPLUS_TOKEN: ${{ secrets.SWATPLUS_TOKEN }}
+        run: |
+          git clone https://bitbucket.org/blacklandgrasslandmodels/modular_swatplus.git
+          cd modular_swatplus
+          git remote add github https://$GITHUB_ACTOR:$SWATPLUS_TOKEN@github.com/$GITHUB_REPOSITORY.git
+          git push github master:swatplus
