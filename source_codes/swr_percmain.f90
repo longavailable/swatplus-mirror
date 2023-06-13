@@ -67,7 +67,6 @@
           gwtranq(j) = gwtranq(j) + hru_gwtran(j,j1) !HRU total
         enddo
       endif
-      
 
       !! initialize water entering first soil layer
       !! ht1%flo is infiltration from overland flow routing
