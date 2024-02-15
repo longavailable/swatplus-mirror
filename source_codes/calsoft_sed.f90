@@ -1,6 +1,6 @@
       subroutine calsoft_sed
 
-      use hru_module, only : hru, hru_init, ihru, tconc
+      use hru_module, only : hru, ihru, tconc
       use soil_module
       use plant_module
       use hydrograph_module

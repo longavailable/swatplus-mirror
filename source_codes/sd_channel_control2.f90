@@ -44,7 +44,11 @@
       chsd_d(ich)%flo_in_mm = ht1%flo / (10. * ob(icmd)%area_ha)   !flow in mm
       ch_in_d(ich) = ht1                        !set inflow om hydrograph
       ch_in_d(ich)%flo = ht1%flo / 86400.       !flow for om output - m3/s
-      hcs1 = obcs(icmd)%hin
+      
+      !set constituents (rtb salt) to incoming loads
+      if (cs_db%num_tot > 0) then
+        hcs1 = obcs(icmd)%hin(1)
+      end if
       !! zero outgoing flow and sediment - ht2
       ht2 = hz
 
@@ -110,7 +114,7 @@
       
       !! set pesticide output variables
       do ipest = 1, cs_db%num_pests
-        chpst_d(ich)%pest(ipest)%tot_in = obcs(icmd)%hin%pest(ipest)
+        chpst_d(ich)%pest(ipest)%tot_in = obcs(icmd)%hin(1)%pest(ipest)
         chpst_d(ich)%pest(ipest)%sol_out = frsol * obcs(icmd)%hd(1)%pest(ipest)
         chpst_d(ich)%pest(ipest)%sor_out = frsrb * obcs(icmd)%hd(1)%pest(ipest)
         chpst_d(ich)%pest(ipest)%react = chpst%pest(ipest)%react

@@ -6,6 +6,7 @@
         use organic_mineral_mass_module
         use carbon_module
         use output_landscape_module
+        use time_module
         
         implicit none
         
@@ -107,50 +108,18 @@
        real :: wc                !none                 |scaling factor for soil water impact on daily
        real :: sat               !                     |
        real :: void              !                     |
-       real :: sut               !                     |soil water control on biological processes
        real :: cdg               !                     |soil temperature control on biological processes
-       real :: ox                !                     |oxygen control on biological processes with soil depth
-       real :: cs                !                     |combined factor controlling biological processes [cs = sqrt(cdg×sut)* 0.8*ox*x1), cs < 10; cs = 10, cs>=10 (williams, 1995)]
-       real :: x1                !none                 |tillage control on residue decomposition (not used)
        real :: x3                !none                 |amount of c transformed from passive, slow, metabolic, and non-lignin structural pools to microbial pool
-       real :: lmf               !frac                 |fraction of the litter that is metabolic 
-       real :: lsf               !frac                 |fraction of the litter that is structural
-       real :: lslf              !kg kg-1              |fraction of structural litter that is lignin 
-       real :: xlslf             !                     |control on potential transformation of structural litter by lignin fraction
-       real :: lsr               !                     |
        real :: lscta             !                     |
        real :: lslcta            !                     |
        real :: lslncta           !                     |
        real :: lsnta             !                     |
        real :: lmcta             !                     |
-       real :: lsctp             !kg ha-1 day-1        |potential transformation of C in structural litter
-       real :: lslctp            !kg ha-1 day-1        |potential transformation of C in lignin of structural litter
-       real :: lslnctp           !kg ha-1 day-1        |potential transformation of C in nonlignin structural litter
-       real :: lsntp             !kg ha-1 day-1        |potential transformation of N in structural litter			  
-       real :: lmr               !                     |
-       real :: lmctp             !kg ha-1 day-1        |potential transformation of C in metabolic litter
-       real :: lmntp             !kg ha-1 day-1        |potential transformation of N in metabolic litter	
-       real :: bmctp             !kg ha-1 day-1        |potential transformation of C in microbial biomass
-       real :: hsctp             !kg ha-1 day-1        |potential transformation of C in slow humus
-       real :: hsntp             !kg ha-1 day-1        |potential transformation of N in slow humus
-       real :: hpctp             !kg ha-1 day-1        |potential transformation of C in passive humus 
-       real :: hpntp             !kg ha-1 day-1        |potential transformation of N in passive humus
-       real :: nchp              !                     |n/c ratio of passive humus
        real :: nf                !                     |
-       real :: ncbm              !                     |n/c ratio of biomass
-       real :: nchs              !                     |n/c ration of slow humus
-       real :: alslco2           !                     |Fraction of decomposed lignin of structural litter allocated to CO2
-       real :: alslnco2          !                     |Fraction of decomposed lignin of structural litter allocated to CO2
-       real :: almco2            !                     |Fraction of decomposed metabolic litter allocated to CO2 
-       real :: abco2             !                     |Fraction of decomposed microbial biomass allocated to CO2
-       real :: a1co2             !                     |
-       real :: apco2             !                     |Fraction of decomposed  passive humus allocated to CO2
-       real :: asco2             !                     |Fraction of decomposed slow humus allocated to CO2 
-       real :: abp               !                     |Fraction of decomposed microbial biomass allocated to passive humus
-       real :: asp               !                     |Fraction of decomposed slow humus allocated to passive
        real :: a1                !                     |
        real :: asx               !                     |
        real :: apx               !                     |
+       real :: a1co2             !                     |
        real :: df1               !                     |
        real :: df2               !                     |
        real :: snmn              !
@@ -382,13 +351,19 @@
           org_con%cs = min(10., sqrt(org_con%cdg * org_con%sut) * 0.9* org_con%ox * till_eff) 
           
           !! call denitrification (to use void and cdg factor)
-          wdn = 0.
-          org_con%cdg = fcgd(soil(j)%phys(k)%tmp)
-          if (org_con%cdg > 0. .and. void <= 0.1) then
-            call nut_denit(k, j, org_con%cdg, wdn, void)
-          end if
+          !wdn = 0.
+          !org_con%cdg = fcgd(soil(j)%phys(k)%tmp)
+          !if (org_con%cdg > 0. .and. void <= 0.1) then
+          !  call nut_denit(k, j, org_con%cdg, wdn, void)
+          !end if
+          
+          if (org_con%sut >= bsn_prm%sdnco) then
+            wdn = soil1(j)%mn(k)%no3 * (1.-Exp(-bsn_prm%cdn * cdg * soil1(j)%cbn(k) / 100.))
+          else
+            wdn = 0.
+          endif
+          soil1(j)%mn(k)%no3 = max(0.0001,soil1(j)%mn(k)%no3 - wdn)
           hnb_d(j)%denit = hnb_d(j)%denit + wdn
-
           sol_min_n = soil1(j)%mn(k)%no3 + soil1(j)%mn(k)%nh4
               
           !lignin content in structural litter (fraction)          
@@ -411,7 +386,7 @@
             org_ratio%nchp = .1
             xbm = 1.
             ! compute n/c ratios - relative nitrogen content in residue
-            rsdn_pct = 0.1 * (rsd1(j)%str%n + rsd1(j)%meta%n) / (rsd1(j)%tot_com%m / 1000. + 1.e-5)
+            rsdn_pct = 0.1 * (rsd1(j)%tot_str%n + rsd1(j)%tot_meta%n) / (rsd1(j)%tot_com%c / 1000. + 1.e-5)
             if (rsdn_pct > 2.) then
               org_ratio%ncbm = .1
               org_ratio%nchs = org_ratio%ncbm / (5. * org_ratio%ncbm + 1.)
@@ -909,7 +884,7 @@
               rspc = .3 * lslcta + a1co2 * (lslncta + lmcta) + org_allo%abco2 * bmcta + org_allo%asco2 * hscta + &
                 org_allo%apco2 * hpcta
               !!rspc_da is accounting variable summarizing co2 emissions from all soil layers
-              cbn_loss(j)%rspc_d = cbn_loss(j)%rspc_d +  rspc 
+              hsc_d(j)%rsp_c = hsc_d(j)%rsp_c +  rspc 
               
               !!update other vairables used in swat
               !!==================================

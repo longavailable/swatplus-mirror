@@ -34,11 +34,11 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
       use hru_module, only : hru, ihru, i_sep, inflpcp, isep, latlyr, latq, lyrtile, qstemm, sepbtm, sepcrktot, sepday,   &
-         sw_excess, wt_shall, qtile, gwtranq !rtb gwflow
+         sw_excess, wt_shall, qtile, gwsoilq !rtb gwflow
       use soil_module
       use septic_data_module
       use hydrograph_module
-      use gwflow_module, only : hru_gwtran,gw_transfer_flag,gw_transport_flag !rtb gwflow
+      use gwflow_module, only : gw_soil_flag,gw_solute_flag !rtb gwflow
       use basin_module
       
       implicit none
@@ -61,11 +61,8 @@
       ires =  hru(j)%dbs%surf_stor !Jaehak 2022
 
       !rtb gwflow: add groundwater transferred to soil profile
-      if(gw_transfer_flag.eq.1) then
-        do j1 = 1, soil(j)%nly
-          soil(j)%phys(j1)%st = soil(j)%phys(j1)%st + hru_gwtran(j,j1)
-          gwtranq(j) = gwtranq(j) + hru_gwtran(j,j1) !HRU total
-        enddo
+      if(bsn_cc%gwflow.eq.1) then
+        call gwflow_soil(j)
       endif
 
       !! initialize water entering first soil layer
@@ -90,7 +87,7 @@
       do                  !slug loop
         sepday = amin1(sep_left, slug)
         sep_left = sep_left - sepday
-        sep_left = amax1(0., sep_left)
+        sep_left = max(0., sep_left)
       do j1 = 1, soil(j)%nly
         !! add water moving into soil layer from overlying layer
         soil(j)%phys(j1)%st = soil(j)%phys(j1)%st + sepday
@@ -135,9 +132,7 @@
       end do                    !slug loop
 
       !! redistribute soil water if above saturation (high water table)
-      do j1 = 1, soil(j)%nly
-        call swr_satexcess(j1)
-      end do
+      call swr_satexcess
       
       !! update soil profile water
       soil(j)%sw = 0.

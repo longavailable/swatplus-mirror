@@ -24,12 +24,11 @@
 !!    SWAT: Qman
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
-      use hru_module, only : hru, ihru
+      use hru_module, only : hru
       use channel_velocity_module
       
       implicit none
        
-      integer :: jj             !none          |counter
       integer :: k              !none          |dummy argument (HRU number)
       real :: fps               !none          |change in horizontal distance per unit
                                 !              |change in vertical distance on floodplain side
@@ -48,10 +47,7 @@
                                 !              |change in vertical distance on channel side
                                 !              |slopes; always set to 2 (slope=1/2) 
       real :: qman              !m^3/s or m/s  |flow rate or flow velocity
-      integer :: j              !none          |hru number
       
-      !k = ihru
-
       aa = 1.
       b = 0.
       d = 0.

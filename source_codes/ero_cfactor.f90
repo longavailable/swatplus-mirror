@@ -70,14 +70,14 @@
         end do
         rsd_pctcov = 100. * (1. - Exp(-rsd_sumfac))
         rsd_pctcov = amin1 (100., rsd_pctcov)
-        rsd_pctcov = amax1 (0., rsd_pctcov)
+        rsd_pctcov = max (0., rsd_pctcov)
         rsd_covfact = Exp (-pcom(j)%rsd_covfac * rsd_pctcov)
         
         can_frcov = amin1 (1., pcom(j)%lai_sum)
         can_frcov = amin1 (1., pcom(j)%lai_sum / 3.)
         can_covfact = 1. - can_frcov * Exp(-.328 * pcom(j)%cht_mx)
         can_covfact = amin1 (1., can_covfact)
-        can_covfact = amax1 (0., can_covfact)
+        can_covfact = max (0., can_covfact)
         c = Max(1.e-10, rsd_covfact * can_covfact)
         
         !! erosion output variables

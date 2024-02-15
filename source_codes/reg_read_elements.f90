@@ -25,7 +25,6 @@
       integer :: nspu                   !             | 
       integer :: isp                    !             |
       integer :: ielem1                 !none         |counter
-      integer :: ii                     !none         |counter
       integer :: iihru                  !none         |counter
       integer :: ihru_tot               !             |
       integer :: ilsu                   !             |

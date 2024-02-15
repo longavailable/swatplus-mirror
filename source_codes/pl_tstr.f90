@@ -72,6 +72,9 @@
       else
         pcom(j)%plstr(ipl)%strst = 0.
       end if
+      
+      pcom(j)%plstr(ipl)%strst = max (0., pcom(j)%plstr(ipl)%strst)
+      pcom(j)%plstr(ipl)%strst = amin1 (1., pcom(j)%plstr(ipl)%strst)
 
       return
       end subroutine pl_tstr

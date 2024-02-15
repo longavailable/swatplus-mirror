@@ -18,12 +18,14 @@
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
      
-      use hru_module, only : cbodu,chl_a,clayld,cnday,doxq,etday,grayld,hhsedy,         &
-         hhsurfq,hru,lagyld,latno3,latq,nplnt,                                          &
-         par,percn,pplnt,qdr,rcn,sagyld,sanyld,sedminpa,                                &
+      use hru_module, only : cbodu,chl_a,clayld,cnday,doxq,grayld,        &
+         hhsurfq,lagyld,latno3,latq,nplnt,                                          &
+         percn,pplnt,qdr,sagyld,sanyld,sedminpa,                                &
          sedminps,sedorgn,sedorgp,sedyld,sepbtm,silyld,sol_sumno3,sol_sumsolp, surfq,   &
          surqno3,surqsolp,tileno3,ubnrunoff,ubntss,                                     &
-         gwtranq, satexq, gwtrann, gwtranp, satexn !rtb gwflow
+         gwsoilq, satexq, gwsoiln, gwsoilp, satexn, surqsalt,latqsalt,tilesalt,percsalt,& !rtb gwflow; rtb salt
+         urbqsalt,wetqsalt,wtspsalt,gwupsalt,                                           &
+         surqcs,latqcs,tilecs,perccs,gwupcs,urbqcs,sedmcs,irswcs,irgwcs,wetqcs,wtspcs !rtb cs
       use soil_module
             
       use organic_mineral_mass_module
@@ -31,6 +33,7 @@
       use hydrograph_module
       use reservoir_module
       use maximum_data_module
+      use res_cs_module
 
       !!initialize variables at beginning of day
       ! initialising wetland by Ann 
@@ -77,11 +80,34 @@
       surqsolp = 0.
       tileno3 = 0.    !CB 8/24/09
       
-      gwtranq = 0. !rtb gwflow
-      gwtrann = 0. !rtb gwflow
-      gwtranp = 0. !rtb gwflow
+      !rtb salt
+      surqsalt = 0.
+      latqsalt = 0.
+      tilesalt = 0.
+      percsalt = 0.
+      gwupsalt = 0.
+      urbqsalt = 0.
+      wetqsalt = 0.
+      wtspsalt = 0.
+      
+      !rtb cs
+      surqcs = 0.
+      latqcs = 0.
+      tilecs = 0.
+      perccs = 0.
+      gwupcs = 0.
+      urbqcs = 0.
+      wetqcs = 0.
+      wtspcs = 0.
+      sedmcs = 0.
+      irswcs = 0.
+      irgwcs = 0.
+      
+      !rtb gwflow
+      gwsoilq = 0.
+      gwsoiln = 0.
+      gwsoilp = 0.
       satexq = 0.
-
       satexn = 0.
 
 !----------------------------------------------------        
@@ -92,11 +118,6 @@
       hhsurfq = 0.
 !-----------------------------------------------------        
 
-      ! zero carbon losses for the day
-      do j = 1, sp_ob%hru
-        cbn_loss(j) = cbn_lossz
-      end do
-	
         !! added for Srini in output.mgt nitrogen and phosphorus nutrients per JGA by gsm 9/8/2011
                   
           sol_sumno3 = 0.

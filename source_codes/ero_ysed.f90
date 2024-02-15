@@ -42,7 +42,6 @@
       implicit none
 
       integer :: j           !none                   |HRU number
-      real :: c              !                       |
       real :: usle           !metric tons/ha         | daily soil loss predicted with USLE equation
       real :: rock           !percent                |rock fragments
 

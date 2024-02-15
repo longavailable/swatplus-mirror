@@ -81,12 +81,24 @@
       end type aquifer_init_data_char
       type (aquifer_init_data_char), dimension(:), allocatable :: aqu_init_dat_c
       
+      !rtb salt/cs
+      type aquifer_init_data_char_cs
+        character (len=16) :: name                 !xwalk with aqudb(iaqu)%aqu_ini 
+        character (len=16) :: pest                 !points to initial pesticide input file
+        character (len=16) :: path                 !points to initial pathogen input file
+        character (len=16) :: hmet                 !points to initial heavy metals input file
+        character (len=16) :: salt                 !points to initial salt input file (salt_aqu.ini)
+        character (len=16) :: cs                   !points to initial constituent input file (cs_aqu.ini)
+      end type aquifer_init_data_char_cs
+      type (aquifer_init_data_char_cs), dimension(:), allocatable :: aqu_init_dat_c_cs
+      
       type aquifer_init_data
         integer :: org_min = 1              !points to initial organic-mineral input file
         integer :: pest = 1                 !points to initial pesticide input file
         integer :: path = 1                 !points to initial pathogen input file
         integer :: hmet = 1                 !points to initial heavy metals input file
         integer :: salt = 1                 !points to initial salt input file
+        integer :: cs = 1                   !points to initial constituent input file (rtb cs)
       end type aquifer_init_data
       type (aquifer_init_data), dimension(:), allocatable :: aqu_init
       

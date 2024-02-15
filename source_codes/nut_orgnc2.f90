@@ -54,17 +54,16 @@
       real :: xx1                   !              |
       real :: sol_thick             !              |
       real :: y1                    !              |
+      real :: c_ly1
       
-      latc_clyr = 0.
-        
-      j = 0
       j = ihru
       
-      xx = 0.
-	  wt1 = 0.  !! conversion factor
+      latc_clyr = 0.        
+      perc_clyr = 0.
+	wt1 = 0.  !! conversion factor
       er = 0.	!! enrichment ratio
         !! HRU calculations
-        xx = rsd1(j)%str%n + rsd1(j)%meta%n + soil1(j)%hp(1)%n + soil1(j)%hs(1)%n
+        c_ly1 = rsd1(j)%tot_str%n + rsd1(j)%tot_meta%n + soil1(j)%hp(1)%n + soil1(j)%hs(1)%n
         !wt = sol_bd(1,j) * sol_z(1,j) * 10. (tons/ha)
         !wt1 = wt/1000
         wt1 = soil(j)%phys(1)%bd * soil(j)%phys(1)%d / 100.
@@ -86,8 +85,8 @@
         
         !!add by zhang to update soil nitrogen pools
         
-		rsd1(j)%str%n = rsd1(j)%str%n * xx1
-		rsd1(j)%meta%n = rsd1(j)%meta%n * xx1
+		rsd1(j)%tot_str%n = rsd1(j)%tot_str%n * xx1
+		rsd1(j)%tot_meta%n = rsd1(j)%tot_meta%n * xx1
 		soil1(j)%hp(1)%n = soil1(j)%hp(1)%n * xx1
 		soil1(j)%hs(1)%n = soil1(j)%hs(1)%n * xx1
 		!sol_BMN(1,j) = sol_BMN(1,j) * xx1
@@ -107,7 +106,7 @@
       YBC=0.    !BMC LOSS WITH SEDIMENT
       YOC=0.    !Organic C loss with sediment
       YW=0.     !YW = WIND EROSION (T/HA)
-      TOT = soil1(j)%hp(1)%c + soil1(j)%hs(1)%c + rsd1(j)%meta%c + rsd1(j)%str%c !Total organic carbon in layer 1
+      TOT = soil1(j)%hp(1)%c + soil1(j)%hs(1)%c + rsd1(j)%tot_meta%c + rsd1(j)%tot_str%c !Total organic carbon in layer 1
       !YEW = MIN(er*(sedyld(j)/hru(j)%area_ha+YW/hru(j)%area_ha)/(sol_mass/1000.),.9)
       ! Not sure whether should consider enrichment ratio or not!
       YEW = MIN((sedyld(j)/hru(j)%area_ha+YW/hru(j)%area_ha)/(sol_mass/1000.),.9) !fraction of soil erosion of total soil mass
@@ -119,20 +118,17 @@
       YOC=YEW*TOT
       soil1(j)%hs(1)%c = soil1(j)%hs(1)%c * X1
       soil1(j)%hp(1)%c = soil1(j)%hp(1)%c * X1
-      rsd1(j)%str%m = rsd1(j)%str%m * X1
-      rsd1(j)%meta%m = rsd1(j)%meta%m * X1
-      rsd1(j)%lig%m = rsd1(j)%lig%m * X1
-      rsd1(j)%str%c = rsd1(j)%str%c * X1
-      rsd1(j)%meta%c = rsd1(j)%meta%c * X1
-      rsd1(j)%lig%c = rsd1(j)%lig%c * X1
-      rsd1(j)%lig%c = rsd1(j)%str%c - rsd1(j)%lig%c
-      if (surfq(j) > 0) then
-        !write(*,*) "stop"
-      end if
+      rsd1(j)%tot_str%m = rsd1(j)%tot_str%m * X1
+      rsd1(j)%tot_meta%m = rsd1(j)%tot_meta%m * X1
+      rsd1(j)%tot_lignin%m = rsd1(j)%tot_lignin%m * X1
+      rsd1(j)%tot_str%c = rsd1(j)%tot_str%c * X1
+      rsd1(j)%tot_meta%c = rsd1(j)%tot_meta%c * X1
+      !rsd1(j)%tot_lignin%c = rsd1(j)%tot_str%c - rsd1(j)%tot_lignin%c
+
       IF(soil1(j)%microb(1)%c > .01) THEN
           PRMT_21 = 0.  !KOC FOR CARBON LOSS IN WATER AND SEDIMENT(500._1500.) KD = KOC * C
           PRMT_21 = 1000.
-          soil1(j)%water(1)%c = rsd1(j)%str%c + rsd1(j)%meta%c + soil1(j)%hp(1)%c + soil1(j)%hs(1)%c + soil1(j)%microb(1)%c 
+          soil1(j)%water(1)%c = rsd1(j)%tot_str%c + rsd1(j)%tot_meta%c + soil1(j)%hp(1)%c + soil1(j)%hs(1)%c + soil1(j)%microb(1)%c 
           DK = .0001 * PRMT_21 * soil1(j)%water(1)%c
           !X1=PO(LD1)-S15(LD1)
           X1 = soil(j)%phys(1)%por*soil(j)%phys(1)%d-soil(j)%phys(1)%wpmm !mm
@@ -162,13 +158,12 @@
       END IF
 
       soil1(j)%microb(1)%c = soil1(j)%microb(1)%c - YBC 
-      cbn_loss(j)%surfqc_d = QBC * (surfq(j) / (surfq(j) + soil(j)%ly(1)%flat + 1.e-6))
+      hsc_d(j)%surq_c = QBC * (surfq(j) / (surfq(j) + soil(j)%ly(1)%flat + 1.e-6))
        
       soil(j)%ly(1)%latc = QBC*(soil(j)%ly(1)%flat/(surfq(j)+soil(j)%ly(1)%flat+1.e-6))
       soil(j)%ly(1)%percc = VBC 
-      cbn_loss(j)%sedc_d = YOC + YBC
+      hsc_d(j)%sed_c = YOC + YBC
       
-      latc_clyr = latc_clyr + soil(j)%ly(1)%latc   
       do k = 2, soil(j)%nly
           if (soil(j)%ly(k)%prk > 0 .and. k == soil(j)%nly) then
           end if
@@ -185,15 +180,14 @@
           soil(j)%ly(k)%percc = VBC-soil(j)%ly(k)%latc
           soil1(j)%microb(k)%c = Y1 - VBC
 
-        !! calculate nitrate in percolate        
-        !perc_clyr = 0.
-        perc_clyr = perc_clyr + soil(j)%ly(k)%percc
-        
+        !! calculate nitrate in percolate and lateral flow
+        if (k == soil(j)%nly) then
+          hsc_d(j)%perc_c = soil(j)%ly(k)%percc
+        end if
         latc_clyr = latc_clyr + soil(j)%ly(k)%latc
       end do
      
-        cbn_loss(j)%latc_d = latc_clyr
-        cbn_loss(j)%percc_d = perc_clyr
+      hsc_d(j)%latq_c = latc_clyr
 
       return
       end subroutine nut_orgnc2

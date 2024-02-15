@@ -2,8 +2,7 @@
       
       use plant_data_module
       use basin_module
-      use hru_module, only : hru, uapd, uno3d, par, bioday, ep_day, es_day,              &
-         ihru, ipl, pet_day, rto_no3, rto_solp, sum_no3, sum_solp, uapd_tot, uno3d_tot, vpd
+      use hru_module, only : hru, ihru, ipl
       use plant_module
       use plant_data_module
       use carbon_module
@@ -18,7 +17,6 @@
       integer :: iob            !                   |
       integer :: iwgn           !                   |
       real :: rto               !none               |ratio of current years of growth:years to maturity of perennial
-      real :: biomxyr
       real :: ppet              !mm/mm              |running average of precip over pet
       real :: leaf_tov_mon      !months             |leaf turnover rate months
       real :: coef              !                   |coefficient for ppet - leaf turnover equation
@@ -40,16 +38,16 @@
           pcom(j)%plg(ipl)%lai = pcom(j)%plg(ipl)%olai * rto ** pldb(idp)%dlai_rate
           
           !! compute leaf biomass drop
-          if (lai_init > 1.e-6) then
-            lai_drop = (lai_init - pcom(j)%plg(ipl)%lai) / lai_init
-            lai_drop = amax1 (0., lai_drop)
-            lai_drop = amin1 (1., lai_drop)
-            leaf_drop%m = lai_drop * pl_mass(j)%leaf(ipl)%m
-            leaf_drop%n = leaf_drop%m * pcom(j)%plm(ipl)%n_fr
-            leaf_drop%n = amax1 (0., leaf_drop%n)
-            leaf_drop%p = leaf_drop%m * pcom(j)%plm(ipl)%p_fr
-            leaf_drop%p = amax1 (0., leaf_drop%p)
-          end if
+          !if (lai_init > 1.e-6) then
+          !  lai_drop = (lai_init - pcom(j)%plg(ipl)%lai) / lai_init
+          !  lai_drop = max (0., lai_drop)
+          !  lai_drop = amin1 (1., lai_drop)
+          !  leaf_drop%m = lai_drop * pl_mass(j)%leaf(ipl)%m
+          !  leaf_drop%n = leaf_drop%m * pcom(j)%plm(ipl)%n_fr
+          !  leaf_drop%n = max (0., leaf_drop%n)
+          !  leaf_drop%p = leaf_drop%m * pcom(j)%plm(ipl)%p_fr
+          !  leaf_drop%p = max (0., leaf_drop%p)
+          !end if
         end if
       end if
       
@@ -63,7 +61,7 @@
           pcom(j)%plg(ipl)%d_senes = pcom(j)%plg(ipl)%d_senes + 1.
           rto = 1. - (pcom(j)%plg(ipl)%d_senes / 15.)     !! assume 15 day senescence and leaf drop
           pcom(j)%plg(ipl)%lai = (pcom(j)%plg(ipl)%olai - pldb(idp)%alai_min) * rto + pldb(idp)%alai_min
-          pcom(j)%plg(ipl)%lai = amax1 (pcom(j)%plg(ipl)%lai, pldb(idp)%alai_min)
+          pcom(j)%plg(ipl)%lai = max (pcom(j)%plg(ipl)%lai, pldb(idp)%alai_min)
           !! logistic decline rate - Strauch and Volk
           !pcom(j)%plg(ipl)%lai = (pcom(j)%plg(ipl)%olai - pldb(idp)%alai_min) /   &
           !      (1. + Exp((rto - .5) * (-12))) + pldb(idp)%alai_min
@@ -76,13 +74,13 @@
           else
             lai_drop = 0.
           end if
-          lai_drop = amax1 (0., lai_drop)
+          lai_drop = max (0., lai_drop)
           lai_drop = amin1 (1., lai_drop)
           leaf_drop%m = lai_drop * pl_mass(j)%leaf(ipl)%m
           leaf_drop%n = leaf_drop%m * pcom(j)%plm(ipl)%n_fr
-          leaf_drop%n = amax1 (0., leaf_drop%n)
+          leaf_drop%n = max (0., leaf_drop%n)
           leaf_drop%p = leaf_drop%m * pcom(j)%plm(ipl)%p_fr
-          leaf_drop%p = amax1 (0., leaf_drop%p)
+          leaf_drop%p = max (0., leaf_drop%p)
         end if
       end if
       
@@ -102,20 +100,20 @@
           leaf_tov_mon = pldb(idp)%leaf_tov_min
         end if
         leaf_tov_mon = amin1 (leaf_tov_mon, pldb(idp)%leaf_tov_min)
-        leaf_tov_mon = amax1 (leaf_tov_mon, pldb(idp)%leaf_tov_max)
+        leaf_tov_mon = max (leaf_tov_mon, pldb(idp)%leaf_tov_max)
         !! daily turnover - from monthly turnover rate
         pcom(j)%plcur(ipl)%leaf_tov = (1. / (30. * leaf_tov_mon))
         
         !! assume an lai-biomass relationship - linear with slope = 0.0002 LAI/leaf biomass(kg/ha) ***should be plant parm in plants.plt
         pcom(j)%plg(ipl)%lai = pcom(j)%plg(ipl)%lai - pcom(j)%plcur(ipl)%leaf_tov
-        pcom(j)%plg(ipl)%lai = amax1 (pcom(j)%plg(ipl)%lai, pldb(idp)%alai_min)
+        !pcom(j)%plg(ipl)%lai = max (pcom(j)%plg(ipl)%lai, pldb(idp)%alai_min)
         
         !! compute leaf biomass drop
         leaf_drop%m = pcom(j)%plcur(ipl)%leaf_tov * pl_mass(j)%leaf(ipl)%m
         leaf_drop%n = leaf_drop%m * pcom(j)%plm(ipl)%n_fr
-        leaf_drop%n = amax1 (0., leaf_drop%n)
+        leaf_drop%n = max (0., leaf_drop%n)
         leaf_drop%p = leaf_drop%m * pcom(j)%plm(ipl)%p_fr
-        leaf_drop%p = amax1 (0., leaf_drop%p)
+        leaf_drop%p = max (0., leaf_drop%p)
         
       end if
           
@@ -126,6 +124,9 @@
         pl_mass(j)%leaf(ipl) = pl_mass(j)%leaf(ipl) - leaf_drop
         pl_mass(j)%tot(ipl) = pl_mass(j)%tot(ipl) - leaf_drop
         pl_mass(j)%ab_gr(ipl) = pl_mass(j)%ab_gr(ipl) - leaf_drop
+        hrc_d(j)%plant_c = hrc_d(j)%plant_c + pl_mass(j)%ab_gr(ipl)%c
+        hpc_d(j)%drop_c = hpc_d(j)%drop_c + pl_mass(j)%ab_gr(ipl)%c
+
       end if
       
       return

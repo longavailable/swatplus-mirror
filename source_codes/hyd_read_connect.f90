@@ -11,6 +11,7 @@
       use time_module
       use climate_module
       use maximum_data_module
+      use gwflow_module, only: nat_model
       
       implicit none
       
@@ -20,28 +21,26 @@
       integer, intent(in) :: nspu1    !           |
       character (len=80) :: titldum   !           |title of file
       character (len=80) :: header    !           |header of file
-      character (len=16) :: namedum   !           |
       integer :: eof                  !           |end of file
       integer :: imax                 !none       |determine max number for array (imax) and total number in file
       logical :: i_exist              !none       |check to determine if file exists
-      character (len=16) ::con_file   !           |
-      character (len=3) :: ihtyp      !           |
+      character (len=20) ::con_file   !           |
       character (len=8) :: obtyp      !           |
       integer :: isp                  !none       |counter
       integer :: cmd_prev             !none       |previous command (object) number
       integer :: ob1                  !none       |beginning of loop
       integer :: ob2                  !none       |ending of loop
-      integer :: iob
-      integer :: i                    !none       |counter
+      integer :: i                    !none       |object counter
+      integer :: isp_ob               !none       |spatial object counter
       integer :: nout                 !           |       
       integer :: iout                 !           |       
       integer :: k                    !           |
-      integer :: ics                  !           |
       integer :: ihyd                 !           |hydrograph counter
       integer :: npests               !           |pesticides counter
       integer :: npaths               !           |pathogens counter
       integer :: nmetals              !           |heavy metals counter
       integer :: nsalts               !           |salts counter
+      integer :: ncs                  !           |constituent counter
       integer :: aqu_found            !           |rtb gwflow
       
       eof = 0
@@ -62,46 +61,118 @@
           if (nspu > 0) then
             ob1 = nspu1
             ob2 = nspu1 + nspu - 1
+            isp_ob = 0
 
             do i = ob1, ob2
               ob(i)%typ = obtyp
               ob(i)%nhyds = nhyds
+              isp_ob = isp_ob + 1
+              ob(i)%sp_ob_no = isp_ob
               allocate (ob(i)%hd(nhyds))
               allocate (ob(i)%hd_aa(nhyds))
               ob(i)%trans = hz
               ob(i)%hin_tot = hz
               ob(i)%hout_tot = hz
+									  
               ob(i)%hd_aa(:) = hz
               if (cs_db%num_tot > 0) then
+                
+                !set flag for allocating obcs
+                obcs_alloc(i) = 1
+              
+                !allocate
                 allocate (obcs(i)%hd(nhyds))
+                
+                !allocate additional hydrographs
+                allocate (obcs(i)%hin(1))
+                allocate (obcs(i)%hin_sur(1))
+                allocate (obcs(i)%hin_lat(1))
+                allocate (obcs(i)%hin_til(1))
+                allocate (obcs(i)%hin_aqu(1))
+                
                 npests = cs_db%num_pests
                 if (npests > 0) then
-                  allocate (obcs(i)%hin%pest(npests))
-                  allocate (obcs(i)%hin_sur%pest(npests))
-                  allocate (obcs(i)%hin_lat%pest(npests))
-                  allocate (obcs(i)%hin_til%pest(npests))
+                  allocate (obcs(i)%hin(1)%pest(npests))
+                  allocate (obcs(i)%hin_sur(1)%pest(npests))
+                  allocate (obcs(i)%hin_lat(1)%pest(npests))
+                  allocate (obcs(i)%hin_til(1)%pest(npests))
                 end if
                 npaths = cs_db%num_paths
                 if (npaths > 0) then
-                  allocate (obcs(i)%hin%path(npaths))
-                  allocate (obcs(i)%hin_sur%path(npaths))
-                  allocate (obcs(i)%hin_lat%path(npaths))
-                  allocate (obcs(i)%hin_til%path(npaths))
+                  allocate (obcs(i)%hin(1)%path(npaths))
+                  allocate (obcs(i)%hin_sur(1)%path(npaths))
+                  allocate (obcs(i)%hin_lat(1)%path(npaths))
+                  allocate (obcs(i)%hin_til(1)%path(npaths))
                 end if
                 nmetals = cs_db%num_metals
                 if (nmetals > 0) then 
-                  allocate (obcs(i)%hin%hmet(nmetals))
-                  allocate (obcs(i)%hin_sur%hmet(nmetals))
-                  allocate (obcs(i)%hin_lat%hmet(nmetals))
-                  allocate (obcs(i)%hin_til%hmet(nmetals))
+                  allocate (obcs(i)%hin(1)%hmet(nmetals))
+                  allocate (obcs(i)%hin_sur(1)%hmet(nmetals))
+                  allocate (obcs(i)%hin_lat(1)%hmet(nmetals))
+                  allocate (obcs(i)%hin_til(1)%hmet(nmetals))
                 end if
                 nsalts = cs_db%num_salts
                 if (nsalts > 0) then 
-                  allocate (obcs(i)%hin%salt(nsalts))
-                  allocate (obcs(i)%hin_sur%salt(nsalts))
-                  allocate (obcs(i)%hin_lat%salt(nsalts))
-                  allocate (obcs(i)%hin_til%salt(nsalts))
+                  allocate (obcs(i)%hin(1)%salt(nsalts))
+                  allocate (obcs(i)%hin(1)%salt_min(nsalts))
+                  allocate (obcs(i)%hin(1)%saltc(nsalts))
+                  allocate (obcs(i)%hin_sur(1)%salt(nsalts))
+                  allocate (obcs(i)%hin_sur(1)%salt_min(nsalts))
+                  allocate (obcs(i)%hin_sur(1)%saltc(nsalts))
+                  allocate (obcs(i)%hin_lat(1)%salt(nsalts))
+                  allocate (obcs(i)%hin_lat(1)%salt_min(nsalts))
+                  allocate (obcs(i)%hin_lat(1)%saltc(nsalts))
+                  allocate (obcs(i)%hin_til(1)%salt(nsalts))
+                  allocate (obcs(i)%hin_til(1)%salt_min(nsalts))
+                  allocate (obcs(i)%hin_til(1)%saltc(nsalts))
+                  obcs(i)%hin(1)%salt = 0.
+                  obcs(i)%hin(1)%salt_min = 0.
+                  obcs(i)%hin(1)%saltc = 0.
+                  obcs(i)%hin_sur(1)%salt = 0.
+                  obcs(i)%hin_sur(1)%salt_min = 0.
+                  obcs(i)%hin_sur(1)%saltc = 0.
+                  obcs(i)%hin_lat(1)%salt = 0.
+                  obcs(i)%hin_lat(1)%salt_min = 0.
+                  obcs(i)%hin_lat(1)%saltc = 0.
+                  obcs(i)%hin_til(1)%salt = 0.
+                  obcs(i)%hin_til(1)%salt_min = 0.
+                  obcs(i)%hin_til(1)%saltc = 0.
                 end if
+                ncs = cs_db%num_cs !rtb cs
+                if (ncs > 0) then 
+                  allocate (obcs(i)%hin(1)%cs(ncs))
+                  allocate (obcs(i)%hin(1)%cs_sorb(ncs))
+                  allocate (obcs(i)%hin(1)%csc(ncs))
+                  allocate (obcs(i)%hin(1)%csc_sorb(ncs))
+                  allocate (obcs(i)%hin_sur(1)%cs(ncs))
+                  allocate (obcs(i)%hin_sur(1)%cs_sorb(ncs))
+                  allocate (obcs(i)%hin_sur(1)%csc(ncs))
+                  allocate (obcs(i)%hin_sur(1)%csc_sorb(ncs))
+                  allocate (obcs(i)%hin_lat(1)%cs(ncs))
+                  allocate (obcs(i)%hin_lat(1)%cs_sorb(ncs))
+                  allocate (obcs(i)%hin_lat(1)%csc(ncs))
+                  allocate (obcs(i)%hin_lat(1)%csc_sorb(ncs))
+                  allocate (obcs(i)%hin_til(1)%cs(ncs))
+                  allocate (obcs(i)%hin_til(1)%cs_sorb(ncs))
+                  allocate (obcs(i)%hin_til(1)%csc(ncs))
+                  allocate (obcs(i)%hin_til(1)%csc_sorb(ncs))
+                  obcs(i)%hin(1)%cs = 0.
+                  obcs(i)%hin(1)%cs_sorb = 0.
+                  obcs(i)%hin(1)%csc = 0.
+                  obcs(i)%hin(1)%csc_sorb = 0.
+                  obcs(i)%hin_sur(1)%cs = 0.
+                  obcs(i)%hin_sur(1)%cs_sorb = 0.
+                  obcs(i)%hin_sur(1)%csc = 0.
+                  obcs(i)%hin_sur(1)%csc_sorb = 0.
+                  obcs(i)%hin_lat(1)%cs = 0.
+                  obcs(i)%hin_lat(1)%cs_sorb = 0.
+                  obcs(i)%hin_lat(1)%csc_sorb = 0.
+                  obcs(i)%hin_lat(1)%csc = 0.
+                  obcs(i)%hin_til(1)%cs = 0.
+                  obcs(i)%hin_til(1)%cs_sorb = 0.
+                  obcs(i)%hin_til(1)%csc = 0.  
+                  obcs(i)%hin_til(1)%csc_sorb = 0.
+                endif
                 
                 do ihyd = 1, nhyds
                   if (npests > 0) then 
@@ -113,13 +184,28 @@
                   if (nmetals > 0) then 
                     allocate (obcs(i)%hd(ihyd)%hmet(nmetals))
                   end if
-                  if (nsalts > 0) then 
+                  if (nsalts > 0) then !rtb salt
                     allocate (obcs(i)%hd(ihyd)%salt(nsalts))
+                    allocate (obcs(i)%hd(ihyd)%salt_min(nsalts))
+                    allocate (obcs(i)%hd(ihyd)%saltc(nsalts))
+                    obcs(i)%hd(ihyd)%salt = 0.
+                    obcs(i)%hd(ihyd)%salt_min = 0.
+                    obcs(i)%hd(ihyd)%saltc = 0.
+                  end if
+                  if (ncs > 0) then !rtb cs
+                    allocate (obcs(i)%hd(ihyd)%cs(ncs))
+                    allocate (obcs(i)%hd(ihyd)%cs_sorb(ncs))
+                    allocate (obcs(i)%hd(ihyd)%csc(ncs))
+                    allocate (obcs(i)%hd(ihyd)%csc_sorb(ncs))
+                    obcs(i)%hd(ihyd)%cs = 0.
+                    obcs(i)%hd(ihyd)%cs_sorb = 0.
+                    obcs(i)%hd(ihyd)%csc = 0.
+                    obcs(i)%hd(ihyd)%csc_sorb = 0.
                   end if
                 end do
               end if
                 
-              if (time%step > 0) then
+              !if (time%step > 0) then
                 ob(i)%day_max = ndsave
                 allocate (ob(i)%ts(ob(i)%day_max,time%step))
                 allocate (ob(i)%tsin(time%step))
@@ -127,7 +213,7 @@
                 allocate (ob(i)%hyd_flo(ob(i)%day_max,time%step))
                 ob(i)%uh = 0.
                 ob(i)%hyd_flo = 0.
-              end if
+              !end if
               read (107,*,iostat=eof) ob(i)%num, ob(i)%name, ob(i)%gis_id, ob(i)%area_ha, ob(i)%lat, ob(i)%long, &
                 ob(i)%elev, ob(i)%props, ob(i)%wst_c, ob(i)%constit, ob(i)%props2, ob(i)%ruleset, ob(i)%src_tot
               
@@ -176,10 +262,30 @@
                     allocate (obcs(i)%hcsout_y(iout)%hmet(nmetals))
                     allocate (obcs(i)%hcsout_a(iout)%hmet(nmetals))
                   end if
-                  if (nsalts > 0) then 
+                  if (nsalts > 0) then !rtb salt
                     allocate (obcs(i)%hcsout_m(iout)%salt(nsalts))
+                    allocate (obcs(i)%hcsout_m(iout)%salt_min(nsalts))
+                    allocate (obcs(i)%hcsout_m(iout)%saltc(nsalts))
                     allocate (obcs(i)%hcsout_y(iout)%salt(nsalts))
+                    allocate (obcs(i)%hcsout_y(iout)%salt_min(nsalts))
+                    allocate (obcs(i)%hcsout_y(iout)%saltc(nsalts))
                     allocate (obcs(i)%hcsout_a(iout)%salt(nsalts))
+                    allocate (obcs(i)%hcsout_a(iout)%salt_min(nsalts))
+                    allocate (obcs(i)%hcsout_a(iout)%saltc(nsalts))
+                  end if
+                  if (ncs > 0) then !rtb cs
+                    allocate (obcs(i)%hcsout_m(iout)%cs(ncs))
+                    allocate (obcs(i)%hcsout_m(iout)%cs_sorb(ncs))
+                    allocate (obcs(i)%hcsout_m(iout)%csc(ncs))
+                    allocate (obcs(i)%hcsout_m(iout)%csc_sorb(ncs))
+                    allocate (obcs(i)%hcsout_y(iout)%cs(ncs))
+                    allocate (obcs(i)%hcsout_y(iout)%cs_sorb(ncs))
+                    allocate (obcs(i)%hcsout_y(iout)%csc(ncs))
+                    allocate (obcs(i)%hcsout_y(iout)%csc_sorb(ncs))
+                    allocate (obcs(i)%hcsout_a(iout)%cs(ncs))
+                    allocate (obcs(i)%hcsout_a(iout)%cs_sorb(ncs))
+                    allocate (obcs(i)%hcsout_a(iout)%csc(ncs))
+                    allocate (obcs(i)%hcsout_a(iout)%csc_sorb(ncs))
                   end if
                 end do
                 end if
@@ -199,7 +305,7 @@
                       endif
                     enddo
                   endif
-                  if(aqu_found.eq.1) then
+                  if(aqu_found.eq.1 .and. nat_model) then
                     ob(i)%src_tot = ob(i)%src_tot - 1
                   endif
                   

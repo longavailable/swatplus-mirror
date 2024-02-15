@@ -9,7 +9,7 @@
         use organic_mineral_mass_module
         use constituent_mass_module
         use output_ls_pesticide_module
-        use hydrograph_module, only : sp_ob, icmd
+        use hydrograph_module, only : sp_ob
         use plant_module
         use pesticide_data_module
       

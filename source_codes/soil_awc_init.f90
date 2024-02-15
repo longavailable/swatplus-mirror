@@ -33,19 +33,10 @@
 
       integer :: ly           !none          |soil layer counter
       integer :: nly          !none          |number of soil layers
-      real :: xx              !none          |variable to hold value
       real :: sumpor          !mm            |porosity of profile
       real :: pormm           !mm            |porosity in mm depth
-      real :: nota            !              |
-      real :: a               !m^2           |cross-sectional area of channel
-      real :: b               !m             |bottom width of channel
-      real :: c               !none          |inverse of channel side slope
-      real :: d               !m             |depth of flow
       integer :: isol         !              |   
       real :: drpor           !              |
-      real :: sa              !ha            |surface area of impounded water body
-      real :: cl              !              |
-      real :: si              !m/n           |slope of main channel
       real :: depth_prev      !              |
       
       !! reset soil parameters based on awc

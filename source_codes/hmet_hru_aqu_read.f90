@@ -3,6 +3,8 @@
       use constituent_mass_module
       use input_file_module
       use maximum_data_module
+
+      implicit none
  
       character (len=80) :: titldum
       character (len=80) :: header
@@ -10,6 +12,7 @@
       integer :: ihmeti
       integer :: eof, imax
       logical :: i_exist              !none       |check to determine if file exists
+      integer :: ipest
 
       eof = 0
       

@@ -9,31 +9,27 @@
       use constituent_mass_module
       use reservoir_module
       use pesticide_data_module
+      use res_salt_module
+      use res_cs_module
       use reservoir_conditions_module
       
       implicit none
 
-      integer :: mon
       integer :: i
-      real :: lnvol
       
       character (len=80) :: titldum   !           |title of file
       character (len=80) :: header    !           |header of file
-      character (len=16) :: namedum   !           |
       integer :: eof                  !           |end of file
       integer :: imax                 !none       |determine max number for array (imax) and total number in file
       logical :: i_exist              !none       |check to determine if file exists
       integer :: ires                 !none       |counter 
       integer :: k                    !           |
-      integer :: iinit                !none       |counter 
       integer :: ihyd                 !none       |counter
       integer :: irel                 !none       |counter 
       integer :: ised                 !none       |counter
       integer :: inut                 !none       |counter
-      integer :: ipst                 !none       |counter
       integer :: isp_ini              !          |
       integer :: ics                  !none      |counter
-      integer :: iob                  !none      |counter
       
       eof = 0
       imax = 0
@@ -146,6 +142,7 @@
              exit
            end if
          end do   
+         
 
        if (res_dat(ires)%hyd == 0) write (9001,*) res_dat_c(ires)%hyd, " not found (res-hyd)"
        if (res_dat(ires)%release == 0) write (9001,*) res_dat_c(ires)%release, " not found (res-release)"         

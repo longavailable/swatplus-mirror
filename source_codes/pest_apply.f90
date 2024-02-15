@@ -25,7 +25,6 @@
 
       use mgt_operations_module
       use basin_module
-      use hru_module, only : hru
       use soil_module
       use plant_module
       use output_ls_pesticide_module
@@ -35,7 +34,6 @@
       
       integer :: j                       !none          |HRU number
       integer, intent (in) :: jj         !none          |subbasin number
-      integer :: k                       !none          |sequence number of pesticide
       real :: gc                         !none          |fraction of ground covered by plant foliage
       integer, intent (in) :: ipest      !none          |sequential hru pesticide number
       integer, intent (in) :: pestop     !              | 

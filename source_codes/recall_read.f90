@@ -31,7 +31,6 @@
       integer :: ii                   !none       |counter
       integer :: i                    !           |
       integer :: iexco_om
-      integer :: ifirst               !           |
       integer :: iexo_allo = 0
       integer :: idaystep
       

@@ -36,22 +36,14 @@
 
       implicit none
 
-      integer :: icrop       !none      |land cover code
       integer :: j           !none      |hru number
       integer :: l           !none      |counter (soil layer)
       real :: root_depth     !mm        |root depth
       real :: soil_depth     !mm        |soil layer depth
       real :: uapl           !kg P/ha   |amount of phosphorus removed from layer
-      real :: gx             !mm        |lowest depth in layer from which nitrogen
-                             !          |may be removed
       real :: upmx           !kg P/ha   |maximum amount of phosphorus that can be
                              !          |removed from the soil layer
-      real :: uobp           !none      |phosphorus uptake normalization parameter
-                             !          |This variable normalizes the phosphorus
-                             !          |uptake so that the model can easily verify
-                             !          |that uptake from the different soil layers
-                             !          |sums to 1.0
-      
+     
       j = ihru
 
       pcom(j)%plstr(ipl)%strsp = 1.
@@ -59,7 +51,7 @@
       if (uapd(ipl) < 1.e-6) return
 
       !! find depth of soil layer the roots are into
-      root_depth = amax1 (10.1, pcom(j)%plg(ipl)%root_dep)
+      root_depth = max (10.1, pcom(j)%plg(ipl)%root_dep)
       soil_depth = 0.
       do l = 1, soil(j)%nly
         soil_depth = soil(j)%phys(l)%d

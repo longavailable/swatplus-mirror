@@ -1,4 +1,4 @@
-      subroutine pl_burnop (jj, iplant, iburn)
+      subroutine pl_burnop (jj, iburn)
       
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine performs all management operations             
@@ -13,7 +13,7 @@
       use basin_module
       use mgt_operations_module
       use organic_mineral_mass_module
-      use hru_module, only : cn2, ihru, ipl
+      use hru_module, only : cn2, ipl
       use soil_module
       use plant_module
       use carbon_module
@@ -21,8 +21,7 @@
       implicit none      
    
       integer :: j                           !none          |counter
-      integer, intent (in) :: jj             !none          |counter
-      integer, intent (in) :: iplant         !              |plant number xwalked from hlt_db()%plant and plants.plt  
+      integer, intent (in) :: jj             !none          |counter  
       integer, intent (in) :: iburn          !julian date   |date of burning
       real :: cnop                           !              |updated cn after fire
       real :: fr_burn                        !              |fraction burned
@@ -50,16 +49,16 @@
       !!insert new biomss by zhang	  
       !!=================================
       if (bsn_cc%cswat == 2) then
-          rsd1(j)%meta%m = rsd1(j)%meta%m * fr_burn
-          rsd1(j)%str%m = rsd1(j)%str%m * fr_burn
-          rsd1(j)%str%c = rsd1(j)%str%c * fr_burn
-          rsd1(j)%str%n = rsd1(j)%str%n * fr_burn
-          rsd1(j)%meta%c = rsd1(j)%meta%c * fr_burn
-          rsd1(j)%meta%n = rsd1(j)%meta%n * fr_burn
-          rsd1(j)%lig%m = rsd1(j)%lig%m * fr_burn  
+          rsd1(j)%tot_meta%m = rsd1(j)%tot_meta%m * fr_burn
+          rsd1(j)%tot_str%m = rsd1(j)%tot_str%m * fr_burn
+          rsd1(j)%tot_str%c = rsd1(j)%tot_str%c * fr_burn
+          rsd1(j)%tot_str%n = rsd1(j)%tot_str%n * fr_burn
+          rsd1(j)%tot_meta%c = rsd1(j)%tot_meta%c * fr_burn
+          rsd1(j)%tot_meta%n = rsd1(j)%tot_meta%n * fr_burn
+          rsd1(j)%tot_lignin%c = rsd1(j)%tot_lignin%c * fr_burn
 
-          cbn_loss(j)%emitc_d = cbn_loss(j)%emitc_d + pl_mass(j)%tot(ipl)%m * (1. - fr_burn)
-          cbn_loss(j)%emitc_d = cbn_loss(j)%emitc_d + rsd1(j)%tot_com%m * (1. - fr_burn)  
+          hpc_d(j)%emit_c = hpc_d(j)%emit_c + pl_mass(j)%tot(ipl)%m * (1. - fr_burn)
+          hrc_d(j)%emit_c = hrc_d(j)%emit_c + rsd1(j)%tot_com%m * (1. - fr_burn)  
       end if 
       !!insert new biomss by zhang
       !!=================================

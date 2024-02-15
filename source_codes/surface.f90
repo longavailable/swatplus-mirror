@@ -22,9 +22,8 @@
       use basin_module
       use time_module
       use hydrograph_module
-      use climate_module, only:  wst
-      use hru_module, only : hru, surfq, ovrlnd_dt, ihru, &
-        qp_cms, precip_eff, qday, satexq !rtb gwflow
+      use hru_module, only : hru, surfq, ihru,    &
+        qp_cms, precip_eff, qday                  !rtb gwflow
       use soil_module
       use urban_data_module
       use output_landscape_module
@@ -35,7 +34,6 @@
       real :: ulu                 !              |
       real :: hruirrday           !              |
       integer :: irmmdt           !              |
-      integer :: ii               !none          |counter
 
       j = ihru
       ulu = hru(j)%luse%urb_lu
@@ -59,8 +57,8 @@
 
       !! calculate amount of surface runoff reaching main channel during day
       !! (qday) and store the remainder
-      call sq_surfst
-      !qday =  surfq(j)
+      !call sq_surfst
+      qday =  surfq(j)
 
       if (qday > 1.e-6) then
         !! compute peak rate - qp_cms in m3/s  

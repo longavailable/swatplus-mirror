@@ -40,36 +40,26 @@
       
       implicit none
            
-      integer :: k                !none          |counter
-      integer :: inum3sprev       !none          |subbasin number of previous HRU
       integer :: ii               !none          |counter       
       integer :: iyp              !none          |year currently being simulated
       integer :: idap             !julain date   |day currently being simulated
-      integer :: ib               !none          |counter
-      real :: tdif                !deg C         |difference in temperature for station and
-                                  !              |temperature for elevation band
-      real :: pdif                !mm H2O        |difference in precipitation for station and
-                                  !              |precipitation for elevation band
-      real :: ratio               !none          |fraction change in precipitation due to 
-                                  !              |elevation changes
       real :: petmeas             !mm H2O        |potential ET value read in for day 
       real :: half_hr_mn          !mm H2O        |lowest value half hour precip fraction can have
       real :: half_hr_mx          !mm H2O        |highest value half hour precip fraction can have
       integer :: iwgn             !              |
-      integer :: ipg              !              | 
-      integer :: ist              !none          |counter
+      integer :: ipet             !              |
       integer :: ig               !              |
       integer :: yrs_to_start     !              |
       integer :: cur_day
       real :: ramm                !MJ/m2         |extraterrestrial radiation
       real :: xl                  !MJ/kg         |latent heat of vaporization
-      real :: expo                !              | 
       real :: atri                !none          |daily value generated for distribution
       integer :: ifirstpet = -1   !none          |potential ET data search code
                                   !              |0 first day of potential ET data located in
                                   !              |file
                                   !              |1 first day of potential ET data not located
                                   !              |in file
+      real :: xx
       character(len=1) :: out_bounds = 'n'
         
       !! Precipitation:
@@ -85,7 +75,7 @@
           ig = wst(iwst)%wco%tgage
           out_bounds = "n"
           cur_day = time%day
-          call cli_bounds_check (cur_day, tmp(ig)%start_day, tmp(ig)%start_yr,       &
+          call cli_bounds_check (tmp(ig)%start_day, tmp(ig)%start_yr,       &
                                 tmp(ig)%end_day, tmp(ig)%end_yr, out_bounds)
           if (out_bounds == "y") then
             wst(iwst)%weat%tmax = -98.
@@ -114,7 +104,7 @@
           ig = wst(iwst)%wco%sgage
           out_bounds = "n"
           cur_day = time%day
-          call cli_bounds_check (cur_day, slr(ig)%start_day, slr(ig)%start_yr,       &
+          call cli_bounds_check (slr(ig)%start_day, slr(ig)%start_yr,       &
                                 slr(ig)%end_day, slr(ig)%end_yr, out_bounds)
           if (out_bounds == "y") then 
             wst(iwst)%weat%solrad = -98.
@@ -138,7 +128,7 @@
           ig = wst(iwst)%wco%hgage
           out_bounds = "n"
           cur_day = time%day
-          call cli_bounds_check (cur_day, hmd(ig)%start_day, hmd(ig)%start_yr,       &
+          call cli_bounds_check (hmd(ig)%start_day, hmd(ig)%start_yr,       &
                                 hmd(ig)%end_day, hmd(ig)%end_yr, out_bounds)
           if (out_bounds == "y") then 
             wst(iwst)%weat%rhum = -98.
@@ -164,7 +154,7 @@
           ig = wst(iwst)%wco%wgage
           out_bounds = "n"
           cur_day = time%day
-          call cli_bounds_check (cur_day, wnd(ig)%start_day, wnd(ig)%start_yr,       &
+          call cli_bounds_check (wnd(ig)%start_day, wnd(ig)%start_yr,       &
                                 wnd(ig)%end_day, wnd(ig)%end_yr, out_bounds)
           if (out_bounds == "y") then 
             wst(iwst)%weat%windsp = -98.
@@ -180,38 +170,40 @@
       end do 
 
 !! Potential ET: Read in data !!
-      if (bsn_cc%pet == 3) then
-        if (ifirstpet == 0) then
-          read (140,*) iyp, idap, petmeas
-        else
-          ifirstpet = 0
-          do 
-            iyp = 0
-            idap = 0
-            read (140,*) iyp, idap, petmeas
-            if (iyp == time%yrc .and. idap == time%day_start) exit
-          end do
-        end if
-        do iwst = 1, db_mx%wst
-          wst(iwst)%weat%pet = petmeas
-        end do
-      else
-        !! HARGREAVES POTENTIAL EVAPOTRANSPIRATION METHOD
-        !! extraterrestrial radiation
-        !! 37.59 is coefficient in equation 2.2.6 !!extraterrestrial
-        !! 30.00 is coefficient in equation 2.2.7 !!max at surface
-        do iwst = 1, db_mx%wst
-          ramm = wst(iwst)%weat%solradmx * 37.59 / 30. 
-          if (wst(iwst)%weat%tmax > wst(iwst)%weat%tmin) then
-            xl = 2.501 - 2.361e-3 * wst(iwst)%weat%tave
-            wst(iwst)%weat%pet = .0023 * (ramm / xl) * (wst(iwst)%weat%tave      &
-               + 17.8) * (wst(iwst)%weat%tmax - wst(iwst)%weat%tmin) ** 0.5
-            wst(iwst)%weat%pet = Max(0., wst(iwst)%weat%pet)
-          else
-            wst(iwst)%weat%pet = 0.
-          endif
-        end do
-      end if
+      do iwst = 1, db_mx%wst
+        iwgn = wst(iwst)%wco%wgn
+        if (wst(iwst)%wco_c%petgage == "sim") then
+            
+            !! HARGREAVES POTENTIAL EVAPOTRANSPIRATION METHOD
+            !! extraterrestrial radiation
+            !! 37.59 is coefficient in equation 2.2.6 !!extraterrestrial
+            !! 30.00 is coefficient in equation 2.2.7 !!max at surface
+            ramm = wst(iwst)%weat%solradmx * 37.59 / 30. 
+            if (wst(iwst)%weat%tmax > wst(iwst)%weat%tmin) then
+                xl = 2.501 - 2.361e-3 * wst(iwst)%weat%tave
+                wst(iwst)%weat%pet = .0023 * (ramm / xl) * (wst(iwst)%weat%tave      &
+                + 17.8) * (wst(iwst)%weat%tmax - wst(iwst)%weat%tmin) ** 0.5
+                wst(iwst)%weat%pet = Max(0., wst(iwst)%weat%pet)
+            else
+                wst(iwst)%weat%pet = 0.
+            endif
+        else    
+            ig = wst(iwst)%wco%petgage
+            out_bounds = "n"
+            cur_day = time%day
+            call cli_bounds_check (petm(ig)%start_day, petm(ig)%start_yr,       &
+                petm(ig)%end_day, petm(ig)%end_yr, out_bounds)
+            if (out_bounds == "y") then 
+                wst(iwst)%weat%pet = -98.
+            else
+                yrs_to_start = time%yrs - petm(ig)%yrs_start
+                wst(iwst)%weat%pet = petm(ig)%ts(time%day,yrs_to_start)
+            endif
+            !!if (wst(iwst)%weat%pet <= -97.) then
+                !! HARGREAVES POTENTIAL EVAPOTRANSPIRATION METHOD
+          !!end if
+        endif
+    end do
 
 !! Update CMI and Precip minus PET 30 day moving sum
       ppet_mce = ppet_mce + 1
@@ -228,13 +220,22 @@
         wgn_pms(iwgn)%p_pet_rto = wgn_pms(iwgn)%precip_sum / wgn_pms(iwgn)%pet_sum
         wgn_pms(iwgn)%precip_mce(ppet_mce) = wst(iwst)%weat%precip
         wgn_pms(iwgn)%pet_mce(ppet_mce) = wst(iwst)%weat%pet
+        
+        !! Calculate air temperature lag day for stream temperature
+        !! replace current day temperature
+        wst(iwst)%tlag(wst(iwst)%tlag_mne) = wst(iwst)%weat%tave
+        !! lag day is the next variable in array
+        wst(iwst)%tlag_mne = wst(iwst)%tlag_mne + 1
+        if (wst(iwst)%tlag_mne > w_temp%airlag_d) wst(iwst)%tlag_mne = 1
+        wst(iwst)%airlag_temp = wst(iwst)%tlag(wst(iwst)%tlag_mne)
       end do
             
 !! Calculate maximum half-hour rainfall fraction
       do iwst = 1, db_mx%wst
         iwgn = wst(iwst)%wco%wgn
         half_hr_mn = 0.02083
-        half_hr_mx = 1. - expo(-125. / (wst(iwst)%weat%precip + 5.))
+        xx = (-125. / (wst(iwst)%weat%precip + 5.))
+        half_hr_mx = 1. - Exp(xx)
         wst(iwst)%weat%precip_half_hr = Atri(half_hr_mn, wgn_pms(iwgn)%amp_r(time%mo), half_hr_mx, rndseed(10,iwgn))
       end do
 
@@ -254,7 +255,7 @@
       do iwst = 1, db_mx%wst
         wst(iwst)%weat%precip = wst(iwst)%weat%precip * (1. + wst(iwst)%rfinc(time%mo) / 100.)
         if (wst(iwst)%weat%precip < 0.) wst(iwst)%weat%precip = 0.
-        if (time%step > 0) then
+        if (time%step > 1) then
           do ii = 1, time%step
             wst(iwst)%weat%ts(ii) = wst(iwst)%weat%ts(ii) * (1. + wst(iwst)%rfinc(time%mo) / 100.)
             if (wst(iwst)%weat%ts(ii) < 0.) wst(iwst)%weat%ts(ii) = 0.

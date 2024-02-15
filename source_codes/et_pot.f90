@@ -40,7 +40,7 @@
       use basin_module
       use hydrograph_module
       use climate_module
-      use hru_module, only : hru, ihru, albday, epmax, ipl, pet_day, vpd, ep_max
+      use hru_module, only : hru, ihru, albday, ipl, pet_day, vpd, ep_max
       use plant_module
       
       implicit none

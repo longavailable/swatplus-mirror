@@ -20,9 +20,13 @@
 
       ! set initial heat units and other data
       pcom(j)%plcur(ipl)%phuacc = transpl(itrans)%phuacc
-      pcom(j)%plg(ipl)%laimxfr = pcom(j)%plcur(ipl)%phuacc / (pcom(j)%plcur(ipl)%phuacc +     &
+      pcom(j)%plcur(ipl)%phuacc_p = transpl(itrans)%fr_yrmat + (pcom(j)%plcur(ipl)%phumat *         &
+                                          transpl(itrans)%phuacc) / pcom(j)%plcur(ipl)%phumat_p
+      pcom(j)%plg(ipl)%laimxfr = pcom(j)%plcur(ipl)%phuacc / (pcom(j)%plcur(ipl)%phuacc +           &
               Exp(plcp(idp)%leaf1 - plcp(idp)%leaf2 * pcom(j)%plcur(ipl)%phuacc))
-      pcom(j)%plg(ipl)%lai = transpl(itrans)%lai
+      pcom(j)%plg(ipl)%laimxfr_p = pcom(j)%plcur(ipl)%phuacc_p / (pcom(j)%plcur(ipl)%phuacc_p +     &
+              Exp(plcp(idp)%leaf1 - plcp(idp)%leaf2 * pcom(j)%plcur(ipl)%phuacc_p))
+      !pcom(j)%plg(ipl)%lai = transpl(itrans)%lai
       pl_mass(j)%tot(ipl)%m = transpl(itrans)%bioms
       pcom(j)%plcur(ipl)%curyr_mat = int (transpl(itrans)%fr_yrmat * float(pldb(idp)%mat_yrs))
       pcom(j)%plcur(ipl)%curyr_mat = max (1, pcom(j)%plcur(ipl)%curyr_mat)

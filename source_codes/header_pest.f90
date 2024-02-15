@@ -2,7 +2,7 @@
     
      use basin_module
      use reservoir_module
-     use hydrograph_module, only : res, sp_ob
+     use hydrograph_module, only : sp_ob
      use output_ls_pesticide_module
      use constituent_mass_module
      use ch_pesticide_module

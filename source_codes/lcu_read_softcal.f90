@@ -4,7 +4,7 @@
       use maximum_data_module
       use calibration_data_module
       use hydrograph_module
-      use hru_module, only : hru, ihru  
+      use hru_module, only : ihru  
       use hru_lte_module
       use output_landscape_module
       use basin_module

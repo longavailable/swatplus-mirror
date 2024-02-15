@@ -8,11 +8,6 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    daylmn(:)      |hours         |shortest daylength occurring during the
 !!                                  |year
-!!    dormhr(:)      |hour          |time threshold used to define dormant
-!!                                  |period for plant (when daylength is within
-!!                                  |the time specified by dormhr from the minimum
-!!                                  |daylength for the area, the plant will go
-!!                                  |dormant)
 !!    ihru           |none          |HRU number
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
@@ -25,8 +20,7 @@
       use hydrograph_module
       use plant_data_module
       use organic_mineral_mass_module
-      use hru_module, only : hru, dormhr, phubase, sol_sumno3, sol_sumsolp, ipl, ihru,  &
-         sol_sumno3, sol_sumsolp
+      use hru_module, only : hru,  ipl, ihru
       use soil_module
       use plant_module
       use carbon_module
@@ -80,9 +74,10 @@
       iwst = ob(iob)%wst
       iwgn = wst(iwst)%wco%wgn
 
-        if (bsn_cc%cswat == 2) then
-          cbn_loss(j)%rsdc_d = cbn_loss(j)%rsdc_d + resnew*0.42
-        end if
+      if (bsn_cc%cswat == 2) then
+        hrc_d(j)%plant_c = hrc_d(j)%plant_c + pl_mass(j)%ab_gr(ipl)%c
+        hpc_d(j)%drop_c = hpc_d(j)%drop_c + pl_mass(j)%ab_gr(ipl)%c
+      end if
 
         if (bsn_cc%cswat == 2) then
           BLG1 = 0.01/0.10
@@ -117,22 +112,21 @@
 
           LSLF = CLG          
 	          
-          rsd1(j)%lig%m = rsd1(j)%lig%m + RLR* LSF * resnew
-          rsd1(j)%str%c = rsd1(j)%str%c + 0.42*LSF * resnew  
+          rsd1(j)%tot_str%c = rsd1(j)%tot_str%c + 0.42*LSF * resnew  
 	          
-          rsd1(j)%lig%c = rsd1(j)%lig%c + RLR*0.42*LSF*resnew
-          rsd1(j)%lig%n = rsd1(j)%str%c - rsd1(j)%lig%c
+          rsd1(j)%tot_lignin%c = rsd1(j)%tot_lignin%c + RLR * 0.42 * LSF * resnew
+          rsd1(j)%tot_lignin%c = rsd1(j)%tot_str%c - rsd1(j)%tot_lignin%c
 
           if (resnew_ne >= (0.42 * LSF * resnew /150)) then
-            rsd1(j)%str%n = rsd1(j)%str%n + 0.42*LSF*resnew / 150
-            rsd1(j)%meta%n = rsd1(j)%meta%n + resnew_ne -         &
+            rsd1(j)%tot_str%n = rsd1(j)%tot_str%n + 0.42*LSF*resnew / 150
+            rsd1(j)%tot_meta%n = rsd1(j)%tot_meta%n + resnew_ne -         &
                               (0.42 * LSF * resnew / 150) + 1.E-25
           else
-            rsd1(j)%str%n = rsd1(j)%str%n + resnew_ne
-            rsd1(j)%meta%n = rsd1(j)%meta%n + 1.E-25
+            rsd1(j)%tot_str%n = rsd1(j)%tot_str%n + resnew_ne
+            rsd1(j)%tot_meta%n = rsd1(j)%tot_meta%n + 1.E-25
           end if	
 
-          rsd1(j)%meta%c = rsd1(j)%meta%c + 0.42 * LMF * resnew
+          rsd1(j)%tot_meta%c = rsd1(j)%tot_meta%c + 0.42 * LMF * resnew
 
           !update no3 and nh3 in soil
           soil1(j)%mn(1)%no3 = soil1(j)%mn(1)%no3 * (1-sf)

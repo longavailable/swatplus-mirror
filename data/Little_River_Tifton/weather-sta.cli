@@ -1,5 +1,5 @@
 weather-sta.cli: Weather stations - LREW
-name          wgn            pcp            tmp            slr            hmd            wnd    wnd_dir    atmo_dep
+name          wgn            pcp            tmp            slr            hmd            wnd        pet    atmo_dep
 wea1       wgn001    lrew162.pcp    lrewuga.tem    lrewuga.slr    lrewuga.hmd    lrewuga.wnd        sim         null
 wea10      wgn001    lrew142.pcp    lrewuga.tem    lrewuga.slr    lrewuga.hmd    lrewuga.wnd        sim         null
 wea11      wgn001    lrew144.pcp    lrewuga.tem    lrewuga.slr    lrewuga.hmd    lrewuga.wnd        sim         null

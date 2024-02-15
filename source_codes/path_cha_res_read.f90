@@ -7,12 +7,15 @@
       use hydrograph_module
       use sd_channel_module
       use organic_mineral_mass_module
+
+      implicit none
  
       character (len=80) :: titldum
       character (len=80) :: header
       integer :: ipathi
       integer :: eof, imax
       logical :: i_exist              !none       |check to determine if file exists
+      integer :: ipath
 
       eof = 0
       

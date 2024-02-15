@@ -2,8 +2,7 @@
       
       use plant_data_module
       use basin_module
-      use hru_module, only : hru, uapd, uno3d, par, bioday, ep_day, es_day,              &
-         ihru, ipl, pet_day, rto_no3, rto_solp, sum_no3, sum_solp,uapd_tot, uno3d_tot, vpd
+      use hru_module, only : ipl
       use plant_module
       use carbon_module
       use organic_mineral_mass_module
@@ -33,7 +32,7 @@
       
       !! partition leaf and stem (stalk) and seed (grain) mass
       if (pldb(idp)%typ == "perennial") then
-        leaf_frac_veg = 0.03    !forest
+        leaf_frac_veg = 0.30    !forest
       else
         leaf_frac_veg = 0.30    !should be plant parm
       end if

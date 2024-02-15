@@ -126,6 +126,13 @@
         type (soft_calib_ls_adjust) :: prm                      !parameter adjustments used in landscape calibration
         type (soft_calib_ls_adjust) :: prm_prev                 !parameter adjustments used in landscape calibration
         type (soft_calib_ls_adjust) :: prm_lim                  !code if parameters are at limits
+        type (soft_calib_ls_adjust) :: pcur                     !current parameter
+        type (soft_calib_ls_adjust) :: phi                      !high parameter
+        type (soft_calib_ls_adjust) :: plo                      !low parameter
+        type (soft_calib_ls_processes) :: scur                  !simulated sum of soft calibration parms of each land use - m3,t,kg
+        type (soft_calib_ls_processes) :: shi                   !average annual soft calibration parms of each land use - mm,t/ha,kg/ha
+        type (soft_calib_ls_processes) :: slo                   !simulated sum of soft calibration parms of previous run - m3,t,kg
+
       end type ls_calib_regions
             
       type soft_data_calib_landscape
@@ -146,10 +153,10 @@
         character(len=16) :: name = "default"
         real :: init_val                            !! xwalk lum()%name with lscal()%lum()%name
         character(len=16) :: chg_typ                !! type of change (absval,abschg,pctchg)
-        real :: neg                     !! negative limit of change
-        real :: pos                     !! positive limit of change
-        real :: lo                      !! lower limit of parameter
-        real :: up                      !! upper limit of parameter
+        real :: neg                     !! negative limit per interation
+        real :: pos                     !! positive limit per iteration
+        real :: lo                      !! ultimate lower limit of parameter
+        real :: up                      !! ultimate upper limit of parameter
       end type pl_parms_cal
 
       type pl_parm_region

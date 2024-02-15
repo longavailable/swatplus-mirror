@@ -11,15 +11,13 @@
       integer :: ics                  !none          |counter
       character (len=3) :: iobtyp     !none          |object type
       integer :: ii                   !none          |counter 
-      integer :: i                    !              |
       integer :: iihru                !none          |hru counter 
       integer :: ihru_tot             !none          |total number of hru in the flood plain   
 
-      ihru_tot = 0
-        
       do ics = 1, sp_ob%chandeg
         if (sd_ch(ics)%fp%obj_tot > 0) then
         !! determine number of hru's
+        ihru_tot = 0
         do ii = 1, sd_ch(ics)%fp%obj_tot
           iobtyp = sd_ch(ics)%fp%obtyp(ii)     !object type
           select case (iobtyp)
@@ -45,6 +43,7 @@
             ihru = sd_ch(ics)%fp%obtypno(ii)
             sd_ch(ics)%fp%hru(ihru_tot) = ihru
             sd_ch(ics)%fp%ha = sd_ch(ics)%fp%ha + hru(ihru)%area_ha
+            hru(ihru)%wet_fp = "y"
             
           case ("ru")   !flood plain routing unit
             iru = sd_ch(ics)%fp%obtypno(ii)
@@ -55,6 +54,7 @@
               ihru = ru_def(iru)%num(iihru)
               sd_ch(ics)%fp%hru(ihru_tot) = ihru
               sd_ch(ics)%fp%ha = sd_ch(ics)%fp%ha + hru(ihru)%area_ha
+              hru(ihru)%wet_fp = "y"
             end do
       
           end select

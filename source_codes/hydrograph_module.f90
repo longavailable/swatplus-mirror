@@ -179,6 +179,22 @@
       end type object_output
       type (object_output), dimension (:), allocatable :: ob_out
       
+      type channel_floodplain_water_balance
+        real :: inflo               !! m3       | inflow
+        real :: outflo              !! m3       | outflow
+        real :: tl                  !! m3       | transmission losses
+        real :: ev                  !! m3       | evaporation
+        real :: ch_stor_init        !! m3       | channel storage at start of time step
+        real :: ch_stor             !! m3       | channel storage at end of time step
+        real :: fp_stor_init        !! m3       | flood plain storage at start of time step (all flood plain storage above wetland emergency volume)
+        real :: fp_stor             !! m3       | flood plain storage at end of time step
+        real :: tot_stor_init       !! m3       | total channel + wetland storage at start of time step
+        real :: tot_stor            !! m3       | total channel + wetland storage at end of time step
+        real :: wet_stor_init       !! m3       | wetland flood plain storage at start of time step
+        real :: wet_stor            !! m3       | wetland flood plain storage at end of time step
+      end type channel_floodplain_water_balance
+      type (channel_floodplain_water_balance), dimension (:), allocatable :: ch_fp_wb
+      
       type timestep
         type (hyd_output), dimension(:),allocatable :: hh
       end type timestep
@@ -196,6 +212,17 @@
         real :: mean = 0
         real, dimension (27) :: p        !probabilities for all points on the fdc
       end type duration_curve_points
+
+      type water_temperature_data
+        character(len=16) :: name
+        real :: sno_mlt = 1.        ! none          |coefficient influencing snowmelt temperature contributions
+        real :: gw = .97            ! none          |coefficient influencing groundwater temperature contributions
+        real :: sur_lat = 1.        ! none          |coefficient influencing suface and lateral flow temperature contributions
+        integer :: airlag_d = 6     ! days          |average air temperature lag
+        real :: hex_coef1 = .67     ! 1/hour        |heat transfer coefficient 1
+        real :: hex_coef2 = 1.16    ! 1/hour        |heat transfer coefficient 2
+      end type water_temperature_data
+      type (water_temperature_data) :: w_temp
 
       integer :: fdc_npts = 27
       real, dimension (27) :: fdc_p = (/.1,.5,1.,2.,3.,5.,10.,15.,20.,25.,30.,35.,40.,45.,50.,55.,60.,65.,70.,75.,80.,85.,90.,95.,&
@@ -236,6 +263,7 @@
         real :: plaps                   !precipitation lapse applied to object precip
         real :: tlaps                   !temperature lapse applied to object precip
         real :: area_ha = 80.           !input drainag area - ha
+        integer :: sp_ob_no = 1         !spatial object number - ie: hru number, channel number, etc
         real :: area_ha_calc = 80.      !calculated drainage area-ha. only for checking - doesn't work if routing across landscape
         integer :: props = 1            !properties number from data base (ie hru.dat, sub.dat) - change props to data
         character (len=50) ::  wst_c    !weather station name
@@ -608,21 +636,6 @@
         character (len=15) :: temp_out =   "       temp_out"        !! deg c        |temperature        
       end type sed_hyd_header
       type (sed_hyd_header) :: sd_hyd_hdr
-      
-      type sol_header        
-        character (len=15) :: layer1 =  "        st_mm_1"        !!mm H2O       |amt of water stored in layer 1 
-        character (len=15) :: layer2 =  "        st_mm_2"        !!mm H2O       |amt of water stored in layer 2              
-        character (len=15) :: layer3 =  "        st_mm_3"        !!mm H2O       |amt of water stored in layer 3
-        character (len=15) :: layer4 =  "        st_mm_4"        !!mm H2O       |amt of water stored in layer 4      
-        character (len=15) :: layer5 =  "        st_mm_5"        !!mm H2O       |amt of water stored in layer 5
-        character (len=15) :: layer6 =  "        st_mm_6"        !!mm H2O       |amt of water stored in layer 6 
-        character (len=15) :: layer7 =  "        st_mm_7"        !!mm H2O       |amt of water stored in layer 7
-        character (len=15) :: layer8 =  "        st_mm_8"        !!mm H2O       |amt of water stored in layer 8
-        character (len=15) :: layer9 =  "        st_mm_9"        !!mm H2O       |amt of water stored in layer 9
-        character (len=15) :: layer10 = "       st_mm_10"        !!mm H2O       |amt of water stored in layer 10
-      end type sol_header
-      type (sol_header) :: sol_hdr
-      
      type sd_hyd_header_units
         character (len=15) :: flo_in    =  "          m^3/s"        !! avg daily m^3/s        |volume of water
         character (len=15) :: flo_out   =  "          m^3/s"        !! avg daily m^3/s        |volume of water
@@ -651,20 +664,54 @@
       end type sd_hyd_header_units
       type (sd_hyd_header_units) :: sd_hyd_hdr_units
       
-      type solnut_header        
-        character (len=15) :: mn_no3 =  "        st_mm_1"        !!mm H2O       |amt of water stored in layer 1 
-        character (len=15) :: mn_nh4 =  "        st_mm_2"        !!mm H2O       |amt of water stored in layer 2              
-        character (len=15) :: hact_n =  "        st_mm_3"        !!mm H2O       |amt of water stored in layer 3
-        character (len=15) :: hsta_n =  "        st_mm_4"        !!mm H2O       |amt of water stored in layer 4      
-        !character (len=15) :: layer5 =  "        st_mm_5"        !!mm H2O       |amt of water stored in layer 5
-        !character (len=15) :: layer6 =  "        st_mm_6"        !!mm H2O       |amt of water stored in layer 6 
-        !character (len=15) :: layer7 =  "        st_mm_7"        !!mm H2O       |amt of water stored in layer 7
-        !character (len=15) :: layer8 =  "        st_mm_8"        !!mm H2O       |amt of water stored in layer 8
-        !character (len=15) :: layer9 =  "        st_mm_9"        !!mm H2O       |amt of water stored in layer 9
-        !character (len=15) :: layer10 = "       st_mm_10"        !!mm H2O       |amt of water stored in layer 10
-      end type solnut_header
-      type (solnut_header) :: solnut_hdr
-                              
+      type sol_header        
+        character (len=15) :: layer1 =  "        st_mm_1"        !!mm H2O       |plant name
+        character (len=15) :: layer2 =  "        st_mm_2"        !!mm H2O       |amt of water stored in layer 2              
+        character (len=15) :: layer3 =  "        st_mm_3"        !!mm H2O       |amt of water stored in layer 3
+        character (len=15) :: layer4 =  "        st_mm_4"        !!mm H2O       |amt of water stored in layer 4      
+        character (len=15) :: layer5 =  "        st_mm_5"        !!mm H2O       |amt of water stored in layer 5
+        character (len=15) :: layer6 =  "        st_mm_6"        !!mm H2O       |amt of water stored in layer 6 
+        character (len=15) :: layer7 =  "        st_mm_7"        !!mm H2O       |amt of water stored in layer 7
+        character (len=15) :: layer8 =  "        st_mm_8"        !!mm H2O       |amt of water stored in layer 8
+        character (len=15) :: layer9 =  "        st_mm_9"        !!mm H2O       |amt of water stored in layer 9
+        character (len=15) :: layer10 = "       st_mm_10"        !!mm H2O       |amt of water stored in layer 10
+      end type sol_header
+      type (sol_header) :: sol_hdr
+      
+      type plant_header        
+        character (len=15) :: name =  "     name        "       !!none         |plant name 
+        character (len=15) :: growing =  "growing"              !!none         |plant growing             
+        character (len=15) :: dormant =  "dormant"              !!none         |plant dormant
+        character (len=15) :: lai =  "lai"                      !!none         |leaf area index 
+        character (len=15) :: can_hgt =  "can_hgt"              !!m            |canopy height 
+        character (len=15) :: root_dep =  "root_dep"            !!m            |root depth 
+        character (len=15) :: phuacc =  "phuacc"                !!0-1          |accumulated heat units
+        character (len=15) :: tot_m =  "tot_m"                  !!kg/ha        |total biomass 
+        character (len=15) :: ab_gr_m =  "ab_gr_m"              !!kg/ha        |above ground biomass
+        character (len=15) :: leaf_m =  "leaf_m"                !!kg/ha        |leaf biomass
+        character (len=15) :: root_m =  "root_m"                !!kg/ha        |root biomass
+        character (len=15) :: stem_m = "stem_m"                 !!kg/ha        |stem biomass
+        character (len=15) :: seed_m = "seed_m"                 !!kg/ha        |seed biomass
+      end type plant_header
+      type (plant_header) :: plt_hdr
+      
+      type flood_plain_header        
+        character (len=15) :: inflo =           "        inflo"     !!m3        | inflow 
+        character (len=15) :: outflo =          "       outflo"     !!m3        | outflow             
+        character (len=15) :: dormant =         "      dormant"     !!m3        | evaporation
+        character (len=15) :: tl =              "           tl"     !!m3        | transmission losses
+        character (len=15) :: ev =              "           ev"     !!m3        | evaporation 
+        character (len=15) :: ch_stor_init =    " ch_stor_init"     !!m3        | channel storage at start of time step
+        character (len=15) :: ch_stor =         "      ch_stor"     !!m3        | channel storage at end of time step
+        character (len=15) :: fp_stor_init =    " fp_stor_init"     !!m3        | flood plain storage at start of time step (all flood plain storage above wetland emergency volume)
+        character (len=15) :: fp_stor =         "      fp_stor"     !!m3        | flood plain storage at end of time step
+        character (len=15) :: tot_stor_init =   "tot_stor_init"     !!m3        | total channel + wetland storage at start of time step
+        character (len=15) :: tot_stor =        "     tot_stor"     !!m3        | total channel + wetland storage at end of time step
+        character (len=15) :: wet_stor_init =   "wet_stor_init"     !!m3        | wetland flood plain storage at start of time step
+        character (len=15) :: wet_stor =        "     wet_stor"     !!m3        | wetland flood plain storage at end of time step
+      end type flood_plain_header
+      type (flood_plain_header) :: fp_hdr
+      
       type ch_watbod_header 
         character (len=6) :: day           = "  jday"       
         character (len=6) :: mo            = "   mon"

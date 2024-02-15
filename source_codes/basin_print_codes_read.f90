@@ -40,7 +40,7 @@
      !! read database output
         read (107,*,iostat=eof) header
         if (eof < 0) exit
-        read (107,*,iostat=eof) pco%csvout, pco%dbout, pco%cdfout
+        read (107,*,iostat=eof) pco%csvout, pco%carbout, pco%cdfout
         if (eof < 0) exit
         
      !! read other output
@@ -142,6 +142,36 @@
      !! all pesticide outputs
         read (107,*,iostat=eof) name, pco%pest
         if (eof < 0) exit  
+		 !! salt outputs !rtb salt
+        read (107,*,iostat=eof) name, pco%salt_basin
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%salt_hru
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%salt_ru
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%salt_aqu
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%salt_chn
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%salt_res
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%salt_wet
+        if (eof < 0) exit
+      !! constituent outputs !rtb cs
+        read (107,*,iostat=eof) name, pco%cs_basin
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%cs_hru
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%cs_ru
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%cs_aqu
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%cs_chn
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%cs_res
+        if (eof < 0) exit
+        read (107,*,iostat=eof) name, pco%cs_wet
+        if (eof < 0) exit
         exit
       end do
       end if

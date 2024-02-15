@@ -39,13 +39,10 @@
       
       integer, intent (in) :: ly1     !none          |soil layer number
       integer :: j                    !none          |HRU number
-      real :: yy                      !mm            |depth to top of soil layer
-      real :: dg                      !mm            |depth of soil layer
       real :: ho                      !none          |variable to hold intermediate calculation
                                       !              |result
       real :: ratio                   !none          |ratio of seepage to (latq + sepday)
       real :: sol_k_sep               !              |
-      real :: adj_lin                 !              |
 
       j = ihru
 

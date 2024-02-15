@@ -31,7 +31,6 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
 !!    Intrinsic: Exp, Min, Max
-!!    SWAT: Expo
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
  
@@ -49,8 +48,6 @@
       implicit none
 
       integer :: j               !none          |HRU number
-      integer :: ib              !none          |counter
-      integer :: lym             !none          |counter
 !!    real, parameter :: esd = 500., etco = 0.80, effnup = 0.1
       real :: esd                !mm            |maximum soil depth from which evaporation
                                  !              |is allowed to occur
@@ -69,8 +66,6 @@
       real :: pet                !mm H2O        |amount of PET remaining after water stored
                                  !              |in canopy is evaporated
       real :: esleft             !mm H2O        |potenial soil evap that is still available
-      real :: sumsnoeb           !mm H2O        |amount of snow in elevation bands whose air
-                                 !              |temperature is greater than 0 degrees C
       real :: evzp               !              |
       real :: eosl               !mm H2O        |maximum amount of evaporation that can occur
                                  !              |from soil profile
@@ -79,7 +74,6 @@
       real :: evz                !              | 
       real :: sev                !mm H2O        |amount of evaporation from soil layer
       real :: sev_st             !mm H2O        |evaporation / soil water for no3 flux from layer 1 -> 2
-      real :: expo               !              |
       real :: cover              !kg/ha         |soil cover
       real :: wetvol_mm          !mm            |wetland water volume - average depth over hru
       integer :: ly              !none          |counter     
@@ -187,7 +181,7 @@
         !! compute evaporation from ponded water
         wet_wat_d(j)%evap = 0.
         if (wet(j)%flo > 0.) then
-          wetvol_mm = wet(j)%flo / (10. *  hru(j)%area_ha)    !mm*ha*10.=m3
+          wetvol_mm = wet(j)%flo / (10. *  hru(j)%area_ha)    !mm=m3/(10.*ha)
           !! take all soil evap from wetland storage before taking from soil
           if (wetvol_mm >= esleft) then
             wetvol_mm = wetvol_mm - esleft
@@ -224,7 +218,7 @@
           if (soil(j)%phys(ly)%st < soil(j)%phys(ly)%fc) then
             xx =  2.5 * (soil(j)%phys(ly)%st - soil(j)%phys(ly)%fc) /    &
              soil(j)%phys(ly)%fc
-            sev = sev * expo(xx)
+            sev = sev * exp(xx)
           end if
           sev = Min(sev, soil(j)%phys(ly)%st * etco)
 

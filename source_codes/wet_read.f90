@@ -9,6 +9,8 @@
       use hydrograph_module
       use constituent_mass_module
       use pesticide_data_module
+      use res_salt_module
+      use res_cs_module
       use hru_module, only : hru
       
       implicit none
@@ -21,17 +23,13 @@
       integer :: i                       !none       |counter
       integer :: ires                    !none       |counter 
       integer :: ihyd                    !none       |counter 
-      integer :: iinit                   !none       |counter
       integer :: k                       !           |
       integer :: irel                    !none       |counter
       integer :: ised                    !none       |counter
       integer :: inut                    !none       |counter
-      integer :: ipst                    !none       |counter
       integer :: isp_ini                 !none       |counter
       integer :: ics                     !none       |counter
-      integer :: isstor               !none       |counter
-
-      real :: lnvol
+      integer :: isstor                  !none       |counter
       
       eof = 0
       imax = 0
@@ -131,7 +129,7 @@
             exit
           end if
         end do   
-
+        
         if (wet_dat(ires)%init == 0) write (9001,*) wet_dat_c(ires)%init, " not found (wet-init)"
         if (wet_dat(ires)%hyd == 0) write (9001,*) wet_dat_c(ires)%hyd, " not found (wet-hyd)"
         if (wet_dat(ires)%release == 0) write (9001,*) wet_dat_c(ires)%release, " not found (wet-release)"

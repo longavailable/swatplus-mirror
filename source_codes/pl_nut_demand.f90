@@ -46,6 +46,7 @@
       integer :: nly            !none          |soil layer number
       integer :: idp            !none          |plant data base number (plants.plt)
       real :: delg              !              |
+      real :: delg_p            !              |
 
       j = ihru
       
@@ -61,9 +62,12 @@
         delg = 0.
         if (pcom(j)%plcur(ipl)%phumat > 0.1) then
           delg = (w%tave - pldb(idp)%t_base) / pcom(j)%plcur(ipl)%phumat
+          delg_p = (w%tave - pldb(idp)%t_base) / pcom(j)%plcur(ipl)%phumat_p
         end if
         if (delg < 0.) delg = 0.
+        if (delg_p < 0.) delg_p = 0.
         pcom(j)%plcur(ipl)%phuacc = pcom(j)%plcur(ipl)%phuacc + delg  
+        pcom(j)%plcur(ipl)%phuacc_p = pcom(j)%plcur(ipl)%phuacc_p + delg_p  
         call pl_nupd
         call pl_pupd
         uno3d_tot = uno3d_tot + uno3d(ipl)

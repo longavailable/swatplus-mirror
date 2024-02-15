@@ -22,7 +22,7 @@
       use tillage_data_module
       use basin_module
       use organic_mineral_mass_module
-      use hru_module, only: hru, tillage_days, tillage_depth, tillage_switch
+      use hru_module, only: hru
       use soil_module
       use constituent_mass_module
       use plant_module
@@ -35,15 +35,12 @@
       integer, intent (in) :: idtill   !none           |tillage type
       integer :: l                     !none           |counter
       integer :: k                     !none           |counter
-      integer :: kk                    !               |
       integer :: npmx                  !               |
-      integer :: ipl
       !CB 12/2/09 nl and a are not used.
       real :: emix                     !none           |mixing efficiency
       real :: dtil                     !mm             |depth of mixing
       real :: frac_mixed               !               |
       real :: frac_non_mixed           !               |
-      real :: maxmix                   !none           | maximum mixing eff to preserve specified minimum residue cover
       !!by zhang
       !!=============   
       real :: smix(22+cs_db%num_pests+12)         !varies         |amount of substance in soil profile
@@ -57,7 +54,7 @@
       real :: sol_msn(soil(jj)%nly)     !              |sol_mass not mixed 
       real :: frac_dep(soil(jj)%nly)    !              |fraction of soil layer in tillage depth
       real :: frac_dep1(soil(jj)%nly)    !              |fraction of soil layer in tillage depth plus ponding water
-      real :: frac1, frac2, tdep
+      real :: tdep
 
       npmx = cs_db%num_pests
 

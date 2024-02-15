@@ -4,28 +4,19 @@
        use hru_module, only :  uptake
        
        implicit none
-       
-       real :: ubw      !                                        |the uptake distribution for water is hardwired
-       real :: uobw     !(not used in this model) none           |water uptake normalization parameter 
-       real :: uobn     !(not used in this model) none           |nitrogen uptake normalization parameter 
-       real :: uobp     !(not used in this model) none           |phosphorus uptake normalization parameter 
       
          if (bsn_prm%evlai < 1.e-6) bsn_prm%evlai = 3.0           !! leaf area index at which no evap occurs
          if (bsn_prm%ffcb < 1.e-6) bsn_prm%ffcb = 0.              !! intial soil water cont expressed as a fraction of fc 
          if (bsn_prm%surlag < 1.e-6) bsn_prm%surlag = 4.0         !! surface runoff lag time (days)
          if (bsn_prm%adj_pkr < 1.e-6) bsn_prm%adj_pkr = 1.0       !! peak rate adjustment factor in the subbasin
          if (bsn_prm%prf < 1.e-6) bsn_prm%prf = 1.0               !! peak rate adjustment factor for sediment routing in the channel
-         if (bsn_prm%spcon < 1.e-6) bsn_prm%spcon = 0.0001        !! linear parm for calc sed reentrained in channel sed routin
-         if (bsn_prm%spexp < 1.e-6) bsn_prm%spexp = 1.0           !! exponent parameter for calc sed reentrained in channel sed routing
          if (bsn_prm%cmn < 1.e-6) bsn_prm%cmn = 0.0003            !! rate factor for mineralization on active org N
          if (bsn_prm%n_updis < 1.e-6) bsn_prm%n_updis = 20.0      !! nitrogen uptake dist parm
          if (bsn_prm%p_updis < 1.e-6) bsn_prm%p_updis = 20.0      !! phosphorus uptake dist parm
          if (bsn_prm%nperco < 1.e-6) bsn_prm%nperco = 0.1         !! nitrate perc coeff (0-1)
-                                                                  !!   0 = conc of nitrate in surface runoff is zero
-                                                                  !!   1 = perc has same conc of nitrate as surf runoff
+                                                                  !!   0 = conc of nitrate in surface runoff is zero                                                                  !!   1 = perc has same conc of nitrate as surf runoff
          if (bsn_prm%pperco < 1.e-6) bsn_prm%pperco = 10.0        !! phos perc coeff (0-1)
-                                                                  !!  0 = conc of sol P in surf runoff is zero
-                                                                  !!  1 = percolate has some conc of sol P as surf runoff      
+                                                                  !!  0 = conc of sol P in surf runoff is zero                                                                  !!  1 = percolate has some conc of sol P as surf runoff      
          if (bsn_prm%phoskd < 1.e-6) bsn_prm%phoskd = 175.0       !! phos soil partitioning coef
          if (bsn_prm%psp < 1.e-6) bsn_prm%psp = 0.40              !! phos availability index
          if (bsn_prm%rsdco < 1.e-6) bsn_prm%rsdco = 0.05          !! residue decomposition coeff

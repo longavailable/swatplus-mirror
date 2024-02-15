@@ -12,7 +12,6 @@
       character (len=80) :: titldum    !              |title of file
       integer :: eof                   !              |end of file
       logical :: i_exist               !              |check to determine if file exists
-      integer :: ii                    !none          |counter
       integer :: imax                  !none          |determine max number for array (imax) and total number in file
       integer :: mcal                  !              |
       integer :: mreg                   !             |

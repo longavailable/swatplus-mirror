@@ -3,7 +3,7 @@
       use sd_channel_module
       use hru_lte_module
       use organic_mineral_mass_module
-      use hru_module, only : hru, hru_init, ihru, bss
+      use hru_module, only : hru, hru_init, bss
       use soil_module
       use plant_module
       use plant_data_module

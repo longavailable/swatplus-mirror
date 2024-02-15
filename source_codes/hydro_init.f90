@@ -32,7 +32,7 @@
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
-      use hru_module, only : hru, sdr, dormhr, ihru, i_sep, isep, isep_ly, iseptic
+      use hru_module, only : hru, sdr, dormhr, ihru
       use soil_module
       use plant_module
       use climate_module
@@ -50,9 +50,6 @@
 
       integer :: j              !none          |counter            
       integer :: l              !none          |counter
-      integer :: idp            !              | 
-      real :: t_ch              !hr            |time for flow entering the farthest upstream 
-                                !              |channel to reach the subbasin outlet
       real :: scmx              !mm/hr         |maximum soil hydraulic conductivity
       real :: xx                !none          |variable to hold calculation result
       real :: tsoil             !              | 
@@ -62,17 +59,7 @@
       real :: sffc              !              | 
       integer :: nly            !none          |end of loop
       integer :: k              !none          |counter
-      real :: plt_zmx           !              |
-      integer :: ipl            !none          |counter
-      real :: plt_zmxp          !              | 
-      integer :: max            !              |
-      integer :: min            !              |
-      real :: dep_new           !              |
-      integer :: jj             !none          |counter
-      real :: solpst            !              |
-      integer :: n              !              |
-      real :: wt1               !none          |conversion factor to convert kg/ha to g/t(ppm) 
-      integer :: ly             !none          |counter   
+      integer :: ipl            !none          |counter  
       integer :: isdr           !none          |conversion factor to convert kg/ha to g/t(ppm)
       real :: sd
       real :: dd

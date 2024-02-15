@@ -4,14 +4,12 @@
       use maximum_data_module
       use septic_data_module
       use plant_data_module
-      use hru_module, only : hru, sdr
+      use hru_module, only : sdr
       use landuse_data_module
       use mgt_operations_module
       
       implicit none
 
-      character (len=13) :: file
-      integer :: i
       character (len=80) :: titldum   !           |title of file
       character (len=80) :: header    !           |header of file
       integer :: eof                  !           |end of file

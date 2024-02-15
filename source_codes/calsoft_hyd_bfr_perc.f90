@@ -1,6 +1,6 @@
       subroutine calsoft_hyd_bfr_perc
 
-      use hru_module, only : cn2, hru, hru_init
+      use hru_module, only : hru, hru_init
       use soil_module
       use plant_module
       use hydrograph_module
@@ -19,26 +19,18 @@
       
       implicit none
       
-      integer :: iter_all      !none      |counter
-      integer :: iterall       !none      |counter
       integer :: isim          !          |
       integer :: ireg          !none      |counter
       integer :: ilum          !none      |counter
       integer :: iihru         !none      |counter
-      integer :: icn           !none      |counter
       integer :: ihru_s        !none      |counter
       integer :: iter_ind      !          |end of loop
-      integer :: ietco         !none      |counter
-      integer :: ik            !none      |counter
-      integer :: nly           !          |end of loop
       integer :: iperco        !none      |counter
       real :: rmeas            !          |
       real :: denom            !          |
       real :: soft             !          |
       real :: diff             !          |
-      real :: rto              !          |
       real :: chg_val          !          | 
-      real :: dep_below_soil   !          |  
       real :: perc_ln_func
 
       ! calibrate percolation
@@ -191,16 +183,6 @@
           end do
           end do
           
-        !zero plant calibration data in case plants are calibrated
-        !do ireg = 1, db_mx%plcal_reg
-        !  do ilum = 1, plcal(ireg)%lum_num
-        !    plcal(ireg)%lum(ilum)%nbyr = 0
-        !    plcal(ireg)%lum(ilum)%precip_aa = 0.
-        !    plcal(ireg)%lum(ilum)%ha = 0.
-        !    plcal(ireg)%lum(ilum)%aa = plcal_z
-        !  end do
-        !end do
-        
         !! re-initialize all objects
         call re_initialize
 

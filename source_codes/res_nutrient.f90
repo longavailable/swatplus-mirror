@@ -1,9 +1,9 @@
-      subroutine res_nutrient (jres, inut, iob)
+      subroutine res_nutrient (inut, iob)
 
       use reservoir_data_module
       use time_module
       use reservoir_module
-      use hydrograph_module, only : res, resz, ob, ht2, wbody
+      use hydrograph_module, only : resz, ob, ht2, wbody
       use climate_module
       
       implicit none      
@@ -13,7 +13,6 @@
       real :: phosk              !              |
       real :: tpco               !              |
       real :: chlaco             !              |
-      integer :: jres            !none          |reservoir number
       integer :: inut            !none          |counter
       integer :: iwst            !none          |weather station number
       real :: nsetlr             !              |
@@ -48,10 +47,10 @@
       iwst = ob(iob)%wst
       nitrok = (conc_n - res_nut(inut)%conc_nmin) * Theta(nsetlr, res_nut(inut)%theta_n, wst(iwst)%weat%tave)
       nitrok = amin1 (nitrok, 1.)
-      nitrok = amax1 (nitrok, 0.)
+      nitrok = max (nitrok, 0.)
       phosk = (conc_p - res_nut(inut)%conc_pmin) * Theta(psetlr, res_nut(inut)%theta_p, wst(iwst)%weat%tave)
       phosk = amin1 (phosk, 1.)
-      phosk = amax1 (phosk, 0.)
+      phosk = max (phosk, 0.)
 
       !! remove nutrients from reservoir by settling
       !! other part of equation 29.1.3 in SWAT manual
@@ -78,13 +77,13 @@
       !endif
 
       !! check nutrient masses greater than zero
-      wbody%no3 = amax1 (wbody%no3, 0.0)
-      wbody%orgn = amax1 (wbody%orgn, 0.0)
-      wbody%sedp = amax1 (wbody%sedp, 0.0)
-      wbody%solp = amax1 (wbody%solp, 0.0)
-      wbody%chla = amax1 (wbody%chla, 0.0)
-      wbody%nh3 = amax1 (wbody%nh3, 0.0)
-      wbody%no2 = amax1 (wbody%no2, 0.0)
+      wbody%no3 = max (wbody%no3, 0.0)
+      wbody%orgn = max (wbody%orgn, 0.0)
+      wbody%sedp = max (wbody%sedp, 0.0)
+      wbody%solp = max (wbody%solp, 0.0)
+      wbody%chla = max (wbody%chla, 0.0)
+      wbody%nh3 = max (wbody%nh3, 0.0)
+      wbody%no2 = max (wbody%no2, 0.0)
 
       !! calculate amount of nutrients leaving reservoir
       ht2%no3 = wbody%no3 * ht2%flo / (wbody%flo + ht2%flo)
@@ -94,6 +93,15 @@
       ht2%chla = wbody%chla * ht2%flo / (wbody%flo + ht2%flo)
       ht2%nh3 = wbody%nh3 * ht2%flo / (wbody%flo + ht2%flo)
       ht2%no2 = wbody%no2 * ht2%flo / (wbody%flo + ht2%flo)
+      
+      !! remove nutrients leaving reservoir
+      wbody%no3 = wbody%no3 - ht2%no3
+      wbody%orgn = wbody%orgn - ht2%orgn
+      wbody%sedp = wbody%sedp - ht2%sedp
+      wbody%solp = wbody%solp - ht2%solp
+      wbody%chla = wbody%chla - ht2%chla
+      wbody%nh3 = wbody%nh3 - ht2%nh3
+      wbody%no2 = wbody%no2 - ht2%no2
 
       return
       end subroutine res_nutrient

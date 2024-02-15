@@ -5,6 +5,7 @@
       use maximum_data_module
       use reservoir_data_module
       use output_landscape_module
+      use gwflow_module, only : in_wet_cell,wet_thick,gw_wet_flag,out_gw !rtb
       
       implicit none
       
@@ -13,8 +14,8 @@
       integer :: eof                  !           |end of file
       integer :: imax                 !none       |determine max number for array (imax) and total number in file
       logical :: i_exist              !none       |check to determine if file exists
-      integer :: i                    !none       |counter
       integer :: ires                 !none       |counter 
+      integer :: dum1                 !none       |
 
       eof = 0
       imax = 0
@@ -61,5 +62,24 @@
       enddo
       endif
   
+      !rtb: if gwflow, then read wetland bottom sediment thickness from gwflow.wetland
+      if(bsn_cc%gwflow .and. gw_wet_flag) then
+        inquire(file='gwflow.wetland',exist=i_exist)
+        if(i_exist) then
+          write(out_gw,*) '          found gwflow.wetland; use wetland specified bed thickness'
+		      open(in_wet_cell,file='gwflow.wetland')
+          read(in_wet_cell,*) header
+          read(in_wet_cell,*) header
+          read(in_wet_cell,*) header
+          read(in_wet_cell,*) header
+          !read in wetland bed thickness (m)
+          read(in_wet_cell,*) header
+          do ires=1,imax
+            read(in_wet_cell,*) dum1,wet_thick(ires)
+          enddo
+        endif
+      endif
+      
+      
       return
       end subroutine wet_read_hyd

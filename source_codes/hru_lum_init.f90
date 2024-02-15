@@ -3,7 +3,7 @@
       use hru_module, only : hru
       use plant_module, only : pcom
       use landuse_data_module, only : lum, lum_str, lum_grp
-      use hydrograph_module, only : ob, sp_ob
+      use hydrograph_module, only : ob
       use climate_module, only : wst
       
       implicit none

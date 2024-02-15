@@ -33,7 +33,7 @@
       real :: xx                        !             | 
       real :: exp                       !             |  
       real :: r2                        !             | 
-      real :: amax1                     !             | 
+      real :: max                     !             | 
       real :: cn_sd                     !             | 
       real :: precipeff                 !             | 
       real :: xxi                       !             | 
@@ -88,8 +88,6 @@
       real :: qssubconc                 !             |
       real :: qssub                     !             |
       real :: cnv                       !none         |conversion factor (mm => m^3)
-      real :: wndspd                    !none         |windspeed 
-      real :: rhum                      !none         |relative humidity
         
       ihlt_db = ob(icmd)%props
       iwst = ob(icmd)%wst
@@ -117,7 +115,7 @@
           if ((hlt(isd)%sw + Exp(xx)) > 0.001) then
             r2 = hlt(isd)%smx * (1. - hlt(isd)%sw / (hlt(isd)%sw + Exp(xx)))
           end if
-          r2 = amax1(3.,r2)
+          r2 = max(3.,r2)
           cn_sd = 25400. / (r2 + 254.)
           
           IF (tave .lt.0.) THEN 
@@ -411,6 +409,7 @@
         hltpw_d(isd)%strstmp = 1. - tstress  !! (1.-strstmp_av)
         hltpw_d(isd)%strsn = 0.              !! (1.-strsn_av)        
         hltpw_d(isd)%strsp = 0.              !! (1.-strsp_av)
+        hltpw_d(isd)%strss = 0.              !! (1.-strss_av)
         hltpw_d(isd)%nplnt = 0.              !! nplnt(isd)
         hltpw_d(isd)%percn = 0.              !! percn(isd)
         hltpw_d(isd)%pplnt = 0.              !! pplnt(isd)

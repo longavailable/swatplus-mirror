@@ -1,4 +1,4 @@
-      subroutine res_sediment (jres, ihyd, ised)
+      subroutine res_sediment (ised)
 
       use reservoir_data_module
       use reservoir_module
@@ -10,17 +10,14 @@
       
       implicit none
 
-      integer, intent (in) :: jres          !none          |reservoir number
-      integer, intent (in) :: ihyd          !none          |res hydrologic data pointer
       integer, intent (in) :: ised          !none          |res sediment data pointer
       real :: trapres                       !              |
-      real :: susp                          !              |
       real :: velofl                        !              |  
       real :: sed_ppm, sil_ppm, cla_ppm 
 
       if (wbody%flo < 1.e-6) then
         ! reservoir is empty
-        wbody%sed = 0.
+        wbody = hz
       else
 
         !! compute new sediment concentration in reservoir
@@ -35,7 +32,7 @@
           end if
 	      if (trapres > 1.) trapres = 1.
 	    else
-	      trapres = 0.
+	      trapres = 1.
         end if
         wbody%sed = wbody%sed - (ht1%sed * trapres)
         wbody%sil = wbody%sil - (ht1%sil * trapres)

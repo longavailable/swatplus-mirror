@@ -31,7 +31,6 @@
       real :: soft             !          |
       real :: diff             !          |
       real :: chg_val          !          | 
-      real :: dep_below_soil   !          | 
       real :: qn1              !          |
       real :: qn3              !          |
       real :: s3               !none      |retention parameter for CN3
@@ -40,7 +39,6 @@
       real :: sumul            !mm H2O    |amount of water held in soil profile at saturation
       real :: sumfc            !mm H2O    |amount of water held in the soil profile at field capacity
       
-
       !calibrate hydrology
         iter_all = 1
         iter_ind = 1

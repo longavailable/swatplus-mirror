@@ -1,4 +1,4 @@
-      subroutine cli_pgenhr(iwgn)
+      subroutine cli_pgenhr
       
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine distributes daily rainfall exponentially within the day
@@ -27,7 +27,6 @@
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
 !!    Intrinsic: Log
-!!    SWAT: Atri, Expo
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
@@ -37,11 +36,8 @@
       
       implicit none
 
-      integer, intent (in) :: iwgn          !              |
       integer :: itime                      !none          |time step during day
       integer :: pt                         !min           |time during day
-      integer :: ihour                      !none          |counter
-      integer :: nhour                      !none          |number of time steps per hour
       integer :: k                          !none          |random number seed, counter
       real :: vv                            !none          |random number between 0.0 and 1.0 that 
                                             !              |represents time to peak rainfall rate

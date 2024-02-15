@@ -7,7 +7,7 @@
       use hydrograph_module
       use hru_module, only : hru, ihru, cn2, phubase, ndeat, igrz, grz_days,    &
         yr_skip, sol_sumno3, sol_sumsolp, fertnh3, fertno3, fertorgn,  &
-        fertorgp, fertsolp, ipl, sweepeff, yr_skip, surfq, sedyld
+        fertorgp, fertsolp, ipl, sweepeff, yr_skip
       use soil_module
       use plant_module
       use time_module
@@ -40,19 +40,17 @@
       integer :: ireg
       integer :: ilum
       real :: fr_curb              !none     |availability factor, the fraction of the 
-      integer :: ihyd                 !none          |counter
       integer :: ires = 0
       integer :: ipud, ipdl        !none     |counter Jaehak 2022
                                    !         |curb length that is sweepable
       real :: biomass              !         |
-      real :: amt_mm               !         |
       real :: frt_kg               !kg/ha    |amount of fertilizer applied
       real :: pest_kg              !kg/ha    |amount of pesticide applied 
       real :: chg_par              !variable |new parameter value
-      real :: wsa1,rto
-      integer :: isstor            !none     |counter
-      integer :: idb            !none     |counter
-      integer :: iru, i, isrc, itr
+      real :: wsa1
+      real :: harveff
+      integer :: idb               !none     |counter
+      integer :: itr
 
       j = ihru
       ires= hru(j)%dbs%surf_stor ! for paddy management Jaehak 2022
@@ -122,9 +120,16 @@
             do ipl = 1, pcom(j)%npl
               idp = pcom(j)%plcur(ipl)%idplt
               if (pldb(idp)%trig == "moisture_gro") then
-                pcom(j)%plcur(ipl)%phuacc = 0.
-                pcom(j)%plcur(ipl)%gro = "y" 
-                pcom(j)%plcur(ipl)%idorm = "n"
+                if (mgt%op3 == 0) then
+                  !! if precip/pet ratio was not triggered during monsoon season - reset phenology
+                  if (pcom(j)%plcur(ipl)%gro == "n") then
+                    pcom(j)%plcur(ipl)%phuacc = 0.
+                    pcom(j)%plcur(ipl)%gro = "y" 
+                    pcom(j)%plcur(ipl)%idorm = "n"
+                    pcom(j)%plcur(ipl)%mseas = "n"
+                  end if
+                end if 
+                if (mgt%op3 == 1) pcom(j)%plcur(ipl)%mseas = "y"
               endif
             end do
 
@@ -141,11 +146,13 @@
                 if (biomass > harvop_db(iharvop)%bm_min) then
                 !harvest specific type
                 select case (harvop_db(iharvop)%typ)
-                case ("biomass")    
+                case ("biomass")
                   call mgt_harvbiomass (j, ipl, iharvop)
                 case ("grain")
                   call mgt_harvgrain (j, ipl, iharvop)
                 case ("residue")
+                  harveff = mgt%op3
+                  call mgt_harvresidue (j, harveff)
                 case ("tree")
                 case ("tuber")
                   call mgt_harvtuber (j, ipl, iharvop)
@@ -230,6 +237,8 @@
                 case ("grain")
                   call mgt_harvgrain (j, ipl, iharvop)
                 case ("residue")
+                  harveff = mgt%op3
+                  call mgt_harvresidue (j, harveff)
                 case ("tree")
                 case ("tuber")
                   call mgt_harvtuber (j, ipl, iharvop)
@@ -295,6 +304,7 @@
             irrop = mgt%op1                        !irrigation amount (mm) from irr.ops data base
             irrig(j)%applied = irrop_db(irrop)%amt_mm * irrop_db(irrop)%eff * (1. - irrop_db(irrop)%surq)
             irrig(j)%runoff = irrop_db(irrop)%amt_mm * irrop_db(irrop)%surq
+            pcom(j)%days_irr = 1            ! reset days since last irrigation
 
             !print irrigation applied
             if (pco%mgtout == "y") then
@@ -309,7 +319,9 @@
             frt_kg = mgt%op3                        !amount applied in kg/ha
             ifertop = mgt%op4                       !surface application fraction from chem app data base
             if (wet(j)%flo>0.) then !case for surface application with standing water
-              call pl_fert_wet (j, ifrt, frt_kg, ifertop) 
+              call pl_fert_wet (ifrt, frt_kg) 
+              call salt_fert_wet(j,ifrt,frt_kg)
+              call cs_fert_wet(j,ifrt,frt_kg)
               if (pco%mgtout == "y") then
                 write (2612,*) j, time%yrc, time%mo, time%day_mo, mgt%op_char, " FERT-WET", &
                   phubase(j), pcom(j)%plcur(ipl)%phuacc, soil(j)%sw, pl_mass(j)%tot(ipl)%m,           &
@@ -317,7 +329,9 @@
                   fertorgn, fertsolp, fertorgp
               endif
             else
-              call pl_fert (j, ifrt, frt_kg, ifertop)
+              call pl_fert (ifrt, frt_kg, ifertop)
+              call salt_fert(j,ifrt,frt_kg,ifertop) !rtb salt 
+              call cs_fert(j,ifrt,frt_kg,ifertop) !rtb cs
               if (pco%mgtout == "y") then
                 write (2612,*) j, time%yrc, time%mo, time%day_mo, mgt%op_char, "    FERT ", &
                   phubase(j), pcom(j)%plcur(ipl)%phuacc, soil(j)%sw, pl_mass(j)%tot(ipl)%m,           &
@@ -367,8 +381,8 @@
             ipl = 1
             ifertop = mgt%op4                       !surface application fraction from chem app data base
             
-            cn2(j) = chg_par (cn2(j), j, mgt%op_char, mgt%op3, 35., 95., 0)
-            call curno (cn2(j), j)
+            cn2(j) = chg_par (cn2(j), mgt%op_char, mgt%op3, 35., 95.)
+            call curno (cn2(j),j)
 
             if (pco%mgtout == "y") then
               write (2612,*) j, time%yrc, time%mo, time%day_mo, mgt%op_char, "    CNUP ", &
@@ -379,7 +393,7 @@
           case ("burn")   !! burning
             iburn = mgt%op1                 !burn type from fire data base
             do ipl = 1, pcom(j)%npl
-              call pl_burnop (j, ipl, iburn)
+              call pl_burnop (j, iburn)
             end do
                         
             if (pco%mgtout == "y") then
@@ -412,10 +426,9 @@
             endif 
             !! added below changed plcur(ipl) to plcur(j) and plm(ipl) to plm(j) gsm 1/30/2018
             if (pco%mgtout ==  "y") then
-              write (2612, *) j, time%yrc, time%mo, time%day_mo, pldb(idp)%plantnm,  "    DRAINAGE_MGT ",       &
-                   phubase(j), pcom(j)%plcur(j)%phuacc,  soil(j)%sw,                                  &
-                   pl_mass(j)%tot(j)%m, rsd1(j)%tot_com%m, sol_sumno3(j),                                   &
-                   sol_sumsolp(j),hru(j)%lumv%sdr_dep
+              write (2612, *) j, time%yrc, time%mo, time%day_mo, pldb(idp)%plantnm,  "  DRAIN_CONTROL",         &
+                   phubase(j), pcom(j)%plcur(j)%phuacc,  soil(j)%sw, pl_mass(j)%tot(j)%m, rsd1(j)%tot_com%m,    &
+                   sol_sumno3(j), sol_sumsolp(j),hru(j)%lumv%sdr_dep
             endif
 
           case ("weir")    !! set/adjust weir height
@@ -428,18 +441,21 @@
             endif
               
           case ("irrp")  !! continuous irrigation to maintain surface ponding in rice fields Jaehak 2022
-
-            hru(j)%irr_src = mgt%op_plant                   !irrigation source: cha; res; aqu; or unlim
-            hru(j)%irr_isc = mgt%op3                        !irrigation source object ID: cha; res; aqu; or unlim
-            hru(j)%irr_hmax = irrop_db(mgt%op1)%amt_mm     !irrigation amount in irr.org, mm
-            hru(j)%irr_hmin = hru(j)%irr_hmax * 0.7        !threshold ponding depth, mm
+            hru(j)%irr_src = mgt%op_plant                   !irrigation source: cha; res; aqu; or unlim													
+            hru(j)%irr_hmin = irrop_db(mgt%op1)%dep_mm     !threshold ponding depth, mm
             irrig(j)%eff = irrop_db(mgt%op1)%eff
             irrig(j)%frac_surq = irrop_db(mgt%op1)%surq
-            if (hru(j)%irr_hmax > 0) then
-              hru(j)%paddy_irr = 1 !paddy irrigation is on with manual scheduling
+            pcom(j)%days_irr = 1            ! reset days since last irrigation
+            if (mgt%op3 < 0) then
+              hru(j)%irr_hmax = irrop_db(mgt%op1)%amt_mm     !irrigation amount in irr.org, mm
             else
-              hru(j)%paddy_irr = 0!paddy irrigation is off
-              hru(j)%irr_hmin = 0
+              hru(j)%irr_hmax = mgt%op3       !target ponding depth, mm
+              if (mgt%op3 > 0) then
+                hru(j)%paddy_irr = 1 !paddy irrigation is on with manual scheduling
+              else
+                hru(j)%paddy_irr = 0!paddy irrigation is off
+                hru(j)%irr_hmin = 0
+              endif
             endif
             
           !print irrigation COMMAND
@@ -454,6 +470,7 @@
             irrop = mgt%op1                        !irrigation amount (mm) from irr.ops data base
             irrig(j)%applied = irrop_db(irrop)%amt_mm * irrop_db(irrop)%eff * (1. - irrop_db(irrop)%surq)
             irrig(j)%runoff = irrop_db(irrop)%amt_mm * irrop_db(irrop)%surq
+            pcom(j)%days_irr = 1            ! reset days since last irrigation
 
             !print irrigation applied
             if (pco%mgtout == "y") then

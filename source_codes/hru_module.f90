@@ -116,13 +116,32 @@
         character(len=40) :: pathc = ""
         character(len=40) :: saltc = ""
         character(len=40) :: hmetc = ""
+        character(len=40) :: csc = "" !rtb cs
         integer :: nut = 0
         integer :: pest = 1
         integer :: path = 1
         integer :: salt = 1
         integer :: hmet = 1
+        integer :: cs = 1 !rtb cs
       end type soil_plant_initialize
       type (soil_plant_initialize), dimension (:), allocatable :: sol_plt_ini
+      
+      !rtb salt/cs
+      type soil_plant_initialize_cs
+        character(len=16) :: name = ""
+        character(len=16) :: pestc = ""
+        character(len=16) :: pathc = ""
+        character(len=16) :: saltc = ""
+        character(len=16) :: hmetc = ""
+        character(len=16) :: csc = "" !rtb cs
+        integer :: pest = 1
+        integer :: path = 1
+        integer :: salt = 1
+        integer :: hmet = 1
+        integer :: cs = 1
+      end type soil_plant_initialize_cs
+      type (soil_plant_initialize_cs), dimension (:), allocatable :: sol_plt_ini_cs
+      
         
       type hru_databases
         character(len=40) :: name = ""
@@ -162,20 +181,20 @@
         real :: sdr_dep = 0.                !! |
         integer :: ldrain= 0.               !! |none          |soil layer where drainage tile is located
         real :: tile_ttime = 0.             !! |none          |Exponential of the tile flow travel time
-        real :: vfsi = 0.                   !! |none          |initial SCS curve number II value
+        integer :: vfsi = 0                 !! |none          |on/off flag for vegetative filter strip
         real :: vfsratio = 0.               !! |none          |contouring USLE P factor
         real :: vfscon = 0.                 !! |none          |fraction of the total runoff from the entire field
         real :: vfsch = 0;                  !! |none          |fraction of flow entering the most concentrated 10% of the VFS.
                                             !!                     which is fully channelized
         integer :: ngrwat = 0
-        real :: grwat_i = 0.                !! |none          |On/off Flag for waterway simulation
+        integer :: grwat_i = 0              !! |none          |On/off Flag for waterway simulation
         real :: grwat_n = 0.                !! |none          |Mannings's n for grassed waterway
         real :: grwat_spcon = 0.            !! |none          |sediment transport coefficant defined by user
         real :: grwat_d = 0.                !! |m             |depth of Grassed waterway
         real :: grwat_w = 0.                !! |none          |Width of grass waterway
         real :: grwat_l = 0.                !! |km            |length of Grass Waterway
         real :: grwat_s = 0.                !! |m/m           |slope of grass waterway
-        real :: bmp_flag = 0.  
+        integer :: bmp_flag = 0             !! |none          |On/off Flag for user defeined bmp efficiency
         real :: bmp_sed = 0.                !! |%             | Sediment removal by BMP 
         real :: bmp_pp = 0.                 !! |%             | Particulate P removal by BMP
         real :: bmp_sp = 0.                 !! |%             | Soluble P removal by BMP
@@ -211,28 +230,32 @@
         type (topography) :: topo
         type (field) :: field
         type (hydrology) :: hyd
+        type (hydrology) :: hydcal
         type (landuse) :: luse
         type (land_use_mgt_variables) :: lumv
         type (subsurface_drainage_parameters) :: sdr
         type (snow_parameters) :: sno
         real :: snocov1, snocov2
         integer :: cur_op = 1
+        integer :: irr = 0                      !none       |set to 1 if irrigated during simulation - for wb soft cal
         integer :: irr_dmd_dtbl = 0
         integer :: man_dmd_dtbl = 0
         integer :: irr_dmd_iauto = 0
         integer :: man_dmd_iauto = 0
         integer :: wet_db = 0                   !none       |pointer to wetland data - saved so turn on/off
-        real :: wet_hc                          !mm/h       |hydraulic conductivity of upper layer - wetlands
-        real :: sno_mm                          !mm H2O     |amount of water in snow on current day
-        real :: water_seep
-        real :: water_evap
+        real :: wet_hc = 0.                     !mm/h       |hydraulic conductivity of upper layer - wetlands
+        real :: sno_mm = 0.                     !mm H2O     |amount of water in snow on current day
+        real :: water_seep = 0.
+        real :: water_evap = 0.
+        real :: wet_obank_in = 0.               !mm         |inflow from overbank into wetlands
         real :: precip_aa
         character(len=1) :: wet_fp = "n"
-        character(len=5) :: irr_src = "unlim"    !        |irrigation source, Jaehak 2022
-        real :: strsa
-        real :: irr_hmax = 0               !mm H2O        |target ponding depth during paddy irrigation Jaehak 2022
-        real :: irr_hmin = 0               !mm H2O        |threshold ponding depth to trigger paddy irrigation
-        real :: irr_isc = 0                !mm H2O        |ID of the source cha/res/aqu for paddy irrigation
+        character(len=5) :: irr_src = "unlim"   !           |irrigation source, Jaehak 2022
+        real :: strsa = 0.
+        real :: irr_hmax = 0                    !mm H2O     |target ponding depth during paddy irrigation Jaehak 2022
+        real :: irr_hmin = 0                    !mm H2O     |threshold ponding depth to trigger paddy irrigation
+        real :: irr_isc = 0                     !mm H2O     |ID of the source cha/res/aqu for paddy irrigation
+        real, dimension(5) :: flow = 0          !mm H2O     |average annual flow (1=wyld,2=perc,3=surface,4=lateral,5=tile)
       end type hydrologic_response_unit
       type (hydrologic_response_unit), dimension(:), allocatable, target :: hru
       type (hydrologic_response_unit), dimension(:), allocatable, target :: hru_init
@@ -349,6 +372,8 @@
       real, dimension (:), allocatable :: sedminpa,sedminps,sedorgn
       real, dimension (:), allocatable :: sedorgp,sedyld,sepbtm
       real, dimension (:), allocatable :: surfq,surqno3
+      real, dimension (:,:), allocatable :: surqsalt,latqsalt,tilesalt,percsalt,gwupsalt,urbqsalt,irswsalt,irgwsalt,wetqsalt,wtspsalt !rtb salt
+      real, dimension (:,:), allocatable :: surqcs,latqcs,tilecs,perccs,gwupcs,urbqcs,sedmcs,irswcs,irgwcs,wetqcs,wtspcs !rtb cs
       real, dimension (:), allocatable :: phubase
       real, dimension (:), allocatable :: dormhr
       real, dimension (:,:), allocatable :: wrt
@@ -360,10 +385,10 @@
       integer, dimension (:), allocatable :: grz_days
       integer, dimension (:), allocatable :: igrz,ndeat
 
-      real, dimension (:), allocatable :: gwtranq,satexq !rtb gwflow
+      real, dimension (:), allocatable :: gwsoilq,satexq !rtb gwflow
       real, dimension (:,:), allocatable :: bss_ex !rtb gwflow
-      real, dimension (:), allocatable :: gwtrann,gwtranp,satexn !rtb gwflow
-      
+      real, dimension (:), allocatable :: gwsoiln,gwsoilp,satexn !rtb gwflow
+      real, dimension (:), allocatable :: irrn,irrp !rtb irrig (irrigation nutrient mass)
 
 !!     gsm added for sdr (drainage) 7/24/08
       integer, dimension (:,:), allocatable :: mgt_ops

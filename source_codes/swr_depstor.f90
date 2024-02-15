@@ -46,7 +46,7 @@
                                 !              |on cumulative EI and cumulative precip_eff
       real:: hru_slpp           !%	           |average percent slope steepness
       real:: sol_orgm           !%      	   |percent organic matter content in soil material
-      real:: sol_orr            !cm			   |oriented roughness (ridges) after a rain event 
+      !real:: sol_orr            !cm			   |oriented roughness (ridges) after a rain event 
       real:: sol_rrr            !cm			   |random roughness after a rain event
       real:: ei                 !Mj*mm/ha*hr   |USLE rainfall erosion index
       real :: xx                !              |

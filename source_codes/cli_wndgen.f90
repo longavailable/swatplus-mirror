@@ -44,7 +44,8 @@
       wst(iwst)%weat%windsp = wgn(iwgn)%windav(time%mo) * (-Log(v6)) ** 0.3
       
       !! Generate wind direction !!
-      iwndir = wst(iwst)%wco%wndir
+      !!! set to zero, no longer attempt to read in
+      iwndir = 0
       if (iwndir > 0) then
       idir1 = 16
       idir2 = 15

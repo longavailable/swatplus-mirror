@@ -14,7 +14,7 @@
 !!    ihru          |none          |HRU number
 
       use pesticide_data_module
-      use hru_module, only : hru, ihru
+      use hru_module, only : ihru
       use constituent_mass_module
       use soil_module
       use plant_module

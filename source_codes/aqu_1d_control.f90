@@ -8,6 +8,10 @@
       use constituent_mass_module
       use pesticide_data_module
       use aqu_pesticide_module
+      use salt_module
+      use salt_aquifer
+      use cs_aquifer
+      use ch_pesticide_module
       
       implicit none
       
@@ -36,7 +40,16 @@
       real :: conc              !kg/mm      |concentration of pesticide in flow
       real :: zdb1              !mm         |kd - flow factor for pesticide transport
       real :: kd                !(mg/kg)/(mg/L) |koc * carbon
-
+      real :: gw_volume         !m3         |m3 of groundwater in aquifer
+      real :: salt_recharge     !kg         |kg of salt in recharge water
+      real :: gw_discharge      !m3         |m3 of groundwater discharging to channels
+      real :: salt_discharge    !kg         |kg of salt in groundwater discharge
+      real :: gw_seep           !m3         |m3 of groundwater seeping from the aquifer
+      real :: salt_seep         !kg         |kg of salt in groundwater seepage 
+      real :: cs_recharge,cs_discharge,cs_seep !rtb cs
+      integer :: m !rtb salt
+      integer :: ics   !rtb cs
+      
       !! set pointers to aquifer database and weather station
       iaq = ob(icmd)%num
       iaqdb = ob(icmd)%props
@@ -49,9 +62,22 @@
         obcs(icmd)%hd(1) = hin_csz
         obcs(icmd)%hd(2) = hin_csz
       end if
-      
+
       !convert from m^3 to mm
       aqu_d(iaq)%rchrg = ob(icmd)%hin%flo / (10. * ob(icmd)%area_ha)
+      
+      !rtb salt
+      !calculate salt ion concentrations in groundwater, using salt equilibrium chemistry
+      if (cs_db%num_salts > 0) then
+        call salt_chem_aqu
+      endif
+      
+      !rtb cs
+      !calculate changes in constituent concentration in groundwater due to chemical reactions and sorption
+      if (cs_db%num_cs > 0) then
+        call cs_rctn_aqu
+        call cs_sorb_aqu
+      endif
       
       !! lag recharge from bottom of soil to water table ** disabled
       !aqu_d(iaq)%rchrg = (1. - aqu_prm(iaq)%delay_e) * aqu_d(iaq)%rchrg + aqu_prm(iaq)%delay_e * aqu_st(iaq)%rchrg_prev
@@ -63,7 +89,7 @@
       
       !! compute groundwater depth from surface
       aqu_d(iaq)%dep_wt = aqu_dat(iaq)%dep_bot - (aqu_d(iaq)%stor / (1000. * aqu_dat(iaq)%spyld))
-      aqu_d(iaq)%dep_wt = amax1 (0., aqu_d(iaq)%dep_wt)
+      aqu_d(iaq)%dep_wt = max (0., aqu_d(iaq)%dep_wt)
 
       !! compute flow and substract from storage
       if (aqu_d(iaq)%dep_wt <= aqu_dat(iaq)%flo_min) then
@@ -126,12 +152,108 @@
       aqu_d(iaq)%no3_st = aqu_d(iaq)%no3_st - aqu_d(iaq)%no3_seep
       ob(icmd)%hd(2)%no3 = aqu_d(iaq)%no3_seep * ob(icmd)%area_ha
       
+      !rtb salt
+      !compute salt recharge into the aquifer
+      do m=1,cs_db%num_salts
+        salt_recharge = obcs(icmd)%hin(1)%salt(m) !kg
+        cs_aqu(iaq)%salt(m) = cs_aqu(iaq)%salt(m) + salt_recharge !kg
+        asaltb_d(iaq)%salt(m)%rchrg = salt_recharge
+      enddo
+      !compute groundwater salt loading and seepage
+      do m=1,cs_db%num_salts
+        !calculate new concentration of salt ion in groundwater
+        gw_volume = (aqu_d(iaq)%stor/1000.) * (ob(icmd)%area_ha*10000.) !m3 of groundwater
+        if(gw_volume.gt.0) then
+          cs_aqu(iaq)%saltc(m) = (cs_aqu(iaq)%salt(m) * 1000.) / gw_volume !g/m3 = mg/L
+        else
+          cs_aqu(iaq)%saltc(m) = 0.
+        endif
+        !compute salt loading to streams
+        gw_discharge = (aqu_d(iaq)%flo/1000.) * (ob(icmd)%area_ha*10000.) !mm --> m3
+        salt_discharge = (cs_aqu(iaq)%saltc(m)*gw_discharge) / 1000. !kg
+        !if loading is more than salt in aquifer, decrease accordingly and set storage = 0
+        if(salt_discharge .gt. cs_aqu(iaq)%salt(m)) then
+          salt_discharge = cs_aqu(iaq)%salt(m)
+        endif
+        cs_aqu(iaq)%salt(m) = cs_aqu(iaq)%salt(m) - salt_discharge !kg (update salt storage)
+        obcs(icmd)%hd(1)%salt(m) = salt_discharge !kg (store salt loading, for input to streams)
+        if (db_mx%aqu2d > 0) then !save to distribute on following day (if aqu2d method is used, with "aqu_cha.lin" file)
+          aq_chcs(iaq)%hd(1)%salt(m) = obcs(icmd)%hd(1)%salt(m) !save to distribute on following day
+        endif
+        asaltb_d(iaq)%salt(m)%saltgw = obcs(icmd)%hd(1)%salt(m) !kg (store for daily output)
+        !compute salt seepage out of aquifer
+        gw_seep = (aqu_d(iaq)%seep/1000.) * (ob(icmd)%area_ha*10000.) !m3 of groundwater
+        salt_seep = (cs_aqu(iaq)%saltc(m) * gw_seep) / 1000. !kg
+        if(salt_seep.gt.cs_aqu(iaq)%salt(m)) then
+          salt_seep = cs_aqu(iaq)%salt(m)
+        endif
+        cs_aqu(iaq)%salt(m) = cs_aqu(iaq)%salt(m) - salt_seep !kg (update salt storage)
+        asaltb_d(iaq)%salt(m)%seep = salt_seep !kg (store for daily output)
+        obcs(icmd)%hd(2)%salt(m) = asaltb_d(iaq)%salt(m)%seep
+        !update salt ion concentration in groundwater        
+        if(gw_volume.gt.0) then
+          cs_aqu(iaq)%saltc(m) = (cs_aqu(iaq)%salt(m) * 1000.) / gw_volume !g/m3 = mg/L
+        else
+          cs_aqu(iaq)%saltc(m) = 0.
+        endif
+        asaltb_d(iaq)%salt(m)%mass = cs_aqu(iaq)%salt(m) !store mass for output
+        asaltb_d(iaq)%salt(m)%conc = cs_aqu(iaq)%saltc(m) !store concentration for output
+      enddo
+
+      !rtb cs
+      !compute constituent mass recharge into the aquifer
+      do ics=1,cs_db%num_cs
+        cs_recharge = obcs(icmd)%hin(1)%cs(ics) !kg
+        cs_aqu(iaq)%cs(ics) = cs_aqu(iaq)%cs(ics) + cs_recharge !kg
+        acsb_d(iaq)%cs(ics)%rchrg = cs_recharge
+      enddo
+      !compute groundwater constituent loading and seepage
+      do ics=1,cs_db%num_cs
+        !calculate new concentration of constituent in groundwater
+        gw_volume = (aqu_d(iaq)%stor/1000.) * (ob(icmd)%area_ha*10000.) !m3 of groundwater
+        if(gw_volume.gt.0) then
+          cs_aqu(iaq)%csc(ics) = (cs_aqu(iaq)%cs(ics) * 1000.) / gw_volume !g/m3 = mg/L
+        else
+          cs_aqu(iaq)%csc(ics) = 0.
+        endif
+        !compute constituent loading to streams
+        gw_discharge = (aqu_d(iaq)%flo/1000.) * (ob(icmd)%area_ha*10000.) !mm --> m3
+        cs_discharge = (cs_aqu(iaq)%csc(ics)*gw_discharge) / 1000. !kg
+        !if loading is more than constituent mass in aquifer, decrease accordingly and set storage = 0
+        if(cs_discharge .gt. cs_aqu(iaq)%cs(ics)) then
+          cs_discharge = cs_aqu(iaq)%cs(ics)
+        endif
+        cs_aqu(iaq)%cs(ics) = cs_aqu(iaq)%cs(ics) - cs_discharge !kg (update constituent mass storage)
+        obcs(icmd)%hd(1)%cs(ics) = cs_discharge !kg (store constituent loading, for input to streams)
+        if (db_mx%aqu2d > 0) then !save to distribute on following day (if aqu2d method is used, with "aqu_cha.lin" file)
+          aq_chcs(iaq)%hd(1)%cs(ics) = obcs(icmd)%hd(1)%cs(ics) 
+        endif
+        acsb_d(iaq)%cs(ics)%csgw = obcs(icmd)%hd(1)%cs(ics) !kg (store for daily output)
+        !compute constituent mass seepage out of aquifer
+        gw_seep = (aqu_d(iaq)%seep/1000.) * (ob(icmd)%area_ha*10000.) !m3 of groundwater
+        cs_seep = (cs_aqu(iaq)%csc(ics) * gw_seep) / 1000. !kg
+        if(cs_seep.gt.cs_aqu(iaq)%cs(ics)) then
+          cs_seep = cs_aqu(iaq)%cs(ics)
+        endif
+        cs_aqu(iaq)%cs(ics) = cs_aqu(iaq)%cs(ics) - cs_seep !kg (update constituent mass storage)
+        acsb_d(iaq)%cs(ics)%seep = cs_seep !kg (store for daily output)
+        obcs(icmd)%hd(2)%cs(ics) = acsb_d(iaq)%cs(ics)%seep
+        !update constituent concentration in groundwater        
+        if(gw_volume.gt.0) then
+          cs_aqu(iaq)%csc(ics) = (cs_aqu(iaq)%cs(ics) * 1000.) / gw_volume !g/m3 = mg/L
+        else
+          cs_aqu(iaq)%csc(ics) = 0.
+        endif
+        acsb_d(iaq)%cs(ics)%mass = cs_aqu(iaq)%cs(ics)  !store mass for output
+        acsb_d(iaq)%cs(ics)%conc = cs_aqu(iaq)%csc(ics) !store concentration for output
+      enddo
+      
       !! compute mineral p flow (constant concentration) from aquifer - m^3 * ppm * 1000 kg/m^3 = 1/1000
       aqu_d(iaq)%minp = ob(icmd)%hin%flo * aqu_dat(iaq)%minp / 1000.
       ob(icmd)%hd(1)%solp = aqu_d(iaq)%minp
       
       !! temperature of aquifer flow
-      !ob(icmd)%hd(1)%temp = l_t * tmp
+      ob(icmd)%hd(1)%temp = w_temp%gw
 
       !! compute fraction of flow to each channel in the aquifer
       !! if connected to aquifer - add flow
@@ -167,7 +289,7 @@
         pest_init = cs_aqu(iaq)%pest(ipest)
         
         !! add incoming pesticide to storage
-        cs_aqu(iaq)%pest(ipest) = cs_aqu(iaq)%pest(ipest) + obcs(icmd)%hin%pest(ipest)
+        cs_aqu(iaq)%pest(ipest) = cs_aqu(iaq)%pest(ipest) + obcs(icmd)%hin(1)%pest(ipest)
         
         !! compute pesticide decay in the aquifer
         aqupst_d(iaq)%pest(ipest)%react = 0.
@@ -212,7 +334,7 @@
         endif
       
         !! set pesticide output variables - kg
-        aqupst_d(iaq)%pest(ipest)%tot_in = obcs(icmd)%hin%pest(ipest)
+        aqupst_d(iaq)%pest(ipest)%tot_in = obcs(icmd)%hin(1)%pest(ipest)
         !! assume frsol = 1 (all soluble)
         aqupst_d(iaq)%pest(ipest)%sol_flo = obcs(icmd)%hd(1)%pest(ipest)
         aqupst_d(iaq)%pest(ipest)%sor_flo = 0.      !! all soluble - may add later
@@ -248,12 +370,12 @@
       ob(icmd)%hin_tot = ob(icmd)%hin_tot + ob(icmd)%hin
       ob(icmd)%hout_tot = ob(icmd)%hout_tot + ob(icmd)%hd(1) + ob(icmd)%hd(2)
         
-      if (time%step > 0) then
+      !if (time%step > 0) then
         do ii = 1, time%step
           step = real(time%step)
           ob(icmd)%ts(1,ii) = ob(icmd)%hd(1) / step
         end do
-      end if
+      !end if
 
       return
       end subroutine aqu_1d_control

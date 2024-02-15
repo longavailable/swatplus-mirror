@@ -10,7 +10,6 @@
       character (len=80) :: titldum   !           |title of file
       character (len=80) :: header    !           |header of file
       character (len=16) :: namedum   !           |
-      character (len=3)::obtyp
       integer :: eof                  !           |end of file
       integer :: imax                 !none       |determine max number for array (imax) and total number in file
       integer :: nspu                 !           |
@@ -20,8 +19,7 @@
       integer :: i                    !none       |counter
       integer :: isp                  !none       |counter
       integer :: numb                 !           |
-      integer :: ise                  !none       |counter
-      integer :: ichan  
+      integer :: ise                  !none       |counter  
           
       eof = 0
       imax = 0
@@ -43,7 +41,7 @@
           if (eof < 0) exit
           imax = imax + 1
         end do
-        imax=max(imax, mcha_sp)
+        imax = max (imax, mcha_sp)
           
         allocate (ch_sur(imax))
         rewind (107)
@@ -56,7 +54,6 @@
 
         db_mx%ch_surf = imax
         
-                !db_mx%ch_surf
         do ise = 1, imax
           read (107,*,iostat=eof) i, namedum, nspu
           if (eof < 0) exit

@@ -5,8 +5,6 @@
       use hydrograph_module
       
       implicit none
-      
-      integer :: ihru        !none      |counter
 
       !! re-initialize all objects
       call re_initialize

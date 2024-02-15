@@ -46,6 +46,17 @@
       end type channel_init_datafiles
       type (channel_init_datafiles), dimension(:), allocatable :: ch_init
 
+      !rtb salt/cs
+      type channel_init_datafiles_cs
+        character(len=16) :: name = "default"
+        character(len=16) :: pest = ""                !points to initial pesticide input file
+        character(len=16) :: path = ""                !points to initial pathogen input file
+        character(len=16) :: hmet = ""                !points to initial heavy metals input file
+        character(len=16) :: salt = ""                !points to initial salt input file
+        character(len=16) :: cs = ""                  !points to initial constituent input file
+      end type channel_init_datafiles_cs
+      type (channel_init_datafiles_cs), dimension(:), allocatable :: ch_init_cs
+      
       type channel_data
         character(len=16) :: name = "default"
         integer :: init = 0                   !initial data-points to initial.res
@@ -76,7 +87,8 @@
         character(len=16) :: name
         integer :: eqn  = 0      !               |sediment routine methods: 
                                    !                   0 = original SWAT method
-                                   !                   1 = Bagnold"s
+                                   !                   1 = Bagnold"seqn
+        
                                    !                   2 = Kodatie
                                    !                   3 = Molinas WU
                                    !                   4 = Yang

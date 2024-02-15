@@ -53,7 +53,8 @@
       real :: sumf              !              |
       real :: sumle             !              |
       real :: fi                !              |
-
+      character(len=1) :: comp_light
+      
       j = ihru  
       par = 0.
 
@@ -90,13 +91,13 @@
       !! calc max height for penman pet equation
       pcom(j)%cht_mx = 0.
       do ipl = 1, pcom(j)%npl
-        pcom(j)%cht_mx = amax1 (pcom(j)%cht_mx, pcom(j)%plg(ipl)%cht)
+        pcom(j)%cht_mx = max (pcom(j)%cht_mx, pcom(j)%plg(ipl)%cht)
       end do
       
       !! calc total biomass for plant community
       !pl_mass(j)%tot_com%m = 0.
       !do ipl = 1, pcom(j)%npl
-      !  pl_mass(j)%tot_com%m = amax1 (pl_mass(j)%tot_com%m, pl_mass(j)%tot(ipl)%m)
+      !  pl_mass(j)%tot_com%m = max (pl_mass(j)%tot_com%m, pl_mass(j)%tot(ipl)%m)
       !end do
       
       npl_gro = 0
@@ -107,16 +108,30 @@
           ip = ipl  !used for only one plant growing
         end if
       end do
- 
+      
+      comp_light = "n"
+      !! check to see if inter row cropping or competition for light (canopy shadowing)
+      if (comp_light == "n") then
+        !! calculate photosynthetically active radiation for each plant
+        do ipl = 1, pcom(j)%npl
+          if (pcom(j)%plcur(ipl)%idorm == "n" .and. pcom(j)%plcur(ipl)%gro == "y")then
+            idp = pcom(j)%plcur(ipl)%idplt
+            pl_db => pldb(idp)
+            par(ipl) = (1. - Exp(-pldb(idp)%ext_coef * (pcom(j)%plg(ipl)%lai + .05)))
+            par(ipl) = .5 * w%solrad * (1. - Exp(-pldb(idp)%ext_coef * (pcom(j)%plg(ipl)%lai + .05)))
+          end if   
+        end do                                                     
+
+      else
+          
+      !! competition for light
       !! calculate photosynthetically active radiation during growth period
       if (npl_gro == 1) then
         !! calculate photosynthetically active radiation for one plant
-        if (pcom(j)%plcur(ip)%idorm == "n" .and. pcom(j)%plcur(ip)%gro        & 
-                                                              == "y")then
+        if (pcom(j)%plcur(ip)%idorm == "n" .and. pcom(j)%plcur(ip)%gro == "y")then
           idp = pcom(j)%plcur(ip)%idplt
           pl_db => pldb(idp)
-          par(ip) = .5 * w%solrad * (1. - Exp(-pldb(idp)%ext_coef *        &    
-                (pcom(j)%plg(ip)%lai + .05)))
+          par(ip) = .5 * w%solrad * (1. - Exp(-pldb(idp)%ext_coef * (pcom(j)%plg(ip)%lai + .05)))
         end if
       else if (npl_gro > 1) then
         !! calculate photosynthetically active radiation for multiple plants
@@ -128,8 +143,8 @@
               if (x1 > 0.) then
                 idp = pcom(j)%plcur(ipl)%idplt
                 pl_db => pldb(idp)
-                translt(ipl) = translt(ipl) + x1 / (pcom(j)%plg(ipl)%cht + 1.e-6) *   & 
-                         pcom(j)%plg(ipl)%lai * (-pldb(idp)%ext_coef)
+                translt(ipl) = translt(ipl) + x1 / (pcom(j)%plg(ipl)%cht + 1.e-6) *         & 
+                                            pcom(j)%plg(ipl)%lai * (-pldb(idp)%ext_coef)
               end if
             end do
           end do
@@ -161,9 +176,9 @@
             par(ipl) = .5 * htfac(ipl) * w%solrad * (1. -                  &              
               Exp(-pldb(idp)%ext_coef * (pcom(j)%plg(ipl)%lai + .05)))
           end do  
-        end if
-      end if
-
+        end if      ! lai_sum > 0.
+      end if        ! npl_gro - check number of plants growing
+      end if        ! competition for light y/n
       return
       
       end subroutine pl_community

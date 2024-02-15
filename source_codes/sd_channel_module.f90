@@ -9,33 +9,31 @@
       real, dimension(:), allocatable :: trav_time  !days       |time spent in each hydrograph time step
       real, dimension(:), allocatable :: flo_dep    !m^2        |hydraulic radius for each hydrograph time step
       real, dimension(:), allocatable :: timeint    !days       |time spent in each hydrograph time step
-      !integer, dimension(:), allocatable :: flood_freq        !rtb floodplain
-
       
       type swatdeg_hydsed_data
         character(len=25) :: name
         character(len=16) :: order
-        real :: chw = 0.        !m          |channel width
-        real :: chd = 0.        !m          |channel depth
-        real :: chs = 0.        !m/m        |channel slope
-        real :: chl = 0.        !km         |channel length
-        real :: chn = 0.        !           |channel Manning's n
-        real :: chk = 0.        !mm/h       |channel bottom conductivity
-        real :: cherod = 0.     !           |channel erodibility
-        real :: cov = 0.        !0-1        |channel cover factor
-        real :: sinu            !none       |sinuousity - ratio of channel length and straight line length
-        real :: chseq = 0.      !m/m        |equilibrium channel slope
-        real :: d50 = 0.        !mm         |channel median sediment size
-        real :: ch_clay = 0.    !%          |clay percent of bank and bed
-        real :: carbon = 0.     !%          |carbon percent of bank and bed
-        real :: ch_bd = 0.      !t/m3       |dry bulk density
-        real :: chss = 0.       !           |channel side slope
-        real :: bedldcoef = 0.  !           |percent of sediment entering the channel that is bed material
-        real :: fps = 0.000001  !m/m        |flood plain slope
-        real :: fpn = 0.1       !           |flood plain Manning's n
-        real :: n_conc = 0.     !mg/kg      |nitrogen concentration in channel bank
-        real :: p_conc = 0.     !mg/kg      |phosphorus concentration in channel bank
-        real :: p_bio = 0.      !frac       |fraction of p in bank that is bioavailable
+        real :: chw = 0.            !m          |channel width
+        real :: chd = 0.            !m          |channel depth
+        real :: chs = 0.            !m/m        |channel slope
+        real :: chl = 0.            !km         |channel length
+        real :: chn = 0.            !           |channel Manning's n
+        real :: chk = 0.            !mm/h       |channel bottom conductivity
+        real :: cherod = 0.         !           |channel erodibility
+        real :: cov = 0.            !0-1        |channel cover factor
+        real :: sinu                !none       |sinuousity - ratio of channel length and straight line length
+        real :: chseq = 0.          !m/m        |equilibrium channel slope
+        real :: d50 = 0.            !mm         |channel median sediment size
+        real :: ch_clay = 0.        !%          |clay percent of bank and bed
+        real :: carbon = 0.         !%          |carbon percent of bank and bed
+        real :: ch_bd = 0.          !t/m3       |dry bulk density
+        real :: chss = 0.           !           |channel side slope
+        real :: bankfull_flo = 0.   !           |bank full flow rate
+        real :: fps = 0.000001      !m/m        |flood plain slope
+        real :: fpn = 0.1           !           |flood plain Manning's n
+        real :: n_conc = 0.         !mg/kg      |nitrogen concentration in channel bank
+        real :: p_conc = 0.         !mg/kg      |phosphorus concentration in channel bank
+        real :: p_bio = 0.          !frac       |fraction of p in bank that is bioavailable
       end type swatdeg_hydsed_data
       type (swatdeg_hydsed_data), dimension (:), allocatable :: sd_chd
       
@@ -53,7 +51,8 @@
         integer :: pest = 1                 !points to initial pesticide input file
         integer :: path = 1                 !points to initial pathogen input file
         integer :: hmet = 1                 !points to initial heavy metals input file
-        integer :: salt = 1                 !points to initial salt input file
+        integer :: salt = 1                 !points to initial salt input file (salt_channel.ini) (rtb salt)
+        integer :: cs = 1                   !points to initial constituent input file (cs_channel.ini) (rtb cs)
       end type swatdeg_init_datafiles
       type (swatdeg_init_datafiles), dimension(:), allocatable :: sd_init
             
@@ -112,7 +111,7 @@
         real :: carbon
         real :: ch_bd
         real :: chss
-        real :: bedldcoef
+        real :: bankfull_flo
         real :: fps
         real :: fpn
         real :: hc_kh = 0.
@@ -447,11 +446,10 @@
         rc2%ttime = rc1%ttime * const
       end function chrc_mult
       
-      subroutine chrc_interp (rc1, rc2, ielev, const, rci)
+      subroutine chrc_interp (rc1, rc2, const, rci)
         type (channel_rating_curve_parameters), intent (in) :: rc1
         type (channel_rating_curve_parameters), intent (in) :: rc2
         type (channel_rating_curve_parameters), intent (out) :: rci
-        integer, intent (in) :: ielev
         real, intent (in) :: const
         rci%xsec_area = rc1%xsec_area + const * (rc2%xsec_area - rc1%xsec_area)
         rci%surf_area = rc1%surf_area + const * (rc2%surf_area - rc1%surf_area)

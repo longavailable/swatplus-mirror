@@ -10,10 +10,13 @@
       use soil_module
       use water_body_module
       use channel_velocity_module
+      use res_salt_module !rtb
+      use res_cs_module !rtb
       
       implicit none
 
       integer :: imax                 !none       |determine max number for array (imax) and total number in file
+      integer :: ii                   !none       |hru counter
 
       imax = sp_ob%hru
       if (imax == 0) then
@@ -22,7 +25,6 @@
         allocate (soil(0:0))
         allocate (soil1(0:0))
         allocate (soil1_init(0:0))
-        allocate (cbn_loss(0:0))
         allocate (pl_mass(0:0))
         allocate (pcom(0:0))
         allocate (rsd1(0:0))
@@ -36,7 +38,6 @@
         allocate (soil(0:imax))
         allocate (soil1(0:imax))
         allocate (soil1_init(0:imax))
-        allocate (cbn_loss(0:imax))
         allocate (pcom(0:imax))
         allocate (pl_mass(0:imax))
         allocate (cs_soil(0:imax))
@@ -61,6 +62,40 @@
         allocate (wet_wat_a(imax))
         allocate (rsd1(0:imax))
         allocate (wet_seep_day(imax))
+        allocate (wet_water(imax))
+        
+        !rtb salt - allocate wetland arrays
+        if(cs_db%num_salts > 0) then
+          allocate(wetsalt_d(imax))
+          allocate(wetsalt_m(imax))
+          allocate(wetsalt_y(imax))
+          allocate(wetsalt_a(imax))
+          do ii=1,imax
+            allocate(wetsalt_d(ii)%salt(cs_db%num_salts))
+            allocate(wetsalt_m(ii)%salt(cs_db%num_salts))
+            allocate(wetsalt_y(ii)%salt(cs_db%num_salts))
+            allocate(wetsalt_a(ii)%salt(cs_db%num_salts))  
+            allocate(wet_water(ii)%salt(cs_db%num_salts))
+            allocate(wet_water(ii)%saltc(cs_db%num_salts))
+					enddo
+        endif
+        
+        !rtb cs - allocate wetland arrays
+        if(cs_db%num_cs > 0) then
+          allocate(wetcs_d(imax))
+          allocate(wetcs_m(imax))
+          allocate(wetcs_y(imax))
+          allocate(wetcs_a(imax))
+          do ii=1,imax
+            allocate (wetcs_d(ii)%cs(cs_db%num_cs))
+            allocate (wetcs_m(ii)%cs(cs_db%num_cs))
+            allocate (wetcs_y(ii)%cs(cs_db%num_cs))
+            allocate (wetcs_a(ii)%cs(cs_db%num_cs))  
+            allocate (wet_water(ii)%cs(cs_db%num_cs))
+            allocate (wet_water(ii)%csc(cs_db%num_cs))
+					enddo
+        endif
+        
       endif
 
       return

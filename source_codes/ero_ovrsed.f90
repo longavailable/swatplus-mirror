@@ -170,14 +170,14 @@
 	  bed_shear = 9807 * (hhqday(j,k) / 1000.) * hru(j)%topo%slope ! N/m2
 	  sedov = 11.02 * bsn_prm%rill_mult * soil(j)%ly(1)%usle_k *           & 
            bsn_prm%c_factor * c * bed_shear ** bsn_prm%eros_expo ! kg/hour/m2
-	  if(time%step > 0) then
+	  if (time%step > 1) then
 	    sedov = 16.667 * sedov * hru(j)%km * time%dtm ! tons per time step
 	  else
 	    sedov = 24000. * sedov * hru(j)%km	! tons per day
-	  endif
+	  end if
 
 	!! Impervious area of HRU
-	  if(hru(j)%luse%urb_lu > 0) sedov = sedov * (1.- urbdb(ulu)%fimp)
+	  if (hru(j)%luse%urb_lu > 0) sedov = sedov * (1.- urbdb(ulu)%fimp)
 
 	  hhsedy(j,k) =  (sedspl + sedov)
 	  if (hhsedy(j,k) < 1.e-10) hhsedy(j,k) = 0.

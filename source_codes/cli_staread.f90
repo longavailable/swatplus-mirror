@@ -4,6 +4,7 @@
     use maximum_data_module 
     use climate_module
     use time_module
+    use hydrograph_module
 
     implicit none
           
@@ -13,7 +14,7 @@
     integer :: imax                 !none       |determine max number for array (imax) and total number in file
     integer :: iwgn                 !           |
     logical :: i_exist              !none       |check to determine if file exists
-    integer :: iwst                 !none       |counter
+    !integer :: iwst                 !none       |counter
     integer :: i                    !none       |counter
     
     eof = 0
@@ -46,6 +47,9 @@
               allocate (wst(iwst)%weat%ts(time%step))
               allocate (wst(iwst)%weat%ts_next(time%step))
               wst(iwst)%weat%precip_prior_day = "dry"
+              allocate (wst(iwst)%tlag(w_temp%airlag_d))
+              iwgn = wst(iwst)%wco%wgn
+              wst(iwst)%tlag = (wgn(iwgn)%tmpmn(1) + wgn(iwgn)%tmpstdmx(1)) / 2.
             end do
 
             rewind (107)
@@ -78,6 +82,9 @@
                if (db_mx%wndfiles > 0) call search (wnd_n, db_mx%wndfiles, wst(i)%wco_c%wgage, wst(i)%wco%wgage)  
                if (wst(i)%wco%wgage == 0 .and. wst(i)%wco_c%wgage /= "sim" ) write (9001,*) &
                     wst(i)%wco_c%wgage, "file not found (wgage)"
+               if (db_mx% petfiles > 0) call search (petm_n, db_mx%petfiles, wst(i)%wco_c%petgage, wst(i)%wco%petgage)  
+               if (wst(i)%wco%petgage == 0 .and. wst(i)%wco_c%petgage /= "sim" ) write (9001,*) &
+                    wst(i)%wco_c%petgage, "file not found (petgage)"
                if (db_mx%atmodep > 0) call search (atmo_n, db_mx%atmodep, wst(i)%wco_c%atmodep, wst(i)%wco%atmodep)  
                if (wst(i)%wco%atmodep == 0 .and. wst(i)%wco_c%atmodep /= "null" ) write (9001,*) &
                     wst(i)%wco_c%atmodep, "file not found (atmodep)"

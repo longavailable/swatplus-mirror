@@ -26,7 +26,7 @@
         end if
 
         if (lum(ilum)%bmpuser /= "null") then
-          call structure_set_parms("bmpuser         ", lum_str(ilum)%bmpuser, j)
+          call structure_set_parms("user_def         ", lum_str(ilum)%bmpuser, j)
         end if
         
       end do

@@ -4,7 +4,7 @@
       use calibration_data_module
       use conditional_module
       use hru_lte_module
-      use hru_module, only : hru, cn2
+      use hru_module, only : hru
       use soil_module
       use plant_module
       use time_module
@@ -35,7 +35,7 @@
       integer :: iday                                         !none            |counter
       integer :: ig                                           !                |
       integer :: nvar                                         !                |number of plant cal variables (1=lai_pot, 2=harv_idx)
-      integer :: cal_lyr1, cal_lyr2, ireg, ilum, iplant
+      integer :: cal_lyr1, cal_lyr2, iplant
          
       do ichg_par = 1, db_mx%cal_upd
         do ispu = 1, cal_upd(ichg_par)%num_elem
@@ -169,8 +169,8 @@
                 do ipl = 1, pcom(ielem)%npl
                   do ic = 1, cal_upd(ichg_par)%conds
                     if (cal_upd(ichg_par)%cond(ic)%targc == pcom(ielem)%pl(ipl)) then
-                      pcom(ielem)%plcur(ipl)%phumat = chg_par (pcom(ielem)%plcur(ipl)%phumat, ielem, chg_typ, chg_val, &
-                            absmin, absmax, num_db)
+                      pcom(ielem)%plcur(ipl)%phumat = chg_par (pcom(ielem)%plcur(ipl)%phumat, chg_typ, chg_val, &
+                            absmin, absmax)
                     end if
                   end do
                 end do
@@ -181,8 +181,8 @@
                 do ic = 1, cal_upd(ichg_par)%conds
                     do ipl = 1, pcom(ielem)%npl
                       if (cal_upd(ichg_par)%cond(ic)%var == "plant") then
-                        pcom(ielem)%plcur(ipl)%lai_pot = chg_par (pcom(ielem)%plcur(ipl)%lai_pot, ielem, chg_typ, chg_val, &
-                            absmin, absmax, num_db)
+                        pcom(ielem)%plcur(ipl)%lai_pot = chg_par (pcom(ielem)%plcur(ipl)%lai_pot, chg_typ, chg_val, &
+                            absmin, absmax)
                         iplant = 1
                       end if
                     end do
@@ -190,8 +190,8 @@
                 if (iplant == 0) then
                   !! not conditioned on plant - change all plants
                   do ipl = 1, pcom(ielem)%npl
-                    pcom(ielem)%plcur(ipl)%lai_pot = chg_par (pcom(ielem)%plcur(ipl)%lai_pot, ielem, chg_typ, chg_val, &
-                            absmin, absmax, num_db)
+                    pcom(ielem)%plcur(ipl)%lai_pot = chg_par (pcom(ielem)%plcur(ipl)%lai_pot, chg_typ, chg_val, &
+                            absmin, absmax)
                   end do
                 end if
                     
@@ -199,8 +199,8 @@
                 do ipl = 1, pcom(ielem)%npl
                   do ic = 1, cal_upd(ichg_par)%conds
                     if (cal_upd(ichg_par)%cond(ic)%targc == pcom(ielem)%pl(ipl)) then
-                      pcom(ielem)%plcur(ipl)%lai_pot = chg_par (pcom(ielem)%plcur(ipl)%lai_pot, ielem, chg_typ, chg_val, &
-                            absmin, absmax, num_db)
+                      pcom(ielem)%plcur(ipl)%lai_pot = chg_par (pcom(ielem)%plcur(ipl)%lai_pot, chg_typ, chg_val, &
+                            absmin, absmax)
                     end if
                   end do
                 end do
@@ -209,8 +209,8 @@
                 do ipl = 1, pcom(ielem)%npl
                   do ic = 1, cal_upd(ichg_par)%conds
                     if (cal_upd(ichg_par)%cond(ic)%targc == pcom(ielem)%pl(ipl)) then
-                      pcom(ielem)%plcur(ipl)%harv_idx = chg_par (pcom(ielem)%plcur(ipl)%harv_idx, ielem, chg_typ, chg_val, &
-                            absmin, absmax, num_db)
+                      pcom(ielem)%plcur(ipl)%harv_idx = chg_par (pcom(ielem)%plcur(ipl)%harv_idx, chg_typ, chg_val, &
+                            absmin, absmax)
                     end if
                   end do
                 end do
@@ -226,7 +226,7 @@
                     iyr = iyear - time%yrc + 1
                     do iday = cal_upd(ichg_par)%day1, cal_upd(ichg_par)%day2
                       val_cur = pcp(ipg)%ts(iday,iyr)
-                      pcp(ipg)%ts(iday,iyr) = chg_par (val_cur, ielem, chg_typ, chg_val, absmin, absmax, num_db)
+                      pcp(ipg)%ts(iday,iyr) = chg_par (val_cur, chg_typ, chg_val, absmin, absmax)
                     end do
                   end do
                 end do
@@ -238,7 +238,7 @@
                     iyr = iyear - time%yrc + 1
                     do iday = cal_upd(ichg_par)%day1, cal_upd(ichg_par)%day2
                       val_cur = tmp(ig)%ts(iday,iyr)
-                      tmp(ig)%ts(iday,iyr) = chg_par (val_cur, ielem, chg_typ, chg_val, absmin, absmax, num_db)
+                      tmp(ig)%ts(iday,iyr) = chg_par (val_cur, chg_typ, chg_val, absmin, absmax)
                     end do
                   end do
                 end do

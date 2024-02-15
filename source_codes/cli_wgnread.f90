@@ -112,57 +112,7 @@
       close (114) 
 
       !! read wind direction generator data from wind_direction.dat
-      inquire (file=in_cli%wind_dir, exist=i_exist)
-      if (.not. i_exist .or. in_cli%wind_dir == "null") then
-        allocate (wnd_dir(0:0))
-      else
-      do 
-        open (114,file=in_cli%wind_dir)
-        read (114,*,iostat=eof) titldum
-        if (eof < 0) exit
-        read (114,*,iostat=eof) mwnd_dir
-        if (eof < 0) exit
-        if (mwnd_dir > 0) then
-        !! arrays containing wind direction
-          allocate (wnd_dir(mwnd_dir))
-        do iwndir = 1, mwnd_dir
-          read (114,*,iostat=eof) wnd_dir(iwndir)%name
-          if (eof < 0) exit
-          read (114,*,iostat=eof) titldum
-          if (eof < 0) exit
-          read (114,*,iostat=eof) titldum
-          if (eof < 0) exit
-          do idir = 1, 16
-            read (114,*,iostat=eof) (wnd_dir(iwndir)%dir(imo,idir),     &    
-                                                           imo = 1, 12)
-            if (eof < 0) exit
-  !          exit
-          end do
-  !      enddo 
-  !      endif
-                  
-          do imo = 1, 12
-            wnd_dir(iwndir)%dir(imo,1) =                                   &
-                                    wnd_dir(iwndir)%dir(imo,1) / 100.
-            do idir = 2, 16
-              wnd_dir(iwndir)%dir(imo,idir) =                              &
-                                 wnd_dir(iwndir)%dir(imo,idir) / 100.      &
-                                 + wnd_dir(iwndir)%dir(imo,idir-1)
-            end do
-            do idir = 1, 16
-              wnd_dir(iwndir)%dir(imo,idir) =                              &
-                                        wnd_dir(iwndir)%dir(imo,idir)      &
-                                        / wnd_dir(iwndir)%dir(imo,16)
-            end do
-          end do
-        end do
-
-      end if
-      exit
-      enddo
-      endif
-      
-      close (114) 
+      !!!removed 1_22_2024
            
       return
       end subroutine cli_wgnread           

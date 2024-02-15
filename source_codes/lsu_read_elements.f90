@@ -20,8 +20,7 @@
       integer :: k                    !           |
       integer :: isp                  !none       |counter
       integer :: ielem1               !none       |counter
-      integer :: ii                   !none       |counter
-      integer :: iihru                !none       |counter
+      !integer :: iihru                !none       |counter
             
       imax = 0
       mcal = 0

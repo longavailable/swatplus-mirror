@@ -12,8 +12,6 @@
 
       implicit none
 
-      real :: resnew                !              |
-      real :: resnew_n              !              |
       integer :: j                  !none          |HRU number
       integer :: idp                !              |
       integer :: iob                !              |
@@ -53,13 +51,13 @@
             else
             lai_drop = 0.
           end if
-          lai_drop = amax1 (0., lai_drop)
+          lai_drop = max (0., lai_drop)
           lai_drop = amin1 (1., lai_drop)
           leaf_drop%m = lai_drop * pl_mass(j)%leaf(ipl)%m
           leaf_drop%n = leaf_drop%m * pcom(j)%plm(ipl)%n_fr
-          leaf_drop%n = amax1 (0., leaf_drop%n)
+          leaf_drop%n = max (0., leaf_drop%n)
           leaf_drop%p = leaf_drop%m * pcom(j)%plm(ipl)%p_fr
-          leaf_drop%p = amax1 (0., leaf_drop%p)
+          leaf_drop%p = max (0., leaf_drop%p)
 
           pl_mass(j)%tot(ipl) = pl_mass(j)%tot(ipl) - abgr_drop - leaf_drop
           pl_mass(j)%ab_gr(ipl) = pl_mass(j)%ab_gr(ipl) - abgr_drop - leaf_drop

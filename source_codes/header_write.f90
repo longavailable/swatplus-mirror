@@ -189,7 +189,7 @@
             open (4604,file="recall_day.csv", recl = 1500)
             write (4604,*) bsn%name, prog
             write (4604,'(*(G0.3,:","))') hyd_hdr_time, hyd_hdr 
-            write (4604,'(*(G0.3,:","))') hyd_hdr_units
+            write (4604,'(*(G0.3,:","))') hyd_hdr_units3
             write (9000,*) "RECALL                    recall_day.csv"
           end if
         endif
@@ -204,7 +204,7 @@
             open (4605,file="recall_mon.csv",recl = 1500)
             write (4605,*) bsn%name, prog
             write (4605,'(*(G0.3,:","))') hyd_hdr_time, hyd_hdr 
-            write (4605,'(*(G0.3,:","))') hyd_hdr_units
+            write (4605,'(*(G0.3,:","))') hyd_hdr_units3
             write (9000,*) "RECALL                    recall_mon.csv"
          end if
        end if
@@ -219,7 +219,7 @@
             open (4606,file="recall_yr.csv", recl = 1500)
             write (4606,*) bsn%name, prog
             write (4606,'(*(G0.3,:","))') hyd_hdr_time, hyd_hdr 
-            write (4606,'(*(G0.3,:","))') hyd_hdr_units
+            write (4606,'(*(G0.3,:","))') hyd_hdr_units3
             write (9000,*) "RECALL                    recall_yr.csv"
           end if
         endif
@@ -234,7 +234,7 @@
             open (4607,file="recall_aa.csv",recl = 1500)
             write (4607,*) bsn%name, prog
             write (4607,'(*(G0.3,:","))') hyd_hdr_time, hyd_hdr 
-            write (4607,'(*(G0.3,:","))') hyd_hdr_units
+            write (4607,'(*(G0.3,:","))') hyd_hdr_units3
             write (9000,*) "RECALL                    recall_aa.csv"
          end if
         end if

@@ -18,11 +18,9 @@
 !!    ~ ~ ~ LOCAL DEFINITIONS ~ ~ ~
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-!!    c           |none          |inverse of channel side slope
 !!    ii          |none          |counter (hour)
 !!    inhyd       |none          |inflow hydrograph storage location number
 !!    jrch        |none          |reach number
-!!    p           |m             |wetted perimeter
 !!    scoef       |none          |storage coefficient
 !!    topw        |m             |width of channel at water level
 !!    vol         |m^3 H2O       |volume of water in reach
@@ -31,7 +29,6 @@
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
 !!    Intrinsic: Sum, Min, Sqrt
-!!    SWAT: Qman
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
@@ -51,16 +48,10 @@
 
       integer :: ii        !none          |counter (hour)
       integer :: jrch      !none          |reach number
-      real :: c            !none          |inverse of channel side slope
-      real :: p            !m             |wetted perimeter
       real :: scoef        !none          |storage coefficient
       real :: vol          !m^3 H2O       |volume of water in reach
       real :: topw         !m             |width of channel at water level
-      real :: qman         !m^3/s or m/s  |flow rate or flow velocity
       real :: inflo_rate   !m^3/s         |inflow rate
-      real :: xs_area      !m^2           |cross section area of channel
-      real :: dep_flo      !m             |depth of flow
-      real :: wet_perim    !m             |wetted perimeter
       real :: ttime        !hr            |travel time through the reach
       real :: t_inc        !hr            |time in routing step - 1/time%step
       real :: outflo       !m^3           |outflow water volume
@@ -109,7 +100,7 @@
             if (ielev > 1) then
               rto = (inflo_rate - ch_rcurv(jrch)%elev(ielev-1)%flo_rate) /     &
                 (ch_rcurv(jrch)%elev(ielev)%flo_rate - ch_rcurv(jrch)%elev(ielev-1)%flo_rate)
-              call chrc_interp (ch_rcurv(jrch)%elev(ielev-1), ch_rcurv(jrch)%elev(ielev), ielev, rto, rcurv)
+              call chrc_interp (ch_rcurv(jrch)%elev(ielev-1), ch_rcurv(jrch)%elev(ielev), rto, rcurv)
               exit
             end if
           end if
@@ -152,7 +143,7 @@
           
           
           !! calculate transmission losses
-          tl = sd_ch(jrch)%chk * sd_ch(jrch)%chl * rcurv%wet_perim * 24. / time%step   !mm/hr * km * mm * hr = m3       
+          tl = sd_ch(jrch)%chk * sd_ch(jrch)%chl * rcurv%wet_perim * 24. / real(time%step)   !mm/hr * km * mm * hr = m3       
           tl = Min(tl, outflo)
           outflo = outflo - tl
           trans_loss = trans_loss + tl
@@ -175,7 +166,7 @@
           end if
 
           !! set volume of water in channel at end of hour
-          write (2612,*) ii, ttime, scoef, vol, ob(icmd)%tsin(ii), outflo
+          !write (2612,*) ii, ttime, scoef, vol, ob(icmd)%tsin(ii), outflo
           vol = vol - outflo !- tl - ev
           ob(icmd)%hyd_flo(1,ii) = outflo
           outflo_sum = outflo_sum + outflo

@@ -45,15 +45,10 @@
 
       integer :: j             !none          |HRU number
       real :: soxy             !mg/L          |dissolved oxygen saturation concentration 
-      real :: tn               !kmoles N      |kilomoles of nitrogen in nutrient loading to
-                               !              |main channel
       real :: tp               !kmoles P      |kilomoles of phosphorus in nutrient loading to
                                !              |main channel
-      real :: qtot             !mm H2O        |total loadings to main channel generated on
-                               !              |day in HRU
       real :: org_c            !kg            |organic carbon content of surface runoff on
                                !              |day in HRU
-      real :: tn_tp            !mol N/mol P   |atomic ratio of N to P in surface runoff
       real :: wtmp             !deg K         |temperature of surface runoff
       real :: ww               !none          |variable to hold intermediate calculation
                                !              |result
@@ -63,9 +58,7 @@
                                !              |result
       real :: zz               !none          |variable to hold intermediate calculation
                                !              |result
-      real :: flow_cms         !m^3/s H2O     |rate of flow to main channel generated on
-                               !              |day in HRU
-
+      
       j = ihru
 
         !! calculcate water temperature
@@ -87,7 +80,7 @@
           !!add by zhang
           !!========================
           if (bsn_cc%cswat == 2) then
-            org_c = cbn_loss(j)%sedc_d * hru(j)%area_ha
+            org_c = hsc_d(j)%sed_c * hru(j)%area_ha
           end if
           !!add by zhang
           !!========================

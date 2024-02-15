@@ -4,9 +4,11 @@
 !!    this subroutine summarizes data for subbasins with multiple HRUs and
 !!    prints the daily output.hru file
 
-      use hru_module, only : cbodu, chl_a, clayld, doxq, hhsurfq, hru, ihru, itb, lagyld, latq, qp_cms, percn, qday,  &
+      use hru_module, only : cbodu, chl_a, clayld, doxq, hhsurfq, hru, ihru, lagyld, latq, qp_cms, percn, qday,  &
          sagyld, sanyld, silyld, sedminpa, sedminps, sedorgn, sedorgp, sepbtm, surqno3, surqsolp, tileno3,     &
-         sedyld, latno3, qtile, tconc, satexq_chan
+         sedyld, latno3, qtile, tconc, satexq_chan, surqsalt, latqsalt, tilesalt, percsalt, urbqsalt,          & !rtb salt
+         snomlt, wetqsalt,                                                                                     &
+         surqcs, latqcs, tilecs, perccs, sedmcs, urbqcs, wetqcs !rtb cs
       use hydrograph_module
       use basin_module
       use time_module
@@ -24,6 +26,8 @@
       integer :: ihyd                !none          |counter
       integer :: ipest               !none          |counter
       integer :: ipath               !none          |counter 
+      integer :: isalt               !none          |counter for salt ions (rtb salt)
+      integer :: ics                 !none          |counter for constituents (rtb cs)
       integer :: istep               !none          |counter
       integer :: istep_bak           !none          |counter
       integer :: day_cur             !none          |counter
@@ -82,6 +86,12 @@
       do ipath = 1, cs_db%num_paths
         obcs(icmd)%hd(3)%path(ipath) = 0
       end do
+      do isalt = 1, cs_db%num_salts !rtb salt
+			  obcs(icmd)%hd(3)%salt(isalt) = (surqsalt(j,isalt)+urbqsalt(j,isalt)+wetqsalt(j,isalt)) * cnv_kg !kg of each salt ion
+      enddo
+      do ics = 1, cs_db%num_cs !rtb cs
+			  obcs(icmd)%hd(3)%cs(ics) = (surqcs(j,ics)+sedmcs(j,ics)+urbqcs(j,ics)+wetqcs(j,ics)) * cnv_kg !kg of each constituent (surface runoff + attached)
+      enddo
       
       !recharge hydrograph (2)
       ob(icmd)%hd(2)%flo = sepbtm(j) * cnv_m3           !! recharge flow
@@ -93,6 +103,12 @@
       do ipath = 1, cs_db%num_paths
         obcs(icmd)%hd(2)%path(ipath) = 0
       end do
+      do isalt = 1, cs_db%num_salts !rtb salt
+        obcs(icmd)%hd(2)%salt(isalt) = percsalt(j,isalt) * cnv_kg !kg of each salt ion
+      enddo
+      do ics = 1, cs_db%num_cs !rtb cs
+        obcs(icmd)%hd(2)%cs(ics) = perccs(j,ics) * cnv_kg !kg of each constituent
+      enddo
       
       !lateral soil flow hydrograph (4)
       ob(icmd)%hd(4)%flo = latq(j) * cnv_m3                 !! lateral flow
@@ -105,6 +121,12 @@
       do ipath = 1, cs_db%num_paths
         obcs(icmd)%hd(4)%path(ipath) = 0
       end do
+      do isalt = 1, cs_db%num_salts !rtb salt
+        obcs(icmd)%hd(4)%salt(isalt) = latqsalt(j,isalt) * cnv_kg !kg of each salt ion
+      enddo
+      do ics = 1, cs_db%num_cs !rtb cs
+        obcs(icmd)%hd(4)%cs(ics) = latqcs(j,ics) * cnv_kg !kg of each constituent
+      enddo
       
       !tile flow hydrograph (5)
       ob(icmd)%hd(5)%flo = qtile * cnv_m3               !! tile flow
@@ -119,17 +141,23 @@
       
       !water temperature calculations
       !percolate temperature
-      !ob(icmd)%hd(2)%temp = b_t
+      ob(icmd)%hd(2)%temp = w_temp%sur_lat
       !surface runoff temperature
-      !if (snomlt > 0.1) then
-        !ob(icmd)%hd(3)%temp = a_t
-      !else
-        !ob(icmd)%hd(3)%temp = l_t * tmp
-      !end if
+      if (snomlt > 0.1) then
+        ob(icmd)%hd(3)%temp = w_temp%sno_mlt
+      else
+        ob(icmd)%hd(3)%temp = w_temp%sur_lat
+      end if
       !lateral soil flow temperature
-      !ob(icmd)%hd(4)%temp = l_t * tmp
+      ob(icmd)%hd(4)%temp = w_temp%sur_lat
       !tile flow temperature
-      !ob(icmd)%hd(5)%temp = l_t * tmp
+      ob(icmd)%hd(5)%temp = w_temp%sur_lat
+      do isalt = 1, cs_db%num_salts !rtb salt
+        obcs(icmd)%hd(5)%salt(isalt) = tilesalt(j,isalt) * cnv_kg !kg of each salt ion
+      enddo
+      do ics = 1, cs_db%num_cs !rtb cs
+        obcs(icmd)%hd(5)%cs(ics) = tilecs(j,ics) * cnv_kg !kg of each constituent
+      enddo
       
       !sum to obtain the total outflow hydrograph (1)
       do ihyd = 3, 5
@@ -144,14 +172,22 @@
       do ipath = 1, cs_db%num_paths
         obcs(icmd)%hd(1)%path(ipath) = 0
       end do
+      do isalt = 1, cs_db%num_salts !rtb salt
+        obcs(icmd)%hd(1)%salt(isalt) = obcs(icmd)%hd(3)%salt(isalt) + obcs(icmd)%hd(4)%salt(isalt) +    &  !total = surface runoff + lateral flow + tile flow
+                                                                      obcs(icmd)%hd(5)%salt(isalt)
+      enddo
+      do ics = 1, cs_db%num_cs !rtb cs
+        obcs(icmd)%hd(1)%cs(ics) = obcs(icmd)%hd(3)%cs(ics) + obcs(icmd)%hd(4)%cs(ics) +    &  !total = surface runoff + lateral flow + tile flow
+                                                              obcs(icmd)%hd(5)%cs(ics)
+      enddo
       
       !! set subdaily hydrographs
-      if (time%step > 0) then
-        !! set previous and next days for adding previous and translating to next
-        day_cur = ob(icmd)%day_cur
-        day_next = day_cur + 1
-        if (day_next > ob(icmd)%day_max) day_next = 1
+      !! set previous and next days for adding previous and translating to next
+      day_cur = ob(icmd)%day_cur
+      day_next = day_cur + 1
+      if (day_next > ob(icmd)%day_max) day_next = 1
           
+      if (time%step > 1) then
         if (bsn_cc%gampt == 1) then
           !! hhsurfq from sq_greenampt - mm
           ob(icmd)%hyd_flo(day_cur,:) = ob(icmd)%hyd_flo(day_cur,:) + hhsurfq(j,:) * cnv_m3
@@ -175,12 +211,15 @@
                 ob(icmd)%hyd_flo(day_cur,istep_bak) = ob(icmd)%hyd_flo(day_cur,istep_bak-tinc)
               end if
             end do
-          end if  
+          end if
         else
           !! use unit hydrograph and daily runoff
           call flow_hyd_ru_hru (ob(icmd)%day_cur, ob(icmd)%hd(3)%flo, ob(icmd)%hd(4)%flo,     &
                                         ob(icmd)%hd(5)%flo, ob(icmd)%uh, ob(icmd)%hyd_flo)
         end if
+      else
+        !! set to total runoff needed when summing incoming in command
+        ob(icmd)%hyd_flo(day_cur,1) = ob(icmd)%hd(1)%flo
       end if
 
       return   

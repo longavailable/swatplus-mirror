@@ -45,7 +45,6 @@
 
       implicit none
 
-      integer :: icrop       !none      |land cover code
       integer :: j           !none      |hru number
       integer :: l           !none      |counter (soil layer)
       real :: uno3l          !kg N/ha   |plant nitrogen demand
@@ -53,10 +52,6 @@
       real :: root_depth     !mm        |root depth
       real :: unmx           !kg N/ha   |maximum amount of nitrogen that can be removed from soil layer
       real :: soil_depth     !mm        |lowest depth in layer from which nitrogen may be removed
-      real :: uobn           !none      |nitrogen uptake normalization parameter
-                             !          |This variable normalizes the nitrogen uptake
-                             !          |so that the model can easily verify that
-                             !          |upake from the different soil layers sums to 1.0
       real :: xx             !          |  
       integer :: max         !          |
   
@@ -68,7 +63,7 @@
       if (uno3d(ipl) < 1.e-6) return
       
       !! find depth of soil layer the roots are into
-      root_depth = amax1 (10.1, pcom(j)%plg(ipl)%root_dep)
+      root_depth = max (10.1, pcom(j)%plg(ipl)%root_dep)
       soil_depth = 0.
       do l = 1, soil(j)%nly
         soil_depth = soil(j)%phys(l)%d

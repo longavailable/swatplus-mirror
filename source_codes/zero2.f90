@@ -3,9 +3,8 @@
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine zeros all array values
 
-      use hru_module, only : clayld,   &
-       hru,lagyld,ndeat,ovrlnd,par,sagyld,sanyld,  &
-       sedyld,silyld,smx,surf_bs,twash,wrt,bss_ex
+      use hru_module, only : clayld, lagyld, ovrlnd, sagyld, sanyld,  &
+          sedyld, silyld, smx,surf_bs, twash,wrt, bss_ex
 
       implicit none
 
@@ -30,6 +29,5 @@
       zdb = 0.
       bss_ex = 0. !rtb gwflow
       
-
       return
       end

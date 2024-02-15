@@ -1,7 +1,7 @@
       subroutine topohyd_init
     
       use hydrograph_module, only : sp_ob, sp_ob1, ob
-      use hru_module, only : hru, hru_db, ihru, snodb, cn2
+      use hru_module, only : hru, ihru, snodb
       use hydrology_data_module
       use topography_data_module
       use soil_data_module
@@ -9,17 +9,13 @@
       
       implicit none
 
-      integer :: eof                  !           |end of file
-      integer :: i                    !none       |counter
       integer :: isno                 !none       |counter
-      integer :: nly                  !           |
       integer :: ifield_db            !           |
       integer :: itopohd_db           !           |
       integer :: ihyd_db              !           |
       integer :: itopo_db             !           |
       integer :: isno_db
       integer :: iob                  !           |
-      integer :: ipl                  !           |
       real :: perc_ln_func            !none       |function to convert perco to perc_lim
     
       !!assign topography and hyd parameters
@@ -35,12 +31,12 @@
         hru(ihru)%topo%slope_len = topo_db(itopohd_db)%slope_len
         hru(ihru)%hyd%name = hyd_db(ihyd_db)%name
         hru(ihru)%hyd%lat_ttime = hyd_db(ihyd_db)%lat_ttime
-        hru(ihru)%hyd%lat_sed = hyd_db(ihyd_db)%lat_sed / 1000. !mg/l => g/l ; mm * km2 * g/l = t
+        hru(ihru)%hyd%lat_sed = hyd_db(ihyd_db)%lat_sed
         hru(ihru)%topo%lat_len = topo_db(itopohd_db)%lat_len
         if (hru(ihru)%topo%lat_len < 1.e-6) hru(ihru)%topo%lat_len = 50.
         hru(ihru)%hyd%canmx = hyd_db(ihyd_db)%canmx
         hru(ihru)%hyd%esco = hyd_db(ihyd_db)%esco
-        !hru(ihru)%hyd%esco = 0.05
+        !hru(ihru)%hyd%esco = 1.0
         hru(ihru)%hyd%epco = hyd_db(ihyd_db)%epco
         hru(ihru)%hyd%erorgn = hyd_db(ihyd_db)%erorgn
         hru(ihru)%hyd%erorgp = hyd_db(ihyd_db)%erorgp
@@ -53,13 +49,12 @@
         !! shape parameters to describes area of snow cover as a function of amount of snow
         call ascrv(.5, .95, hru(ihru)%sno%cov50, .95, hru(ihru)%snocov1, hru(ihru)%snocov2)
 
-
         !! try setting for tile
         if (hru(ihru)%tiledrain > 0) then
           hru(ihru)%hyd%cn3_swf = 0.95
           hru(ihru)%hyd%perco = 0.1
         end if
-
+        
         if (hru(ihru)%hyd%perco > 1.e-9) then
           perc_ln_func = 1.0052 * log(-log(hru(ihru)%hyd%perco - 1.e-6)) + 5.6862
           hru(ihru)%hyd%perco_lim = exp(-perc_ln_func)
@@ -91,6 +86,10 @@
         ! set initial snow cover
         isno = hru(ihru)%dbs%snow 
         hru(ihru)%sno_mm = snodb(isno)%init_mm
+        
+        ! initialize hydrology parms for water balance soft cal (cn3_swf)
+        hru(ihru)%hydcal = hru(ihru)%hyd
+        
       end do
       
       return

@@ -18,8 +18,8 @@
 
       use basin_module
       use organic_mineral_mass_module
-      use gwflow_module, only : gwflow_flag, gw_transfer_flag, gw_transport_flag, hru_ptran, gwflow_percp
-      use hru_module, only : hru, surqsolp, surfq, i_sep, ihru, qtile, gwtranp 
+      use gwflow_module, only : gw_soil_flag, gw_solute_flag, hru_soil, gwflow_percsol
+      use hru_module, only : hru, surqsolp, surfq, i_sep, ihru, qtile, gwsoilp 
       use soil_module
       use output_landscape_module
       use hydrograph_module, only : ht1
@@ -38,10 +38,10 @@
       j = ihru
       
       !rtb gwflow: add P mass transferred to soil profile from the aquifer
-      if(gw_transfer_flag.eq.1 .and. gw_transport_flag.eq.1) then
+      if(gw_soil_flag.eq.1 .and. gw_solute_flag) then
         do jj = 1,soil(j)%nly
-          soil1(j)%mp(jj)%lab = soil1(j)%mp(jj)%lab + hru_ptran(j,jj) !kg/ha
-          gwtranp(j) = gwtranp(j) + hru_ptran(j,jj) !HRU total
+          soil1(j)%mp(jj)%lab = soil1(j)%mp(jj)%lab + hru_soil(j,jj,2) !kg/ha
+          gwsoilp(j) = gwsoilp(j) + hru_soil(j,jj,2) !HRU total
         enddo
       endif
       
@@ -85,10 +85,10 @@
            hls_d(j)%tilelabp = plch
          endif
 	   endif
-   !rtb gwflow: store phosphorus leaching concentration for gwflow module
-   if(gwflow_flag .and. gw_transport_flag) then
-     gwflow_percp(j) = hls_d(j)%lchlabp  
-   endif
+     !rtb gwflow: store phosphorus leaching concentration for gwflow module
+     if(bsn_cc%gwflow .and. gw_solute_flag) then
+       gwflow_percsol(j,2) = hls_d(j)%lchlabp  
+     endif
       end do
       
       return

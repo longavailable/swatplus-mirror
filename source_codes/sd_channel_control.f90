@@ -12,7 +12,12 @@
       use climate_module
       use water_body_module
       use time_module
-    
+      use water_allocation_module, only: wallo
+      use ch_salt_module !rtb salt
+      use ch_cs_module !rtb cs
+      use gwflow_module, only: flood_freq !rtb gwflow
+      use ch_pesticide_module               !!!  nbs added 7-20-23
+      
       implicit none     
     
       !real :: rcharea                !m^2           |cross-sectional area of flow
@@ -22,6 +27,7 @@
       integer :: idb                  !none          |channel data pointer
       integer :: ihyd                 !              |
       integer :: ipest                !              |
+      integer :: isalt                !              |salt ion counter (rtb salt)
       integer :: ihru                 !              |
       integer :: iru                  !              |
       integer :: ise                  !              |
@@ -66,48 +72,27 @@
       real :: flood_dep               !              | 
       real :: dep_e                   !              |
       real :: rto                     !none          |cloud cover factor 
-      real :: e_btm                   !cm            |erosion on bottom of channel at each time step
-      real :: dep_btm                 !cm            |deposition on bottom of channel
       real :: sumtime                 !              |
       real :: vc                      !m/s           |flow velocity in reach
       real :: pr_ratio                !              |
-      real  :: tw                     !              |
-      real :: tave                    !              |
       real :: shear_btm_cr            !              |
-      real :: shear_btm_adj           !none          |take out bedld_cap adjustment
-      real :: shear_btm               !              |
-      real :: shear_bank_cr           !              | 
-      real :: qmm                     !              | 
-      real :: qh                      !              | 
+      real :: shear_btm               !              |  
       real :: hc                      !m/yr          |head cut advance
-      integer :: max                  !              |
-      real :: chns                    !              |
-      integer :: ihval                !none          |counter 
-      real :: bedld_cap               !              |
-      real :: perim_bed               !              |
-      real :: vol
-      real :: perim_bank              !              |
-      real :: s_bank                  !              |
-      real :: shear_bank              !              |
-      real :: shear_bank_adj          !              | 
-      real :: e_bank                  !              | 
-      real :: perc                    !              |
-      real :: w_btm                   !m             |channel bottom width
+      integer :: max                  !              |  
       integer :: iaq
       integer :: iaq_ch
       real :: det                     !hr            |time step
       real :: scoef                   !none          |Storage coefficient
-      integer :: dum                  !rtb gwflow
       real :: flo_ls
-      real :: channel_storage         !rtb gwflow
-      real :: rchvol
-      real :: str_pow                 !              |stream power
-      real :: str_pow_cr              !              |critical stream power
-      real :: d50_m                   !m             |d50 converted to meters
-      real :: vel, cohes, vel_cr, b_coef, sedcap_ppm, qcms, veg, sedcap_t, sedin_t
+      real :: vel, cohes, vel_cr, b_coef, qcms, veg
       real :: rad_curv, cla, pk_rto, vel_bend, vel_rch
       real :: arc_len, hyd_radius, prot_len
-      
+      real :: gw_salt_in              !kg            |salt loading to channel from aquifer
+      real :: gw_cs_in                !kg            |constituent loading to channel from aquifer
+      real :: seep_mass               !kg            |salt mass in seepage water
+      real :: salt_conc(8)            !kg            |salt concentration in channel water
+      real :: cs_conc(8)              !kg            |constituent concentration in channel water
+      real :: bf_flow                 !m3/s          |bankfull flow rate * adjustment factor
       ich = isdch
       isd_db = sd_dat(ich)%hyd
       iwst = ob(icmd)%wst
@@ -127,6 +112,10 @@
       !call ch_rthr
               
       !call sd_channel_sediment (time%step)
+      
+      !rtb floodplain
+      if(bsn_cc%gwflow.eq.1) flood_freq(ich) = 0
+      
         
       !! set ht1 to incoming hydrograph
       ht1 = ob(icmd)%hin
@@ -135,6 +124,11 @@
         ht1 = ht1 + ob(icmd)%trans
         ob(icmd)%trans = hz
       end if
+      
+      !set constituents to incoming loads (rtb salt; rtb cs)
+      if (cs_db%num_tot > 0) then
+        hcs1 = obcs(icmd)%hin(1)
+      endif
       
       chsd_d(ich)%flo_in = ht1%flo / 86400.     !flow for morphology output
       ch_in_d(ich) = ht1                        !set inflow om hydrograph
@@ -165,10 +159,29 @@
           chsd_d(ich)%aqu_in = (aq_ch(iaq)%ch(iaq_ch)%flo_fr * aq_ch(iaq)%hd%flo) / 86400.
           chsd_d(ich)%aqu_in_mm = (aq_ch(iaq)%ch(iaq_ch)%flo_fr * aq_ch(iaq)%hd%flo) / (10. * ob(icmd)%area_ha)
           ht1 = ht1 + aq_ch(iaq)%ch(iaq_ch)%flo_fr * aq_ch(iaq)%hd
+          !rtb salt
+          do isalt=1,cs_db%num_salts
+            gw_salt_in = aq_ch(iaq)%ch(iaq_ch)%flo_fr * aq_chcs(iaq)%hd(1)%salt(isalt) !kg
+            chsalt_d(ich)%salt(isalt)%gw_in = gw_salt_in !kg
+            hcs1%salt(isalt) = hcs1%salt(isalt) + gw_salt_in !kg
+          enddo
+          !rtb cs
+          do ics=1,cs_db%num_cs
+            gw_cs_in = aq_ch(iaq)%ch(iaq_ch)%flo_fr * aq_chcs(iaq)%hd(1)%cs(ics) !kg
+            chcs_d(ich)%cs(ics)%gw_in = gw_cs_in !kg
+            hcs1%cs(ics) = hcs1%cs(ics) + gw_cs_in !kg
+          enddo
           aq_ch(iaq)%ch(iaq_ch)%flo_fr = 0.
         end if
       end if
-      hcs1 = obcs(icmd)%hin
+      
+      !if gwflow is active, calulate aquifer interactions (ht1 is updated)
+      if(bsn_cc%gwflow.eq.1) then
+        call gwflow_gwsw(ich) !channel <--> groundwater
+        call gwflow_canl(ich) !channel --> canal seepage
+        call gwflow_tile(ich) !groundwater --> channel
+        call gwflow_satx(ich) !groundwater --> channel
+      endif
       
       !! set inflow hyds for printing
       chsd_d(ich)%flo_in = ht1%flo / 86400.     !flow for morphology output - m3/s
@@ -202,8 +215,11 @@
           IF (peakrate > sd_ch_vel(ich)%vel_bf) THEN
           !! OVERBANK FLOOD
             
-            !rtb floodplain
-            !flood_freq(ich) = 1 !flag to indicate the water is in the floodplain
+            !rtb floodplain exchange with aquifer (gwflow module)
+            if(bsn_cc%gwflow.eq.1) then
+              flood_freq(ich) = 1 !flag to indicate the water is in the floodplain
+              call gwflow_fpln(ich)
+						endif
             
             sd_ch(ich)%overbank = "ob"
             rcharea = sd_ch_vel(ich)%area
@@ -406,7 +422,7 @@
         else
           cohes = 0.
         end if
-        cohes = amax1 (0., cohes)
+        cohes = max (0., cohes)
         veg = 0.    !Pa 200-10000.
         if (1.177 + 0.021 * cohes + veg > 0.001) then
           !! vel_cr = log10(8.8 * rcurv%dep / 0.004) * (0.0004 * ((1377.-1000.) * 9.81 * 0.004 + 0.021 * cohes + veg)) ** 0.5
@@ -426,16 +442,17 @@
         else
           ebank_m = 0.
         end if
+
         !! calc mass of sediment eroded -> t = bankcut (m) * depth (m) * lengthcut (m) * bd (t/m3)
         !! arc length = 0.33 * meander wavelength * sinuosity  -> protected length 
         arc_len = 0.33 *  (12. * sd_ch(ich)%chw) * sd_ch(ich)%sinu
         hyd_radius = rcurv%xsec_area / rcurv%wet_perim
         prot_len = 0.71 * (hyd_radius ** 1.1666) / sd_ch(ich)%chn
         ebank_t = ebank_m * sd_ch(ich)%chd * (arc_len + prot_len) * sd_ch(ich)%ch_bd
-        ebank_t = amax1 (0., ebank_t)
+        ebank_t = max (0., ebank_t)
         
           !! no downcutting below equilibrium slope
-          if (sd_ch(ich)%chs > sd_ch(ich)%chseq) then
+          if (sd_ch(ich)%chs > 0.000001) then       !sd_ch(ich)%chseq) then
           !! calc critical shear and shear on bottom of channel
           shear_btm_cr = sd_ch(ich)%d50
           shear_btm = 9800. * hyd_radius * sd_ch(ich)%chs   !! Pa = N/m^2 * m * m/m
@@ -448,22 +465,21 @@
           end if
 
           !! adjust for incoming bedload and compute deposition
-          !! assume bedload is deposited
-          !dep = sd_ch(ich)%bedldcoef * ht1%sed
-          !dep_btm = dep / (10. * perim_bed * sd_ch(ich)%chl * sd_ch(ich)%ch_bd)
-          !ebtm_m = ebtm_m ! - dep_btm      !don't add in all bedload (most will be transported out)
           sd_ch(ich)%chd = sd_ch(ich)%chd + ebtm_m !/ 100.
           if (sd_ch(ich)%chd < 0.) then
             !! stream is completely filled in
             sd_ch(ich)%chd = 0.01
           end if
 
+      !! compute flood plain deposition
+      !sd_ch(ich)%bankfull_flo = 1.0      !***jga
+      bf_flow = sd_ch(ich)%bankfull_flo * ch_rcurv(ich)%elev(2)%flo_rate
+      if (peakrate > bf_flow) then
+        dep = sd_ch(ich)%chseq * ht1%sed           !((peakrate - bf_flow) / peakrate) * ht1%sed
+      end if
+      
       !! compute sediment leaving the channel
-	  washld = (1. - sd_ch(ich)%bedldcoef) * ht1%sed
-      washld = amax1 (0., washld)
-	  sedout = washld + hc_sed + ebtm_t + ebank_t
-      dep = ht1%sed - sedout
-      dep = amax1 (0., dep)
+	  sedout = ht1%sed - dep + hc_sed + ebtm_t + ebank_t
       
       !! set values for outflow hydrograph
       !! calculate flow velocity and travel time  ht2 = ht1   !***jga 
@@ -475,7 +491,7 @@
         vc = peakrate / rcharea
         !if (vc > sd_ch_vel(ich)%celerity_bf) vc = sd_ch_vel(ich)%celerity_bf
         rttime = sd_ch(ich)%chl * 1000. / (3600. * vc)
-        if (time%step == 0) rt_delt = 1.
+        if (time%step == 1) rt_delt = 1.
         !if (bsn_cc%wq == 1) then
           !! use modified qual-2e routines
           ht3 = ht1
@@ -528,6 +544,25 @@
       !! add precip
       ht2%flo = ht2%flo + ch_wat_d(ich)%precip
       
+      !salt and constituent concentrations (g/m3) for inflow water
+      if(cs_db%num_salts > 0 .or. cs_db%num_cs > 0) then
+        hcs2 = hcs1 !set outflow to inflow
+        do isalt=1,cs_db%num_salts
+          if(ht2%flo > 0) then
+            salt_conc(isalt) = (hcs2%salt(isalt) * 1000.) / ht2%flo !g/m3 = mg/L 
+          else
+            salt_conc(isalt) = 0.
+          endif
+        enddo
+        do ics=1,cs_db%num_cs
+          if(ht2%flo > 0) then
+            cs_conc(ics) = (hcs2%cs(ics) * 1000.) / ht2%flo !g/m3 = mg/L 
+          else
+            cs_conc(ics) = 0.
+          endif
+        enddo
+      endif
+      
       !! subtract seepage
       if (ht2%flo < ch_wat_d(ich)%seep) then
         ch_wat_d(ich)%seep = ht2%flo
@@ -535,6 +570,28 @@
       else
         ht2%flo = ht2%flo - ch_wat_d(ich)%seep
       end if
+      
+      !salt mass in seepage
+      do isalt=1,cs_db%num_salts
+        seep_mass = salt_conc(isalt) * ch_wat_d(ich)%seep !g/m3 * m3 = g
+        seep_mass = seep_mass / 1000. !kg
+        if(seep_mass > hcs2%salt(isalt)) then
+          seep_mass = hcs2%salt(isalt)
+        endif
+        hcs2%salt(isalt) = hcs2%salt(isalt) - seep_mass !kg
+        chsalt_d(ich)%salt(isalt)%seep = seep_mass !kg (channel salt output)
+      enddo
+      
+      !constituent mass in seepage
+      do ics=1,cs_db%num_cs
+        seep_mass = cs_conc(ics) * ch_wat_d(ich)%seep !g/m3 * m3 = g
+        seep_mass = seep_mass / 1000. !kg
+        if(seep_mass > hcs2%cs(ics)) then
+          seep_mass = hcs2%cs(ics)
+        endif
+        hcs2%cs(ics) = hcs2%cs(ics) - seep_mass !kg
+        chcs_d(ich)%cs(ics)%seep = seep_mass !kg (channel constituent output)
+      enddo
       
       !! subtract evaporation
       if (ht2%flo < ch_wat_d(ich)%evap) then
@@ -555,11 +612,11 @@
       ob(icmd)%hout_tot = ob(icmd)%hout_tot + ht2
         
       !! calculate hydrograph leaving reach and storage in channel
-      !if (time%step == 0) rt_delt = 1.
+      !if (time%step == 1) rt_delt = 1.
       rt_delt = 1.
       det = 24.* rt_delt
       scoef = bsn_prm%scoef * det / (rttime + det)
-      scoef = amax1 (0., scoef)
+      scoef = max (0., scoef)
       scoef = amin1 (1., scoef)
       frac = 1. - scoef
       
@@ -572,9 +629,10 @@
       ht2 = scoef * ht3
       ch_stor(ich) = ht3 - ht2    !incoming + initial storage - outflow
         
-      hcs2 = scoef * hcs1
-      hcs2 = hcs2 + ch_water(ich)
-      ch_water(ich) = frac * hcs1
+      !salt, constituent mass
+      if(cs_db%num_salts > 0 .or. cs_db%num_cs > 0) then
+        hcs3 = hcs2 + ch_water(ich) !incoming + storage
+      endif
       
       !rtb hydrograph separation
       if (rttime > det) then      ! ht1 = incoming + storage
@@ -637,7 +695,7 @@
 
       ich = isdch
             
-      !! check decision table for flow control - water allocation
+      !! check decision table for flow control - water diversion
       if (ob(icmd)%ruleset /= "null" .and. ob(icmd)%ruleset /= "0") then
         id = ob(icmd)%flo_dtbl
         d_tbl => dtbl_flo(id)
@@ -645,7 +703,7 @@
         call actions (ich, icmd, id)
       end if
  
-      !! check decision table for flow control - water allocation
+      !! check decision table for water allocation
       if (sd_ch(isdch)%wallo > 0) then
         call wallo_control (sd_ch(isdch)%wallo)
       end if
@@ -653,6 +711,22 @@
       !! set outflow hyd to ht2 after diverting water
       ob(icmd)%hd(1) = ht2
 
+      !channel salt updates
+      if(cs_db%num_salts > 0) then
+        do isalt=1,cs_db%num_salts
+          hcs2%salt(isalt) = scoef * hcs3%salt(isalt)
+          ch_water(ich)%salt(isalt) = hcs3%salt(isalt) - hcs2%salt(isalt)
+        enddo
+      endif
+      
+      !channel constituent updates
+      if(cs_db%num_cs > 0) then
+        do ics=1,cs_db%num_cs
+          hcs2%cs(ics) = scoef * hcs3%cs(ics)
+          ch_water(ich)%cs(ics) = hcs3%cs(ics) - hcs2%cs(ics)
+        enddo
+      endif
+      
       !ht2 = ob(icmd)%hd(1)  !! reset ht2 for printing
       ob(icmd)%hd(1)%temp = 5. + .75 * wst(iwst)%weat%tave
       ht2%temp = 5. + .75 * wst(iwst)%weat%tave
@@ -660,6 +734,12 @@
       
       if (cs_db%num_pests > 0) then
         obcs(icmd)%hd(1)%pest = hcs2%pest
+      end if
+      if (cs_db%num_salts > 0) then !rtb salt
+        obcs(icmd)%hd(1)%salt = hcs2%salt
+      end if
+      if (cs_db%num_cs > 0) then !rtb cs
+        obcs(icmd)%hd(1)%cs = hcs2%cs
       end if
       
       !! output channel organic-mineral
@@ -691,7 +771,7 @@
       
       !! set pesticide output variables
       do ipest = 1, cs_db%num_pests
-        chpst_d(isdch)%pest(ipest)%tot_in = obcs(icmd)%hin%pest(ipest)
+        chpst_d(isdch)%pest(ipest)%tot_in = obcs(icmd)%hin(1)%pest(ipest)
         chpst_d(isdch)%pest(ipest)%sol_out = frsol * obcs(icmd)%hd(1)%pest(ipest)
         chpst_d(isdch)%pest(ipest)%sor_out = frsrb * obcs(icmd)%hd(1)%pest(ipest)
         chpst_d(isdch)%pest(ipest)%react = chpst%pest(ipest)%react
@@ -704,6 +784,32 @@
         chpst_d(isdch)%pest(ipest)%water = ch_water(ich)%pest(ipest)
         chpst_d(isdch)%pest(ipest)%benthic = ch_benthic(ich)%pest(ipest)
       end do
+      
+      !rtb salt - set salt output variables
+      do isalt = 1, cs_db%num_salts
+        chsalt_d(ich)%salt(isalt)%tot_in = hcs1%salt(isalt) + chsalt_d(ich)%salt(isalt)%gw_in !mass entering the channel (upstream + groundwater)
+        chsalt_d(ich)%salt(isalt)%tot_out = hcs2%salt(isalt) !mass leaving the channel (for current day)
+        chsalt_d(ich)%salt(isalt)%water = ch_water(ich)%salt(isalt) !mass stored in channel (for current day)
+        !concentration of channel water (= concentration of outflow water)
+        if(ht2%flo > 0) then 
+          chsalt_d(ich)%salt(isalt)%conc = (hcs2%salt(isalt) * 1000.) / ht2%flo !g/m3 = mg/L 
+				else
+          chsalt_d(ich)%salt(isalt)%conc = 0.
+				endif
+      enddo
+      
+      !rtb cs - set constituent output variables
+      do ics = 1, cs_db%num_cs
+        chcs_d(ich)%cs(ics)%tot_in = hcs1%cs(ics) + chcs_d(ich)%cs(ics)%gw_in !mass entering the channel (upstream + groundwater)
+        chcs_d(ich)%cs(ics)%tot_out = hcs2%cs(ics) !kg mass leaving the channel (for current day)
+        chcs_d(ich)%cs(ics)%water = ch_water(ich)%cs(ics) !kg mass stored in channel (for current day)
+        if(ht2%flo > 0) then !concentration of outflow water
+          chcs_d(ich)%cs(ics)%conc = (hcs2%cs(ics) * 1000.) / ht2%flo !g/m3 = mg/L 
+				else
+          chcs_d(ich)%cs(ics)%conc = 0.
+				endif
+      enddo
+      
         
       !! set values for recharge hydrograph - should be trans losses
       !ob(icmd)%hd(2)%flo = perc  

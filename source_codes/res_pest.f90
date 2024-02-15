@@ -45,8 +45,8 @@
         idb = ob(icmd)%props
         ipest_db = cs_db%pest_num(ipst)
         jsed = res_dat(idb)%sed
-        respst_d(jres)%pest(ipst)%tot_in = obcs(icmd)%hin%pest(ipst)
-        tpest1 = obcs(icmd)%hin%pest(ipst) + res_water(jres)%pest(ipst)
+        respst_d(jres)%pest(ipst)%tot_in = obcs(icmd)%hin(1)%pest(ipst)
+        tpest1 = obcs(icmd)%hin(1)%pest(ipst) + res_water(jres)%pest(ipst)
         bedvol = 1000. * res_wat_d(jres)%area_ha * pestdb(ipest_db)%ben_act_dep + .01
         tpest2 = res_benthic(jres)%pest(ipst) * bedvol
 

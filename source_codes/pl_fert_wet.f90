@@ -1,4 +1,4 @@
-      subroutine pl_fert_wet (jj, ifrt, frt_kg, fertop)
+      subroutine pl_fert_wet (ifrt, frt_kg)
       
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine applies N and P specified by date and
@@ -27,16 +27,8 @@
                                           !              |between the fresh organic and the stable 
                                           !              |organic pools
       integer :: j                        !none          |counter
-      integer :: l                        !none          |counter 
-      integer, intent (in) :: jj          !none          |counter
       integer, intent (in) :: ifrt        !              |fertilizer type from fert data base
-      integer, intent (in) :: fertop      !              | 
       real, intent (in) :: frt_kg         !kg/ha         |amount of fertilizer applied
-      real :: xx                          !              |
-      real :: gc                          !none          |fraction of ground covered by plant foliage
-      real :: gc1                         !              |
-      real :: swf                         !cfu           |fraction of manure containing active colony forming units 
-      real :: frt_t                       !              |
       
 
       !!added by zhang

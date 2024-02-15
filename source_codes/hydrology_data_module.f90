@@ -21,7 +21,7 @@
         real :: perco = 0.         !!none          |0-1           |percolation coefficient - linear adjustment to daily perc
         real :: lat_orgn = 0.      !!ppm           |organic N concentration in lateral flow
         real :: lat_orgp = 0.      !!ppm           |organic P concentration in lateral flow
-        real :: pet_co  = .0023    !!none          |coefficient related to radiation used in Hargreaves equation
+        real :: pet_co  = 1.0      !!none          |coefficient related to radiation used in Hargreaves equation
         real :: latq_co = 0.3      !!none          |0-1           |lateral soil flow coefficient - linear adjustment to daily lat flow
       end type hydrology_db
       type (hydrology_db), dimension (:), allocatable :: hyd_db

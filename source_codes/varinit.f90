@@ -99,7 +99,7 @@
         fixn = 0.
         grazn = 0.
         grazp = 0.
-        if (time%step > 0)  hhqday(j,:) = 0.
+        if (time%step > 1)  hhqday(j,:) = 0.
         inflpcp = 0.
         lyrtile = 0.
         qp_cms = 0.
@@ -126,11 +126,11 @@
 	  irmmdt = 0.
         hhsedy = 0.
         ubntss = 0.
-        wet_seep_day(:)%no3 = 0
-        wet_seep_day(:)%nh3 = 0
-        wet_seep_day(:)%orgn =0
-        wet_seep_day(:)%solp =0
-        wet_seep_day(:)%sedp =0
+        wet_seep_day(j)%no3 = 0
+        wet_seep_day(j)%nh3 = 0
+        wet_seep_day(j)%orgn =0
+        wet_seep_day(j)%solp =0
+        wet_seep_day(j)%sedp =0
 
        return
        end subroutine varinit

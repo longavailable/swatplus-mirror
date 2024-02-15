@@ -29,7 +29,6 @@
       integer, intent (in) :: iharvop   !               |harvest operation type
       real :: harveff                   !0-1            |harvest efficiency
       integer :: idp                    !none           |plant number from plants.plt
-      real :: harveff1                  !0-1            |1.-harveff
       
       j = jj
       ipl = iplant

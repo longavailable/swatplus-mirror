@@ -51,15 +51,10 @@
     integer isp                !none          |type of septic system for current hru
     integer j                  !none          |hru
     integer nly                !              |
-    integer ibac               !              |
 	real*8 bz_vol              !m^3           |volume of biozone
     real*8 rtrate              !              |
-    real*8 bodconc             !              |
     real*8 qin                 !m^3 H2O       |water in reach during time step
     real*8 qout                !              |
-    real*8 qmm                 !              |  
-    real*8 qvol                !              | 
-    real*8 pormm               !mm            |porosity in mm depth
     real*8 rplqm               !kg/ha         |daily change in plaque
 	real*8 ntr_rt              !1/day         |nitrification reaction rate
     real*8 dentr_rt            !1/day         |denitrification reaction rate
@@ -75,7 +70,6 @@
     real*8 bode                !              |
 	real*8 rnit                !kg/ha         |nitrification during the day
     real*8 rdenit              !kg/ha         |denitrification during the day
-    real*8 rbio                !              |
     real*8 rmort               !kg/ha         |daily mortality of bacteria
     real*8 rrsp                !kg/ha         |daily resparation of bacteria
     real*8 rslg                !kg/ha         |daily slough-off bacteria

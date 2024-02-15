@@ -21,6 +21,13 @@
         real :: frac                            !fraction of demand supplied by the source
         character (len=1) :: comp               !compensate from source if other sources are limiting (y/n)
       end type water_demand_sources
+      
+      !canal diversion source object (rtb)
+      real, dimension (:), allocatable :: div_volume_daily   !daily volume of canal water added to total
+      real, dimension (:), allocatable :: div_volume_total   !volume of canal water available for irrigation
+      real, dimension (:), allocatable :: div_volume_used    !volume of canal water used for irrigation
+      real :: div_delay                                      !number of days that diverted irrigation water can be used
+      
           
       !demand source objects
       type water_demand_source_objects
@@ -98,7 +105,9 @@
 		character(len=6) :: yrc      =	 " yr  "        
 		character(len=8) :: idmd	 =	 " unit   "      
 		character(len=16) :: dmd_typ  =  "dmd_typ         "
-		character(len=16) :: dmd_num =	 "    dmd_num     "        
+		character(len=16) :: dmd_num =	 "    dmd_num     "     
+		character(len=16) :: rcv_typ  =  "drcv_typ         "
+		character(len=16) :: rcv_num =	 "    rcv_num     "   
         character(len=12) :: src1_obj =  "   src1_obj "
 		character(len=12) :: src1_typ =	 " src1_typ   " 
         character(len=12)  :: src1_num = " src1_num	  "                                      
@@ -126,7 +135,9 @@
 		character (len=8) :: yrc      =  "	      "       
 		character (len=8) :: idmd	  =  "	      "     
 		character (len=16) :: dmd_typ  =  "	               "
-		character (len=16) :: dmd_num  =  "                " 
+		character (len=16) :: dmd_num  =  "                "      
+		character (len=16) :: rcv_typ  =  "	               "
+		character (len=16) :: rcv_num  =  "                " 
         character (len=12) :: src1_obj =  "            "
 		character (len=12) :: src1_typ =  "	           "       
 		character (len=8) ::  src1_num =  "        "     

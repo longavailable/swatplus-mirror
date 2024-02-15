@@ -4,7 +4,7 @@
       use fertilizer_data_module
       use basin_module
       use organic_mineral_mass_module
-      use hru_module, only : igrz, ndeat, grz_days, ihru, grazn, grazp 
+      use hru_module, only : ihru, grazn, grazp 
       use soil_module
       use plant_module
       use carbon_module
@@ -22,7 +22,6 @@
       real :: yy           !none        |variable to hold intermediate calculation
                            !            |result
       real :: xz           !            |the amount of organic carbon allocated to structural litter C pool  
-      real :: xxx          !            |the amount of organic carbon allocated to metabolic litter C pool
       real :: x8           !            |organic carbon applied (kg C/ha)   
       real :: x10          !frac        |the fraction of carbon in fertilizer that is allocated to metabolic litter C pool
       real :: x1           !            |fertlizer applied to layer (kg/ha)

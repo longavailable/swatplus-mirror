@@ -30,15 +30,12 @@
       integer :: iter_ind      !          |end of loop
       integer :: ietco         !none      |counter
       integer :: ik            !none      |counter
-      integer :: nly           !          |end of loop
       integer :: iperco        !none      |counter
       real :: rmeas            !          |
       real :: denom            !          |
       real :: soft             !          |
       real :: diff             !          |
-      real :: rto              !          |
       real :: chg_val          !          | 
-      real :: dep_below_soil   !          |  
       real :: perc_ln_func
 
       ! calibrate hydrology

@@ -37,7 +37,7 @@
         surfq(j) = 0.
       endif
 
-      if (time%step > 0) then
+      if (time%step > 1) then
         voli = 0.
         voli = voltot
         do ii = 1, time%step  !j.jeong 4/24/2009

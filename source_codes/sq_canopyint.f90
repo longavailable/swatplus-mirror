@@ -48,7 +48,7 @@
 
       if (pcom(j)%lai_sum < 0.001 .or. pcom(j)%laimx_sum < 0.001) return
 
-      if (time%step > 0) then
+      if (time%step > 1) then
           canstori = canstor(j)
           canmxl = hru(j)%hyd%canmx * pcom(j)%lai_sum / pcom(j)%laimx_sum
           do ii = 1, time%step

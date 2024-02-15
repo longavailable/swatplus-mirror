@@ -18,8 +18,6 @@
       integer :: k                    !           |  
       integer :: nspu                 !none       |end of loop
       integer :: ielem1               !           | 
-      integer :: ii                   !none       |counter
-      integer :: ie                   !none       |counter
       integer :: ireg                 !none       |counter
       integer :: irec                 !none       |counter
       

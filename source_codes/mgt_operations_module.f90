@@ -29,7 +29,7 @@
 
       type filtstrip_operation
         character (len=40) :: name
-        real :: vfsi = 0.               !       |initial SCS curve number II value
+        integer :: vfsi = 0             !       |on/off flag for vegetative filter strip
         real :: vfsratio = 0.           !       |contouring USLE P factor
         real :: vfscon                  !       |fraction of the total runoff from the entire field
         real :: vfsch                   !       |fraction of flow entering the most concentrated 10% of the VFS.
@@ -46,13 +46,13 @@
       
       type grwaterway_operation
         character (len=40) :: name
-        real :: grwat_i = 0.       !none          |On/off Flag for waterway simulation
-        real :: grwat_n = 0.       !none          |Mannings"s n for grassed waterway
-        real :: grwat_spcon = 0.   !none          |sediment transport coefficant defined by user
-        real :: grwat_d = 0.       !m             |depth of Grassed waterway
-        real :: grwat_w = 0.       !none          |width of grass waterway
-        real :: grwat_l = 0.       !km            |length of Grass Waterway
-        real :: grwat_s = 0.       !m/m           |slope of grass waterway
+        integer :: grwat_i = 0.     !none          |On/off Flag for waterway simulation
+        real :: grwat_n = 0.        !none          |Mannings"s n for grassed waterway
+        real :: grwat_spcon = 0.    !none          |sediment transport coefficant defined by user
+        real :: grwat_d = 0.        !m             |depth of Grassed waterway
+        real :: grwat_w = 0.        !none          |width of grass waterway
+        real :: grwat_l = 0.        !km            |length of Grass Waterway
+        real :: grwat_s = 0.        !m/m           |slope of grass waterway
       end type grwaterway_operation
       type (grwaterway_operation),dimension(:), allocatable :: grwaterway_db
 

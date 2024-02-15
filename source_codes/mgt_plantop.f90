@@ -41,7 +41,6 @@
       implicit none
 
       integer :: j            !none          |HRU number
-      integer :: nly          !none          |number of soil layer
       integer :: min          !              | 
       real :: plt_zmx         !mm            |rooting depth of plant
       

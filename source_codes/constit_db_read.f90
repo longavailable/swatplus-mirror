@@ -10,20 +10,14 @@
       implicit none
          
       character (len=80) :: titldum   !           |title of file
-      character (len=80) :: header    !           |header of file
       logical :: i_exist              !none       |check to determine if file exists
       integer :: eof                  !           |end of file
       integer :: i                    !           |
       integer :: imax                 !           |
-      integer :: ip                   !none       |counter
       integer :: ipest                !none       |counter
       integer :: ipestdb              !none       |counter
       integer :: ipath                !none       |counter
       integer :: ipathdb              !none       |counter
-      integer :: ihmet                !none       |counter
-      integer :: ihmetdb              !none       |counter
-      integer :: isalt                !none       |counter
-      integer :: isaltdb              !none       |counter
        
       eof = 0
       imax = 0
@@ -57,11 +51,18 @@
         allocate (cs_db%metals_num(0:cs_db%num_metals))
         read (106,*,iostat=eof) (cs_db%metals(i), i = 1, cs_db%num_metals)
         if (eof < 0) exit
+        !salt ions
         read (106,*,iostat=eof) cs_db%num_salts
         if (eof < 0) exit
         allocate (cs_db%salts(cs_db%num_salts))
         allocate (cs_db%salts_num(0:cs_db%num_salts))
         read (106,*,iostat=eof) (cs_db%salts(i), i = 1, cs_db%num_salts)
+        !other constituents
+        read (106,*,iostat=eof) cs_db%num_cs
+        if (eof < 0) exit
+        allocate (cs_db%cs(cs_db%num_cs))
+        allocate (cs_db%cs_num (0:cs_db%num_cs))
+        read (106,*,iostat=eof) (cs_db%cs(i), i = 1, cs_db%num_cs)
         exit
       end do
       end if
@@ -102,7 +103,9 @@
 !        end do
 !      end do
           
-      cs_db%num_tot = cs_db%num_pests + cs_db%num_paths + cs_db%num_metals + cs_db%num_salts
+      !sum up the number of pesticides, pathogens, metals, salt ions, and other constituents
+      cs_db%num_tot = cs_db%num_pests + cs_db%num_paths + cs_db%num_metals + cs_db%num_salts + cs_db%num_cs !rtb salt, cs
+      
       
       close (106)
       return

@@ -10,7 +10,6 @@
       
       implicit none
 
-      integer, dimension (:), allocatable :: elem_cnt      !         |
       character (len=80) :: titldum                        !         |title of file
       character (len=80) :: header                         !         |header of file
       integer :: eof                                       !         |end of file

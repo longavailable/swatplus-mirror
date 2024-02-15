@@ -3,7 +3,7 @@
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine zeros values for single array variables
 
-      use hru_module, only : hru, par, snocov1, volcrmin    
+      use hru_module, only : snocov1, volcrmin    
       use soil_module
       use time_module
       

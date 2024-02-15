@@ -49,8 +49,8 @@
         character (len=8) :: isd =          "    unit"
         character (len=8) :: id =           "  gis_id"         
         character (len=16) :: name =        "  name          "
-        character (len=16) :: pest =        "  pesticide     "
-        character (len=15) :: plant =       "  plant_kg/ha  "       
+        character (len=16) :: pest =        "  pesticide     "       
+        character (len=15) :: plant =       "    plant_kg/ha"       
         character (len=15) :: soil =        "    soil_kg/ha "
         character (len=15) :: sed =         "    sed_kg/ha  "        
         character (len=15) :: surq =        "   surq_kg/ha  "      
@@ -71,6 +71,10 @@
         module procedure hruout_pestbal_add
       end interface
 
+      interface operator (*)
+        module procedure hruout_pestbal_mult
+      end interface
+      
       interface operator (/)
         module procedure hruout_pestbal_div
       end interface
@@ -102,6 +106,26 @@
         hru3%metab_f = hru1%metab_f + hru2%metab_f
       end function hruout_pestbal_add
 
+      function hruout_pestbal_mult (hru1,const) result (hru2)
+        type (pesticide_balance), intent (in) :: hru1
+        real, intent (in) :: const
+        type (pesticide_balance) :: hru2
+        hru2%plant = hru1%plant
+        hru2%soil = hru1%soil
+        hru2%sed= hru1%sed * const
+        hru2%surq = hru1%surq * const
+        hru2%latq = hru1%latq * const
+        hru2%tileq = hru1%tileq * const
+        hru2%perc = hru1%perc * const
+        hru2%apply_s = hru1%apply_s * const
+        hru2%apply_f = hru1%apply_f * const
+        hru2%decay_s = hru1%decay_s * const
+        hru2%decay_f = hru1%decay_f * const
+        hru2%wash = hru1%wash * const
+        hru2%metab_s = hru1%metab_s * const
+        hru2%metab_f = hru1%metab_f * const
+      end function hruout_pestbal_mult
+      
       function hruout_pestbal_div (hru1,const) result (hru2)
         type (pesticide_balance), intent (in) :: hru1
         real, intent (in) :: const

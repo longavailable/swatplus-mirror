@@ -1,5 +1,5 @@
 hyd-sed-lte.cha
-NAME               ORDER     CHW     CHD     CHS     CHL     CHN     CHK  CHEROD   CHCOV     SINU   CHSEQ     D50    CLAY  CARBON      BD    CHSS   BEDLD     FPS     FPN  N_CONC  P_CONC   P_BIO
+NAME               ORDER     CHW     CHD     CHS     CHL     CHN     CHK  CHEROD   CHCOV     SINU   CHSEQ     D50    CLAY  CARBON      BD    CHSS BANKFULL_FLO  FPS  FPN  N_CONC  P_CONC   P_BIO
 sdc1           tributary    5.461   0.459   0.017   3.277    0.05       1    0.01   0.005    1.05   0.001      12      50    0.04       1     0.5     0.5   0.005     0.2    10.0     1.0    0.05
 sdc2           tributary    6.427   0.507   0.012   4.496    0.05       1    0.01   0.005    1.05   0.001      12      50    0.04       1     0.5     0.5   0.005     0.2    10.0     1.0    0.05
 sdc3           tributary    4.581   0.413   0.022   0.504    0.05       1    0.01   0.005    1.05   0.001      12      50    0.04       1     0.5     0.5   0.005     0.2    10.0     1.0    0.05

@@ -4,7 +4,7 @@
 !!    this subroutine calculates the total amount of pesticide in the soil
 
       use pesticide_data_module
-      use hru_module, only : hru, ihru
+      use hru_module, only : ihru
       use soil_module
       use constituent_mass_module
       use output_ls_pesticide_module

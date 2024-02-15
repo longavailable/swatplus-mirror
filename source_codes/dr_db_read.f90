@@ -5,11 +5,13 @@
       use constituent_mass_module
       !use organic_mineral_mass_module
       use maximum_data_module
+
+      implicit none
  
       character (len=80) :: titldum, header
-      character (len=16) :: namedum
       integer :: eof, imax
       logical :: i_exist              !none       |check to determine if file exists
+      integer :: ii
 
       eof = 0
       

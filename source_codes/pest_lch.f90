@@ -41,14 +41,11 @@
       integer :: ly        !none          |counter (soil layers)
       real :: kd                !(mg/kg)/(mg/L) |koc * carbon
       real :: yy           !              |
-      real :: qsurf        !mm H2O        |surface runoff for layer
       real :: vf           !              |
       real :: xx           !kg/ha         |amount of pesticide removed from soil layer
       real :: zdb1         !              |
       real :: co           !kg/mm-ha      |concentration of pesticide in water
-      real :: cocalc       !kg/mm-ha      |calc concentration of pesticide in water
-      real :: csurf        !kg/mm-ha      |concentration of pesticide in surq and latq
-      integer :: icmd      !              | 
+      real :: csurf        !kg/mm-ha      |concentration of pesticide in surq and latq            | 
 
       j = ihru
 

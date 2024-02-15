@@ -1,6 +1,5 @@
       subroutine calsoft_hyd_bfr
 
-      use hru_module, only : cn2, hru, hru_init
       use soil_module
       use plant_module
       use hydrograph_module
@@ -23,11 +22,11 @@
       integer :: iterall       !none      |counter
 
       ! calibrate hydrology
-        iter_all = 1
+      iter_all = 1
         
       do iterall = 1, iter_all
 
-        ! calibrate pet_co for potential ET
+        ! calibrate harg_pet for potential ET
         call calsoft_hyd_bfr_et
 
         ! calibrate cn3_swf for surface runoff

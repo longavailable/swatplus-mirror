@@ -10,19 +10,26 @@
       integer :: date_time(8)           !              |
       character*10 b(3)                 !              |
     
-      prog = " SWAT+ Jun 13 2023       MODULAR Rev 2023.60.5.7"
+      prog = " SWAT+ Feb 15 2024        MODULAR Rev 2024.61.0"
 
       write (*,1000)
       open (9003,file='simulation.out')
       write (9003,1000)
  1000 format(1x,"                  SWAT+               ",/,             &
-     &          "             Revision 60.5.7          ",/,             &
+     &          "             Revision 61.0            ",/,             &
      &          "      Soil & Water Assessment Tool    ",/,             &
      &          "               PC Version             ",/,             &
      &          "    Program reading . . . executing",/)
       
       open (888,file="erosion.txt",recl = 1500)
-
+      
+ !!!! for Luis only
+ !     open (7777,file='res1_out.txt',recl=1500)
+ !     write (7777,7778) 
+!7778  format (9x,'DAY',8x,'YEAR',10x,'RES',7x,'VOL m^3',4x,'INFLO m^3',5x,'OUTFLO m^3',5x,'PREC m^3',7x,'EVAP m^3',  &
+!        8x,'AREA ha')
+ !!!! for Luis only
+      
       call proc_bsn   
       call proc_date_time
       call proc_db
@@ -38,7 +45,8 @@
       call om_water_init
       call pest_cha_res_read
       call path_cha_res_read
-      call salt_cha_res_read
+      call salt_cha_read !rtb salt
+      call cs_cha_read !rtb cs
 
       call lsu_read_elements        !defining landscape units by hru
 
@@ -74,6 +82,7 @@
       call proc_res
       call wet_read_hyd
       call wet_read
+      call wet_read_salt_cs
       if (db_mx%wet_dat > 0) call wet_all_initial
       if (bsn_cc%i_fpwet == 2) call wet_fp_init
       

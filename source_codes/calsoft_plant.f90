@@ -1,6 +1,6 @@
       subroutine calsoft_plant
 
-      use hru_module, only : ihru, hru, hru_init
+      use hru_module, only : hru, hru_init
       use hydrograph_module
       use ru_module
       use aquifer_module
@@ -530,6 +530,5 @@
         end do      ! ist
           
       end do    ! iter_all loop
-
 	  return
       end subroutine calsoft_plant

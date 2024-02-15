@@ -10,16 +10,27 @@
       use channel_data_module
       use sd_channel_module
       use water_body_module
+      
+      implicit none
 
-      integer :: istep
       real :: tday, wtmp, fll, gra
       real :: lambda, fnn, fpp, algi, fl_1, xx, yy, zz, ww
-      real :: uu, vv, cordo, f1, algcon
+      real :: cordo, f1, algcon
       real :: thgra = 1.047, thrho = 1.047, thrs1 = 1.024
       real :: thrs2 = 1.074, thrs3 = 1.074, thrs4 = 1.024, thrs5 = 1.024
       real :: thbc1 = 1.083, thbc2 = 1.047, thbc3 = 1.047, thbc4 = 1.047
       real :: thrk1 = 1.047, thrk2 = 1.024, thrk3 = 1.024, thrk4 = 1.060
       real :: soxy             !mg O2/L       |saturation concetration of dissolved oxygen
+      real :: theta, rs2_s, rs3_s, rk4_s
+      real :: disoxin, dispin, ammoin, cinn
+      real :: algin
+      real :: factk, wq_semianalyt, alg_m1, alg_m, alg_m2
+      real :: alg_no3_m, alg_nh4_m, alg_p_m, alg_set, algcon_out
+      real :: cbodo, cbodoin, rk1_k, wq_k2m, rk1_m , rk3_k, factm, &
+          bc1_k,bc3_k, rs4_k, bc3_m
+      real :: rk2_m, rk2_k, alg_m_o2, bc2_k, bc1_m, bc2_m, bc4_k, &
+          bc4_m, rs5_k
+      integer :: iwgn
 
       jrch = isdch
       !! calculate flow duration
@@ -45,10 +56,10 @@
 
       !! ht3 = concentration of incoming nutrients
       if (ht3%flo > 0. .and. rchdep > 0.) then
-        disoxin = ht3%dox - rk4_s / ht3%flo
-        disoxin = amax1 (0., disoxin)
-        dispin = ht3%solp + rs2_s / ht3%flo 
-        ammoin = ht3%nh3 + rs3_s / ht3%flo
+        disoxin = ht3%dox - rk4_s / (ht3%flo * 1000.)   !m3*1000 l/m3 = liters
+        disoxin = max (0., disoxin)
+        dispin = ht3%solp + rs2_s / (ht3%flo * 1000.)
+        ammoin = ht3%nh3 + rs3_s / (ht3%flo * 1000.)
 
         !! calculate effective concentration of available nitrogen QUAL2E equation III-15
         cinn = ch_stor(jrch)%nh3 + ch_stor(jrch)%no3
@@ -189,7 +200,7 @@
      
         factk = - rk2_k
         bc2_k = -Theta (ch_nut(jnut)%bc2, thbc2, wtmp)
-        bc1_m = wq_k2m (tday, rt_delt, factk, ch_stor(jrch)%nh3, ht3%nh3)
+        bc1_m = wq_k2m (tday, rt_delt, factk, ch_stor(jrch)%nh3, ammoin)
         bc2_m = wq_k2m (tday, rt_delt, bc2_k, ch_stor(jrch)%no2, ht3%no2)
         factm = rk1_m + rk2_m - rs4_k + bc1_m * ch_nut(jnut)%ai5 + bc2_m * ch_nut(jnut)%ai6
         ht2%dox = wq_semianalyt (tday, rt_delt, factm, factk, ch_stor(jrch)%dox, ht3%dox)
@@ -200,7 +211,7 @@
         !! calculate ammonia nitrogen concentration at end of day QUAL2E section 3.3.2 equation III-17
         factk = -bc1_k
         factm = bc1_m - bc3_m 
-        ht2%nh3 = wq_semianalyt (tday, rt_delt, factm, 0., ch_stor(jrch)%nh3, ht3%nh3)
+        ht2%nh3 = wq_semianalyt (tday, rt_delt, factm, 0., ch_stor(jrch)%nh3, ammoin)
         if (ht2%nh3 < 1.e-6) ht2%nh3 = 0.
   
         !! calculate concentration of nitrite at end of day QUAL2E section 3.3.3 equation III-19
@@ -232,7 +243,7 @@
         !! calculate dissolved phosphorus concentration at end of day QUAL2E section 3.4.2 equation III-25
         factk = 0.
         factm = -bc4_m + ch_nut(jnut)%ai2 * alg_m
-        ht2%solp = wq_semianalyt (tday, rt_delt, factm, 0., ch_stor(jrch)%solp, ht3%solp)
+        ht2%solp = wq_semianalyt (tday, rt_delt, factm, 0., ch_stor(jrch)%solp, dispin)
         if (ht2%solp < 1.e-6) ht2%solp = 0.
         !! end phosphorus calculations
 

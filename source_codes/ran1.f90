@@ -2,7 +2,13 @@
 !
 !
 !  THIS SUBROUTINE IS FROM "NUMERICAL RECIPES" BY PRESS ET AL.
-      implicit real*8 (a-h,o-z)
+      
+      implicit none
+
+      integer :: m1, ia1, ic1, m2, ia2, ic2, m3, ia3, ic3, iff, idum, ix1, ix2, ix3
+      integer :: j 
+      real :: rm1, rm2, rqq
+
       dimension rqq(97)
       parameter (m1 = 259200, ia1 = 7141, ic1 = 54773, rm1 = 3.8580247e-6)
       parameter (m2 = 134456, ia2 = 8121, ic2 = 28411, rm2 = 7.4373773e-6)

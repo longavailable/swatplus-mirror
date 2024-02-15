@@ -124,7 +124,7 @@
          hlt(i)%obj_no = icmd
          hlt(i)%km2 = hlt_db(idb)%dakm2
          hlt(i)%cn2 = hlt_db(idb)%cn2
-         hlt(i)%cn2 = amax1(35., hlt(i)%cn2)
+         hlt(i)%cn2 = max(35., hlt(i)%cn2)
          hlt(i)%cn2 = amin1(98., hlt(i)%cn2)
          hlt(i)%etco = hlt_db(idb)%etco
          hlt(i)%perco = hlt_db(idb)%perco

@@ -8,7 +8,6 @@
       
       character (len=80) :: titldum   !           |title of file
       character (len=80) :: header    !           |header of file
-      character (len=13) :: file      !           |
       character (len=13) :: name      !           |
       integer :: eof                  !           |end of file
       logical :: i_exist              !none       |check to determine if file exists

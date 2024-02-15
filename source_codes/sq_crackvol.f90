@@ -42,7 +42,7 @@
         else
           crlag = crlagwet
         end if
-        soil(j)%ly(l)%volcr = crlag*soil(j)%ly(l)%volcr + (1. - crlag) *   &
+        soil(j)%ly(l)%volcr = crlag * soil(j)%ly(l)%volcr + (1. - crlag) *   &
                   volcrnew
         if (soil(j)%ly(l)%volcr < 0.) soil(j)%ly(l)%volcr = 0.
         voltot = voltot + soil(j)%ly(l)%volcr + volcrmin

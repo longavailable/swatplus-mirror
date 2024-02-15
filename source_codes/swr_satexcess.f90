@@ -1,4 +1,4 @@
-      subroutine swr_satexcess(j1)
+      subroutine swr_satexcess
       
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine moves water to upper layers if saturated and can't perc
@@ -14,23 +14,22 @@
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
-      use hru_module, only : hru, ihru, cbodu, surfq, surqno3, surqsolp, sep_tsincefail, i_sep,  &
-        isep, qday, sepday, satexq  !rtb gwflow
+      use hru_module, only : hru, ihru, surfq, satexq  !rtb gwflow
       use soil_module
       use hydrograph_module
       use basin_module
       use organic_mineral_mass_module
-      use gwflow_module, only : gw_transfer_flag !rtb gwflow
+      use gwflow_module, only : gw_soil_flag !rtb gwflow
       use reservoir_module
       
       implicit none
 
       integer :: j                 !none          |HRU number
-      integer :: j1                !none          |counter
       real:: ul_excess             !              |
       real :: rto                  !              |
       integer :: nn                !none          |number of soil layers
       integer :: ly                !none          |counter
+      integer :: ly1               !none          |counter
       integer :: ires                !none          |counter
 
       j = ihru
@@ -53,12 +52,26 @@
           ul_excess = soil(j)%phys(1)%st - soil(j)%phys(1)%ul
           if (ul_excess > 0.) then
             soil(j)%phys(1)%st = soil(j)%phys(1)%ul
+            !! check if entire profile is saturated - could get excess in first layer if irrigating on frozen soil
+            do ly1 = 2, nn
+              soil(j)%phys(ly1)%st = soil(j)%phys(ly1)%st + ul_excess
+              if (soil(j)%phys(ly1)%st > soil(j)%phys(ly1)%ul) then
+                ul_excess = soil(j)%phys(ly1)%st - soil(j)%phys(ly1)%ul
+                soil(j)%phys(ly1)%st = soil(j)%phys(ly1)%ul
+              else
+                ul_excess = 0.
+                exit
+              end if
+            end do
+          end if
+          !! if still saturated
+          if (ul_excess > 0.) then
             !! if depressional storage, add to ponded water 
             !! if no depressional storage, add to surface runoff
             if (ires == 0) then
               surfq(j) = surfq(j) + ul_excess
               !! rtb gwflow: add ul_excess to runoff storage
-              if(gw_transfer_flag.eq.1) then
+              if(gw_soil_flag.eq.1) then                                             !!!!!!  Ryan please check; 
                 satexq(j) = satexq(j) + ul_excess !saturation excess (mm) leaving HRU soil profile on current day
               end if
             else

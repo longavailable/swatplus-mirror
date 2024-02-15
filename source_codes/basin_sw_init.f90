@@ -30,6 +30,8 @@
       end do
       
         ! summing subbasin output for the basin
+        bwb_d%sw_init = 0.
+        bwb_d%sno_init = 0.
         do ihru = 1, sp_ob%hru
           iihru = lsu_elem(ihru)%obtypno
           if (lsu_elem(iihru)%bsn_frac > 1.e-12) then

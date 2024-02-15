@@ -59,8 +59,7 @@
 
       use plant_data_module
       use basin_module
-      use hru_module, only : hru, uapd, uno3d, par, bioday, ep_day, es_day,              &
-         ihru, ipl, pet_day, rto_no3, rto_solp, sum_no3, sum_solp, uapd_tot, uno3d_tot, vpd
+      use hru_module, only : ihru, ipl
       use plant_module
       use carbon_module
       use organic_mineral_mass_module
@@ -69,7 +68,8 @@
       
       integer :: j              !none               |HRU number
       integer :: idp            !                   |
-      real :: f                 !none               |fraction of plant's maximum lai corresponding to a given fraction of phu 
+      real :: f                 !none               |fraction of plant's maximum lai corresponding to a given fraction of phu (annual)
+      real :: f_p               !none               |fraction of plant's maximum lai corresponding to a given fraction of phu (perennial)
       real :: ff                !                   |
       real :: deltalai          !                   |
       real :: laimax            !none               |maximum leaf area index
@@ -82,11 +82,17 @@
       j = ihru
       idp = pcom(j)%plcur(ipl)%idplt
       
-          f = pcom(j)%plcur(ipl)%phuacc / (pcom(j)%plcur(ipl)%phuacc +     &
+          f = pcom(j)%plcur(ipl)%phuacc / (pcom(j)%plcur(ipl)%phuacc +                  &
               Exp(plcp(idp)%leaf1 - plcp(idp)%leaf2 * pcom(j)%plcur(ipl)%phuacc))
           pcom(j)%plg(ipl)%laimxfr = amin1 (f, pcom(j)%plg(ipl)%laimxfr)    !dormancy and grazing lower phuacc
           ff = f - pcom(j)%plg(ipl)%laimxfr
           pcom(j)%plg(ipl)%laimxfr = f
+          
+          f_p = pcom(j)%plcur(ipl)%phuacc_p / (pcom(j)%plcur(ipl)%phuacc_p +            &
+              Exp(plcp(idp)%leaf1 - plcp(idp)%leaf2 * pcom(j)%plcur(ipl)%phuacc_p))
+          !pcom(j)%plg(ipl)%laimxfr_p = amin1 (f_p, pcom(j)%plg(ipl)%laimxfr_p)
+          !ff_p = f_p - pcom(j)%plg(ipl)%laimxfr_p
+          !pcom(j)%plg(ipl)%laimxfr = f_p
 
           !! calculate new leaf area index when phuacc < dlai
           if (pcom(j)%plcur(ipl)%phuacc < pldb(idp)%dlai) then
@@ -98,14 +104,14 @@
               rto = alog10 (rto_lin)
               lai_exp = rto * pldb(idp)%laixco_tree
               laimax = pcom(j)%plcur(ipl)%lai_pot * 10. ** lai_exp
-              laimax = amin1 (laimax, pcom(j)%plcur(ipl)%lai_pot)
+              laimax = Min (laimax, pcom(j)%plcur(ipl)%lai_pot)
             else
               laimax = pcom(j)%plcur(ipl)%lai_pot
             end if
             
             !! calculate new canopy height
             if (pldb(idp)%typ == "perennial") then
-              pcom(j)%plg(ipl)%cht = rto_lin * pldb(idp)%chtmx
+              pcom(j)%plg(ipl)%cht = pldb(idp)%chtmx * Sqrt(f_p)
             else
               pcom(j)%plg(ipl)%cht = pldb(idp)%chtmx * Sqrt(f)
             end if

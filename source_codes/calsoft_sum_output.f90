@@ -30,6 +30,8 @@
               do ihru_s = 1, region(ireg)%num_tot
                 ihru = region(ireg)%num(ihru_s)
                 if (lscal(ireg)%lum(ilu)%meas%name == hru(ihru)%lum_group_c .or. lscal(ireg)%lum(ilu)%meas%name == "basin") then
+                  !if (hru(ihru)%dbs%surf_stor == 0) then
+                  if (hru(ihru)%irr == 0) then
                   ha_hru = region(ireg)%hru_ha(ihru)      ! 10 * ha * mm --> m3
                   lscal(ireg)%lum(ilu)%ha = lscal(ireg)%lum(ilu)%ha + ha_hru
                   lscal(ireg)%lum(ilu)%precip = lscal(ireg)%lum(ilu)%precip + (10. * ha_hru * hwb_y(ihru)%precip + &
@@ -46,6 +48,8 @@
                                                                     hwb_y(ihru)%latq + hwb_y(ihru)%perc+ hwb_y(ihru)%qtile)
                   lscal(ireg)%lum(ilu)%sim%sed = lscal(ireg)%lum(ilu)%sim%sed + (ha_hru * hls_y(ihru)%sedyld)
                   !add nutrients
+                  end if
+                  !end if
                 end if
               end do
             end do  !lum_num

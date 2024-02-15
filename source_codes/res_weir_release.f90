@@ -1,4 +1,4 @@
-      subroutine res_weir_release (jres, id, ihyd, pvol_m3, evol_m3, dep, weir_hgt)
+      subroutine res_weir_release (jres, id, ihyd, evol_m3, dep, weir_hgt)
 
       use reservoir_data_module
       use reservoir_module
@@ -14,32 +14,23 @@
       
       implicit none
       
-      real,  intent (in) :: pvol_m3
       real,  intent (in) :: evol_m3
       real,  intent (in) :: dep       !m 
       real,  intent (in) :: weir_hgt  !m         |height of weir overflow crest from reservoir bottom
       integer,  intent (in) :: jres             !none      |hru number
-      integer :: iweir             !none      |weir ID 
-      integer :: nstep            !none      |counter
-      integer :: tstep            !none      |hru number
-      integer :: iac              !none      |counter 
-      integer :: ic              !none      |counter
-      integer :: weir_flg=0        !none      |counter
-      integer,  intent (in) :: id               !none      |hru number
-      integer :: ial              !none      |counter
-      integer :: irel             !          |
-      integer :: iob              !none      |hru or wro number
-      integer,  intent (in) :: ihyd             !          |
-      real :: vol                 !          |
-      real :: b_lo                !          |
-      character(len=1) :: action  !          |
-      real :: res_h               !m         |water depth
-      real :: demand              !m3        |irrigation demand by hru or wro
-      real :: wsa1                !m2        |water surface area 
-      real :: qout                !m3        |weir discharge during short time step
-      real :: hgt                 !m         |height of bottom of weir above bottom of impoundment
-      real :: hgt_above           !m         |height of water above the above bottom of weir
-      real :: sto_max             !m3        |maximum storage volume at the bank top
+      integer :: iweir              !none      |weir ID 
+      integer :: nstep              !none      |counter
+      integer :: tstep              !none      |hru number
+      integer :: iac                !none      |counter 
+      integer :: ic                 !none      |counter
+      integer :: weir_flg=0         !none      |counter
+      integer,  intent (in) :: id   !none      |hru number
+      integer,  intent (in) :: ihyd !          |
+      real :: vol                   !          |
+      real :: res_h                 !m         |water depth
+      real :: wsa1                  !m2        |water surface area 
+      real :: qout                  !m3        |weir discharge during short time step
+      real :: hgt_above             !m         |height of water above the above bottom of weir
       
       !! store initial values
       vol = wbody%flo

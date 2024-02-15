@@ -47,7 +47,7 @@
       real :: smxold                       !              | 
       real :: sumul                        !mm H2O        |amount of water held in soil profile at saturation
       real :: sumfc                        !mm H2O        |amount of water held in the soil profile at field capacity
-      real :: amax1                        !              |
+      real :: max                        !              |
       real :: amin1                        !              |
       
       cn2(h) = cnn
@@ -70,7 +70,10 @@
       rtos = 1. - 2.54 / smx(h)
       sumul = soil(h)%sumul
       sumfc = soil(h)%sumfc + hru(h)%hyd%cn3_swf * (soil(h)%sumul - soil(h)%sumfc)
-      sumfc = amax1 (.05, sumfc)
+      if (sumfc < 0.) then  !***jga
+        sumfc = 10.
+      end if
+      sumfc = max (.05, sumfc)
       sumfc = amin1 (sumul-.05, sumfc)
       !! calculate shape parameters
       call ascrv(rto3, rtos, sumfc, sumul, wrt(1,h), wrt(2,h))

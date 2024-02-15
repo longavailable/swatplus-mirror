@@ -1,6 +1,6 @@
       subroutine soils_init
       
-      use hru_module, only : hru, wfsh, ihru, isep, isep_ly, iseptic, i_sep
+      use hru_module, only : hru, wfsh, ihru, isep, iseptic, i_sep
       use soil_module
       use plant_module
       use maximum_data_module
@@ -203,12 +203,6 @@
         !! initialize carbon and nutrient contents for each hru
         call soil_nutcarb_init(isol)
         
-      end do
-      
-      do ihru = 1, sp_ob%hru
-        if (pco%snutc == "d" .or. pco%snutc == "m" .or. pco%snutc == "y" .or. pco%snutc == "a") then
-          call soil_nutcarb_write
-        end if
       end do
 
       return

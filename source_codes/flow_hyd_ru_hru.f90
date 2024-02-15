@@ -22,7 +22,6 @@
       real :: ssq                           !           |
       real :: sq                            !           |
       real :: sumflo                        !           |
-      real :: sumflo_day                    !           |
 
       !! set subdaily hydrographs
       iday_cur = iday_start

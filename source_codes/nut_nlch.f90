@@ -32,8 +32,8 @@
 
       use basin_module
       use organic_mineral_mass_module
-      use hru_module, only : hru, latno3, percn, surqno3, tileno3, surfq, ihru, qtile, gwtrann
-      use gwflow_module, only : gw_transfer_flag,gw_transport_flag,hru_ntran
+      use hru_module, only : hru, latno3, percn, surqno3, tileno3, surfq, ihru, qtile, gwsoiln
+      use gwflow_module, only : gw_soil_flag,gw_solute_flag,hru_soil
       use soil_module
       
       implicit none 
@@ -48,8 +48,6 @@
       real :: vv           !mm H2O        |water mixing with nutrient in layer
       real :: vno3         !              |
       real :: co           !kg N/mm       |concentration of nitrate in solution
-      real :: cosurf       !kg N/mm       |concentration of nitrate in surface runoff 
-      real :: nloss        !frac          |nloss based on half life
       real :: ww           !varies        |variable to hold intermediate calculation
       real :: ul_sum       !mm            |sum of porosity in tile layer to lowest layer
       real :: no3_sum      !kg/ha         |sum of no3 in tile layer to lowest layer
@@ -60,10 +58,10 @@
 
       
       !rtb gwflow: add nitrate mass transferred to soil profile from the aquifer
-      if(gw_transfer_flag.eq.1 .and. gw_transport_flag.eq.1) then
+      if(gw_soil_flag == 1 .and. gw_solute_flag) then
         do jj = 1, soil(j)%nly
-          soil1(j)%mn(jj)%no3 = soil1(j)%mn(jj)%no3 + hru_ntran(j,jj) !kg/ha
-          gwtrann(j) = gwtrann(j) + hru_ntran(j,jj) !HRU total
+          soil1(j)%mn(jj)%no3 = soil1(j)%mn(jj)%no3 + hru_soil(j,jj,1) !kg/ha
+          gwsoiln(j) = gwsoiln(j) + hru_soil(j,jj,1) !HRU total
         enddo
       endif
       

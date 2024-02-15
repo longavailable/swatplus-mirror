@@ -1,10 +1,9 @@
       subroutine cn2_init (j)
 
-      use hru_module, only : cn2, hru, ihru
+      use hru_module, only : cn2, hru
       use soil_module
       use maximum_data_module
       use landuse_data_module
-      use hydrograph_module, only : sp_ob
       
       implicit none
   

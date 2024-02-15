@@ -48,7 +48,6 @@
       real :: dtil                     !mm             |depth of mixing
       real :: frac_mixed               !               |
       real :: frac_non_mixed           !               |
-      real :: maxmix                   !none           | maximum mixing eff to preserve specified minimum residue cover
       !!by zhang
       !!=============   
       real :: smix(22+cs_db%num_pests+12)         !varies         |amount of substance in soil profile

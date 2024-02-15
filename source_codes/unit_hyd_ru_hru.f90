@@ -2,8 +2,8 @@
   
       !!  compute unit hydrographs for all hru and ru
 
-      use hru_module, only : hru, tconc
-      use ru_module, only : ru, ru_tc
+      use hru_module, only : tconc
+      use ru_module, only : ru_tc
       use hydrograph_module
       use time_module
       
@@ -13,10 +13,9 @@
       integer :: iiru           !       |routing unit counter
       integer :: iob            !       |object counter
       integer :: ihyd           !       |receiving hyd counter
-      integer :: ihydno_in      !       |inflow hyd number
       real :: tc                !       |time of concentration for incoming hru and ru
 
-      if (time%step > 0) then
+      if (time%step > 1) then
         do iihru = 1, sp_ob%hru
           iob = sp_ob1%hru + iihru - 1
           call unit_hyd (tconc(iihru), ob(iob)%uh)

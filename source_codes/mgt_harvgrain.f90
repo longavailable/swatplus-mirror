@@ -35,7 +35,7 @@
       harveff = harvop_db(iharvop)%eff
 
       !! check for minimum harvest index
-      pcom(j)%plcur(ipl)%harv_idx = amax1 (pcom(j)%plcur(ipl)%harv_idx, pldb(idp)%wsyf)
+      pcom(j)%plcur(ipl)%harv_idx = max (pcom(j)%plcur(ipl)%harv_idx, pldb(idp)%wsyf)
         
       !! remove seed mass from total plant mass and calculate yield
       pl_mass(j)%tot(ipl) = pl_mass(j)%tot(ipl) - pl_mass(j)%seed(ipl)
@@ -44,6 +44,8 @@
       
       !! apply pest stress to harvest index - mass lost due to pests - don't add to residue
       pl_yield = (1. - pcom(j)%plcur(ipl)%pest_stress) * pl_yield
+      !! add plant carbon for printing
+      hpc_d(j)%harv_c = hpc_d(j)%harv_c + pl_yield%c
       
       !! add seed mass from harveff to slow humus pool of soil - to preserve balances
       harveff1 = 1. - harveff

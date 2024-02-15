@@ -79,7 +79,7 @@
       use channel_module
       use sd_channel_module
       use ch_pesticide_module
-      use hydrograph_module, only : ob, jrch, ht1, ch_stor
+      use hydrograph_module, only : jrch, ht1, ch_stor
       use constituent_mass_module
       use pesticide_data_module
 
@@ -100,7 +100,6 @@
       real :: solmax            !units         |description
       real :: sedcon            !g/m^3         |sediment concentration 
       real :: tday              !none          |flow duration (fraction of 24 hr)
-      real :: rchwtr            !m^3 H2O       |water stored in reach at beginning of day
       real :: por               !none          |porosity of bottom sediments
       real :: pest_init         !mg            |amount of pesticide before decay
       real :: pest_end          !mg            |amount of pesticide after decay
@@ -134,7 +133,7 @@
           ch_water(jrch)%pest(ipest) = 0.
           ch_benthic(jrch)%pest(ipest) = 0.
         end if
-        if (chpstmass + sedpstmass < 1.e-12) return
+        if (chpstmass + sedpstmass < 1.e-12) cycle
 
         !!in-stream processes
         if (wtrin / 86400. > 1.e-9) then

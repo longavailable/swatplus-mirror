@@ -5,13 +5,10 @@
       use topography_data_module
       
       implicit none
-      
-      character (len=13) :: file      !           |
-      integer :: i                    !           |  
+       
       integer :: ith                  !none       |counter
       character (len=80) :: titldum   !           |title of file
       character (len=80) :: header    !           |header of file
-      character (len=16) :: namedum   !           |
       integer :: eof                  !           |end of file
       integer :: imax                 !none       |determine max number for array (imax) and total number in file
       logical :: i_exist              !none       |check to determine if file exists

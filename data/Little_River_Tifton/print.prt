@@ -46,3 +46,17 @@ recall	           n             n           n          n
 hyd                n             n           n          y
 ru                 n             n           n          n
 pest               n             n           n          n          
+basin_salt         n             n           n          n
+hru_salt           n             n           n          n
+ru_salt            n             n           n          n
+aqu_salt           n             n           n          n
+channel_salt       n             n           n          n
+res_salt           n             n           n          n
+wetland_salt       n             n           n          n
+basin_cs       	   n         	 n           n         	n
+hru_cs             n         	 n           n         	n
+ru_cs              n         	 n           n         	n
+aqu_cs         	   n         	 n           n         	n
+channel_cs     	   n         	 n           n         	n
+res_cs             n         	 n           n        	n
+wetland_cs    	   n         	 n           n        	n           

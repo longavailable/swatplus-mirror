@@ -21,7 +21,7 @@
       real :: frac_hum_microb           !0-1        |fraction of humus in microbial pool - CENTURY
       real :: frac_hum_slow             !0-1        |fraction of humus in slow pool - CENTURY
       real :: frac_hum_passive          !0-1        |fraction of humus in passive pool - CENTURY
-      real :: actp, solp, ssp, zdst
+      real :: actp, solp, ssp
 
       nly = soil(ihru)%nly
 
@@ -30,7 +30,7 @@
       isolt = sol_plt_ini(isol_pl)%nut          ! isolt = 0 = default in type
       
       !! set soil carbon
-      soil1(ihru)%cbn(1) = amax1(.001, soildb(isol)%ly(1)%cbn)    !! assume 0.001% carbon if zero
+      soil1(ihru)%cbn(1) = max(.001, soildb(isol)%ly(1)%cbn)    !! assume 0.001% carbon if zero
       !! calculate percent carbon for lower layers using exponential decrease
       do ly = 2, nly
         dep_frac = Exp(-solt_db(isolt)%exp_co * soil(ihru)%phys(ly)%d)

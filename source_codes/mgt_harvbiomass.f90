@@ -44,6 +44,10 @@
             
       !! apply pest stress to harvest index - mass lost due to pests - don't add to residue
       pl_yield = (1. - pcom(j)%plcur(ipl)%pest_stress) * pl_yield
+      !! add plant carbon for printing
+      hrc_d(j)%plant_c = hrc_d(j)%plant_c + pl_yield%c
+      hpc_d(j)%drop_c = hpc_d(j)%drop_c + pl_yield%c
+      
       
       !! update remaining plant organic pools
       pl_mass(j)%seed(ipl) = pl_mass(j)%seed(ipl) - harv_seed

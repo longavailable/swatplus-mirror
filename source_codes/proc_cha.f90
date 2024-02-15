@@ -9,6 +9,7 @@
       integer :: i                      !none          |counter
          
       call ch_read_init
+      call ch_read_init_cs
 
       call sd_hydsed_read
       call ch_read_hyd
@@ -18,7 +19,7 @@
       call sd_channel_read
       call sd_hydsed_init
 
-      call channel_allo
+      !call channel_allo
           
       !! intialize stream-aquifer interactions for geomorphic baseflow
       !! aquifer to channel flow

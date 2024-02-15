@@ -14,7 +14,7 @@
        integer :: eof                  !           |end of file
        logical :: i_exist              !none       |check to determine if file exists
        integer :: mreg                 !none       |end of loop
-       integer :: i, ii                  !none       |counter
+       integer :: i                    !none       |counter
        integer :: ilum
        integer :: ilum_mx
        integer :: isp                  !none       |counter 

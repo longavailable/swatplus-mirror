@@ -31,9 +31,8 @@
 
       use time_module
       use hydrograph_module
-      use hru_module, only : hru, ihru, precip_eff, snocov1, snocov2,  &
-         snofall, snomlt 
-      use climate_module, only: wst, w
+      use hru_module, only : hru, ihru, precip_eff, snofall, snomlt 
+      use climate_module, only:  w
       use output_landscape_module
       
       implicit none
@@ -44,7 +43,6 @@
                             !           |cover ground completely 
       real :: snocov = 0.   !none       |fraction of HRU area covered with snow
       real :: snotmp = 0.   !deg C      |temperature of snow pack
-      integer :: ii     !none       |counter
 
       j = ihru
 
@@ -57,7 +55,7 @@
           snofall = precip_eff
           precip_eff = 0.
           !! set subdaily effective precip to zero
-          if (time%step > 0) w%ts = 0.
+          if (time%step > 1) w%ts = 0.
         endif
  
         if (w%tmax > hru(j)%sno%melttmp .and. hru(j)%sno_mm > 0.) then
@@ -78,7 +76,7 @@
           if (snomlt > hru(j)%sno_mm) snomlt = hru(j)%sno_mm
           hru(j)%sno_mm = hru(j)%sno_mm - snomlt
           precip_eff = precip_eff + snomlt
-          if (time%step > 0) then
+          if (time%step > 1) then
             w%ts(:) = w%ts(:) + snomlt / time%step
           end if
           if (precip_eff < 0.) precip_eff = 0.

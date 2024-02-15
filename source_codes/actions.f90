@@ -4,7 +4,7 @@
       use time_module
       use aquifer_module
       use hru_module, only : hru, cn2, fertno3, fertnh3, fertorgn, fertorgp, fertsolp,   &
-        ihru, ipl, isol, ndeat, phubase, sol_sumno3, sol_sumsolp
+        ihru, ipl, isol,  phubase, sol_sumno3, sol_sumsolp
       use soil_module
       use plant_module
       use plant_data_module
@@ -29,8 +29,6 @@
       use reservoir_data_module
       use manure_allocation_module
       use water_allocation_module
-      use gwflow_module, only : gwflow_flag, hru_num_cells, hru_cells, cell_size, gw_cell_head,  &
-            gw_cell_bot, gw_cell_sy, gw_cell_ss_pumpag
 
       implicit none
 
@@ -40,8 +38,7 @@
       integer :: icom                      !none     |
       integer :: iac                       !none     |counter
       integer :: ial                       !none     |counter
-      integer :: jj                        !none     |counter
-      integer :: i                         !none     |counter
+      !integer :: jj                        !none     |counter
       integer :: iburn                     !none     |burn type from fire data base
       integer :: idtill                    !none     |tillage type
       integer :: ifertop                   !         |surface application fraction from chem app data base
@@ -65,33 +62,27 @@
       integer :: igr
       integer :: ireg                      !         |
       integer :: ilum
-      integer :: iwro                      !         |
       integer :: isrc
-      integer :: irr_ob
       integer :: isched
       integer :: ipud, ipdl
       integer :: ires,idb
       integer :: imallo, idmd,irec
       real :: hiad1                        !         |
-      real :: irrig_m3                     !         |
-      real :: amt_mm                       !         |
       real :: biomass                      !         |
       real :: frt_kg
+      real :: harveff
       real :: wur                          !         |
       real :: frac                         !         |
       real :: rto                          !         |
       real :: rto1                         !         |
       real :: pest_kg                      !kg/ha    |amount of pesticide applied 
-      real :: irr_mm
-      real :: vol_avail
       real :: chg_par                      !variable |new parameter value
       real :: yield 
       real :: sumpst = 0.
       real :: rock
       real :: p_factor
       real :: cn_prev
-      real :: irrig_total,gwvol_demand,gwvol_avail,gwvol_diff,gwmm_diff,gwvol_removed !rtb gwflow
-      integer :: cell_row,cell_col !rtb gwflow
+      real :: stor_m3
       character(len=1) :: action           !         |
       character(len=25) :: lu_prev         !         |
 
@@ -147,37 +138,7 @@
             if (d_tbl%act(iac)%file_pointer == "unlim") then
               irrig(j)%applied = irrop_db(irrop)%amt_mm * irrop_db(irrop)%eff * (1. - irrop_db(irrop)%surq)
               irrig(j)%runoff = irrop_db(irrop)%amt_mm * irrop_db(irrop)%eff * irrop_db(irrop)%surq
-              
-              
-                  !rtb gwflow - connect irrigation to groundwater pumping from aquifer
-                  if(gwflow_flag) then
-                    irrig_total = (irrop_db(irrop)%amt_mm/1000.) * hru(j)%area_ha * 10000. !m3 of irrigation water
-                    if(hru_num_cells(j).gt.0) then
-                      gwvol_demand = irrig_total / hru_num_cells(j) !groundwater to remove from each cell connected to the HRU
-                      !loop through the cells that are connected to the HRU
-                      gwvol_diff = 0.
-                      do i=1,hru_num_cells(j)
-                        cell_row = hru_cells(j,i,1)
-                        cell_col = hru_cells(j,i,2)
-                        !check for available groundwater
-                        gwvol_avail = ((gw_cell_head(cell_row,cell_col)-gw_cell_bot(cell_row,cell_col)) * (cell_size * cell_size)) * gw_cell_Sy(cell_row,cell_col) !m3 of groundwater available for removal
-                        if(gwvol_avail.lt.gwvol_demand) then
-                          gwvol_removed = gwvol_avail
-                          gwvol_diff = gwvol_diff + (gwvol_demand - gwvol_avail) !track the amount that is not available for irrigation
-                        else
-                          gwvol_removed = gwvol_demand
-                        endif
-                        gw_cell_ss_pumpag(cell_row,cell_col) = gwvol_removed * (-1) !m3 --> store for groundwater balance calculations in gwflow_simulate (negative = leaving the aquifer)
-                      enddo
-                      !if available < demand, re-calculate irrigation applied
-                      gwmm_diff = gwvol_diff  / (hru(j)%area_ha * 10000.) * 1000. !m3 --> mm
-                      irrig(j)%applied = (irrop_db(irrop)%amt_mm - gwmm_diff) * irrop_db(irrop)%eff * (1. - irrop_db(irrop)%surq) !decrease ammount by the difference
-                      irrig(j)%runoff = (irrop_db(irrop)%amt_mm - gwmm_diff) * irrop_db(irrop)%eff * irrop_db(irrop)%surq
-                      if(irrig(j)%applied.lt.0) irrig(j)%applied = 0.
-                      if(irrig(j)%runoff.lt.0) irrig(j)%runoff = 0.
-                    endif
-                  endif
-                end if  
+            end if  
               
                 !set organics and constituents from irr.ops ! irrig(j)%water =  cs_irr(j) = 
                 if (pco%mgtout == "y") then
@@ -199,6 +160,9 @@
           case ("irrigate")
             ipl = 1
             j = ob_cur                      ! hru number 
+            
+            !! check number of applications per year
+            if (pcom(j)%dtbl(idtbl)%num_actions(iac) <= Int(d_tbl%act(iac)%const2)) then
             isrc = d_tbl%act(iac)%ob_num    ! source object type number
             irrop = d_tbl%act_typ(iac)      ! irrigation application type in irr.ops
 
@@ -218,16 +182,19 @@
             iob = d_tbl%act(iac)%ob_num
             select case (d_tbl%act(iac)%ob)
             case ("aqu")
-              if (aqu_d(iob)%flo * aqu_prm(iob)%area_ha * 10. > irrig(j)%demand) then
-                rto = irrig(j)%demand / aqu_d(iob)%flo                  ! ratio of water removed from aquifer volume (mm)
+              stor_m3 = aqu_d(iob)%stor * aqu_prm(iob)%area_ha * 10.
+              if (stor_m3 * 10. > irrig(j)%demand) then
+                rto = irrig(j)%demand / stor_m3                 ! ratio of water removed from aquifer volume (m3)
               else
                 rto = 0.
+                irrig(j)%applied = 0.
+                irrig(j)%runoff = 0.
+                irrig(j)%demand = 0.
               end if
               rto = amax1 (0., rto)
               rto = amin1 (1., rto)
               rto1 = (1. - rto)
-              irrig(j)%water%flo = rto * aqu_d(iob)%flo                 ! organics in irrigation water
-              !! need to conver irrig(j)%water%flo from mm to m3 
+              irrig(j)%water%flo = rto * aqu_d(iob)%stor                ! organics in irrigation water
               aqu_d(iob)%stor = rto1 * aqu_d(iob)%stor                  ! remainder stays in aquifer
               cs_irr(iob) = rto * cs_aqu(iob)                           ! constituents in irrigation water
               cs_aqu(iob) = rto1 * cs_aqu(iob)                          ! remainder stays in aquifer
@@ -237,7 +204,12 @@
                 rto = irrig(j)%demand / ch_stor(iob)%flo                ! ratio of water removed from channel volume
               else
                 rto = 0.
+                irrig(j)%applied = 0.
+                irrig(j)%runoff = 0.
+                irrig(j)%demand = 0.
               end if
+              rto = amax1 (0., rto)
+              rto = amin1 (1., rto)
               rto1 = (1. - rto)
               irrig(j)%water = rto * ch_stor(iob)                       ! organics in irrigation water
               ch_stor(iob) = rto1 * ch_stor(iob)                        ! remainder stays in channel
@@ -249,12 +221,17 @@
                 rto = irrig(j)%demand / res(iob)%flo                    ! ratio of water removed from res volume
               else
                 rto = 0.
+                irrig(j)%applied = 0.
+                irrig(j)%runoff = 0.
+                irrig(j)%demand = 0.
               end if
+              rto = amax1 (0., rto)
+              rto = amin1 (1., rto)
               rto1 = (1. - rto)
               irrig(j)%water = rto * res(iob)                           ! organics in irrigation water
               res(iob) = rto1 * res(iob)                                ! remainder stays in reservoir
-              cs_irr(iob) = rto * res_water(iob)                        ! constituents in irrigation water
-              res_water(iob) = rto1 * res_water(iob)                    ! remainder stays in reservoir
+              !cs_irr(iob) = rto * res_water(iob)                        ! constituents in irrigation water
+              !res_water(iob) = rto1 * res_water(iob)                    ! remainder stays in reservoir
               
             end select
                   
@@ -263,6 +240,12 @@
                   pcom(j)%plcur(ipl)%phuacc, soil(j)%sw,pl_mass(j)%tot(ipl)%m, rsd1(j)%tot(ipl)%m, &
                   sol_sumno3(j), sol_sumsolp(j), irrig(j)%demand
             end if
+            
+              pcom(j)%dtbl(idtbl)%num_actions(iac) = pcom(j)%dtbl(idtbl)%num_actions(iac) + 1
+              pcom(j)%dtbl(idtbl)%days_act(iac) = 1                     !reset days since last action
+              pcom(j)%days_irr = 1                                      ! reset days since last irrigation
+              if (iac > 1) pcom(j)%dtbl(idtbl)%days_act(iac-1) =  0     !reset previous action day counter
+            end if      ! const2 - number per year check
 
           !fertilize
           case ("fertilize")
@@ -274,10 +257,9 @@
               ifrt = d_tbl%act_typ(iac)               !fertilizer type from fert data base
               frt_kg = d_tbl%act(iac)%const           !amount applied in kg/ha
               ifertop = d_tbl%act_app(iac)            !surface application fraction from chem app data base
-              call pl_fert (j, ifrt, frt_kg, ifertop)
 
-              if (wet(j)%flo>0. .and. chemapp_db(ifertop)%surf_frac == 1) then
-                call pl_fert_wet (j, ifrt, frt_kg, ifertop)
+              if (wet(j)%flo > 0. .and. chemapp_db(ifertop)%surf_frac == 1) then
+                call pl_fert_wet (ifrt, frt_kg)
                 if (pco%mgtout == "y") then
                   write (2612,*) j, time%yrc, time%mo, time%day_mo, mgt%op_char, " FERT-WET", &
                     phubase(j), pcom(j)%plcur(ipl)%phuacc, soil(j)%sw, pl_mass(j)%tot(ipl)%m,           &
@@ -285,7 +267,7 @@
                     fertorgn, fertsolp, fertorgp
                 endif
               else
-                call pl_fert (j, ifrt, frt_kg, ifertop)
+                call pl_fert (ifrt, frt_kg, ifertop)
                 if (pco%mgtout == "y") then
                   write (2612,*) j, time%yrc, time%mo, time%day_mo, mgt%op_char, "    FERT ", &
                     phubase(j), pcom(j)%plcur(ipl)%phuacc, soil(j)%sw, pl_mass(j)%tot(ipl)%m,           &
@@ -408,6 +390,8 @@
                 case ("grain")
                   call mgt_harvgrain (j, ipl, iharvop)
                 case ("residue")
+                  harveff = d_tbl%act(iac)%const
+                  call mgt_harvresidue (j, harveff)
                 case ("tree")
                 case ("tuber")
                   call mgt_harvtuber (j, ipl, iharvop)
@@ -520,6 +504,8 @@
                 case ("grain")
                   call mgt_harvgrain (j, ipl, iharvop)
                 case ("residue")
+                  harveff = d_tbl%act(iac)%const
+                  call mgt_harvresidue (j, harveff)
                 case ("tree")
                 case ("tuber")
                   call mgt_harvtuber (j, ipl, iharvop)
@@ -566,8 +552,6 @@
                         pcom(j)%plstr(ipl)%sum_a
                   end if 
                 end if
-                pcom(j)%plcur(ipl)%phuacc = 0.
-                phubase(j) = 0.
               end do
               pcom(j)%dtbl(idtbl)%num_actions(iac) = pcom(j)%dtbl(idtbl)%num_actions(iac) + 1
               pcom(j)%dtbl(idtbl)%days_act(iac) = 1     !reset days since last action
@@ -677,6 +661,12 @@
               !  hru(j)%lumv%ldrain = 0
               !end if
               pcom(j)%dtbl(idtbl)%num_actions(iac) = pcom(j)%dtbl(idtbl)%num_actions(iac) + 1
+              
+              if (pco%mgtout == "y") then
+                write (2612, *) j, time%yrc, time%mo, time%day_mo, tilldb(idtill)%tillnm, "  DRAIN_CONTROL",    &
+                    phubase(j), pcom(j)%plcur(1)%phuacc, soil(j)%sw, pl_mass(j)%tot(1)%m,        &
+                    rsd1(j)%tot(1)%m, sol_sumno3(j), sol_sumsolp(j), hru(j)%lumv%sdr_dep
+              end if
             end if
                                    
           ! set the amount of water to be diverted
@@ -684,19 +674,22 @@
             ! ob_num is set in wallo_control
             select case (d_tbl%act(iac)%option)
                 
+            case ("flo_cms")    !! flow diversion demand to m3
+              trans_m3 = d_tbl%act(iac)%const * 86400.
+
             case ("min_cms")    !! minimum flow rate (m3/s)
               if (ob(ob_num)%hd(1)%flo / 86400. < d_tbl%act(iac)%const + .0001) then
                 !! below min - all flow to downstream channel (first outflow hydrograph in connect file)
                 trans_m3 = 0.
               else
                 !! above min flow 
-                trans_m3 = d_tbl%act(iac)%const / (ob(ob_num)%hd(1)%flo / 86400.)
+                trans_m3 = ob(ob_num)%hd(1)%flo - d_tbl%act(iac)%const * 86400.
               end if
               
-            case ("all_flo")    !! all flow to first outflow channel in connect file
+            case ("all_flo")    !! all flow diverted
               trans_m3 = ob(ob_num)%hd(1)%flo
 
-            case ("min_frac")   !! minimum or constant fraction 
+            case ("min_frac")   !! minimum - constant fraction 
               trans_m3 = d_tbl%act(iac)%const * ob(ob_num)%hd(1)%flo
               
             case ("recall")
@@ -1063,7 +1056,7 @@
             if (pcom(j)%dtbl(idtbl)%num_actions(iac) <= Int(d_tbl%act(iac)%const2)) then
               iburn = d_tbl%act_typ(iac)           !burn type from fire data base
               do ipl = 1, pcom(j)%npl
-                call pl_burnop (j, ipl, iburn)
+                call pl_burnop (j, iburn)
               end do
                         
               if (pco%mgtout == "y") then
@@ -1081,7 +1074,7 @@
             
             cn_prev = cn2(j)
             if (pcom(j)%dtbl(idtbl)%num_actions(iac) <= Int(d_tbl%act(iac)%const2)) then
-              cn2(j) = chg_par (cn2(j), j, d_tbl%act(iac)%option, d_tbl%act(iac)%const, 35., 95., 0)
+              cn2(j) = chg_par (cn2(j), d_tbl%act(iac)%option, d_tbl%act(iac)%const, 35., 95.)
               call curno (cn2(j), j)
             end if
             

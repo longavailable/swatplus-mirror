@@ -3,11 +3,11 @@
       use hydrograph_module
       use sd_channel_module
       use maximum_data_module
+      use constituent_mass_module
 
       implicit none
 
       integer :: iaq                !none       |counter
-      integer :: iaq_db             !none       |counter
       integer :: mfe                !none       |my first element (channel with smallest area)
       integer :: next1              !none       |counter
       integer :: iprv               !none       |counter 
@@ -17,7 +17,6 @@
       integer :: ichd               !none       |counter
       integer :: iob                !none       |counter
       real :: sum_len               !km         |total length of channel in aquifer
-      real :: sum_left              !km         |lenght of channels after the baseflow stops
       real, dimension(:), allocatable :: next   !!next channel to dry up - sorted by drainage area
       
       !! set parameters needed to distribute gwflow to channels using geomorphical model
@@ -83,5 +82,25 @@
         
       end do
 
+      !rtb salt/cs
+      if(cs_db%num_tot > 0) then
+        allocate(aq_chcs(sp_ob%aqu))  
+        do iaq = 1, sp_ob%aqu
+          !allocate groundwater loading array
+          allocate(aq_chcs(iaq)%hd(1))
+          !salts
+          if(cs_db%num_salts > 0) then
+            allocate(aq_chcs(iaq)%hd(1)%salt(cs_db%num_salts))
+            aq_chcs(iaq)%hd(1)%salt = 0.
+          endif
+          !other constituents
+          if(cs_db%num_cs > 0) then
+            allocate(aq_chcs(iaq)%hd(1)%cs(cs_db%num_cs))
+            aq_chcs(iaq)%hd(1)%cs = 0.
+          endif
+        enddo
+      endif
+
+      
       return
       end subroutine aqu2d_init

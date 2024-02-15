@@ -6,8 +6,6 @@
       
       implicit none
      
-      character (len=13) :: file      !           |
-      integer :: i                    !           | 
       integer :: mhydrol              !           | 
       integer :: ithyd                !none       |counter
       character (len=80) :: titldum   !           |title of file

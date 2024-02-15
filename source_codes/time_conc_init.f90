@@ -66,7 +66,7 @@
         t_ch = .31 * ch_l * ch_n**.75 / (hru(ihru)%km**.125 * (ch_slope + .001)**.375)
         tconc(ihru) = t_ov(ihru) + t_ch
         !! compute fraction of surface runoff that is reaching the main channel
-        if (time%step > 0) then
+        if (time%step > 1) then
           brt(ihru) = 1.-Exp(-bsn_prm%surlag / (tconc(ihru) /               &
               (time%dtm / 60.)))	!! urban modeling by J.Jeong
         else

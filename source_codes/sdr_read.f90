@@ -2,12 +2,10 @@
       
       use input_file_module
       use maximum_data_module
-      use hru_module, only : hru, sdr
+      use hru_module, only : sdr
       
       implicit none 
       
-      character (len=13) :: file      !           |
-      integer :: i                    !           |
       character (len=80) :: titldum   !           |title of file
       character (len=80) :: header    !           |header of file
       integer :: eof                  !           |end of file

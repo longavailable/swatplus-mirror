@@ -1,4 +1,4 @@
-      subroutine wallo_transfer (iwallo, idmd, isrc, dmd_m3)
+      subroutine wallo_transfer (iwallo, idmd)
       
       use water_allocation_module
       use hydrograph_module
@@ -11,8 +11,6 @@
 
       integer, intent (in):: iwallo         !water allocation object number
       integer, intent (in) :: idmd          !water demand object number
-      integer, intent (in) :: isrc          !source object number
-      real, intent (in) :: dmd_m3           !m3     |demand
       integer :: j                  !none       |object number of specific type (cha, res, aqu, etc)
       integer :: iob                !none       |object number (ob)
 

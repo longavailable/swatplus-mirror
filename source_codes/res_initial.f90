@@ -7,6 +7,8 @@
       use constituent_mass_module
       use pesticide_data_module
       use water_body_module
+      use res_salt_module
+      use res_cs_module
       
       implicit none
       
@@ -18,10 +20,11 @@
       real :: resdif         !              |
       integer :: i           !none          |counter
       integer :: idat        !none          |counter
+      integer :: icon        !none          |
       integer :: init        !              | 
       integer :: ipest       !none          |counter
       integer :: ipath       !              |
-      integer :: isalt       !              |
+      integer :: isalt       !              |counter for salt ions !rtb salt
       integer :: ipest_db    !none      |counter
 
       do ires = 1, sp_ob%res
@@ -36,6 +39,10 @@
         res_ob(ires)%psa = res_hyd(ihyd)%psa
         !! set initial weir height to principal depth - m
         res_ob(ires)%weir_hgt = res_ob(ires)%pvol / (res_ob(ires)%psa * 10000.)
+        
+        !! use br1 as lag - then compute actual br1 (no option to input actual br1)
+        res_ob(ires)%lag_up = res_hyd(ihyd)%br1
+        res_ob(ires)%lag_down = res_hyd(ihyd)%br2
         
         !! calculate shape parameters for surface area equation
         resdif = res_hyd(ihyd)%evol - res_hyd(ihyd)%pvol
@@ -97,19 +104,58 @@
             res_benthic(ires)%path(ipath) = path_water_ini(init)%benthic(ipath)
           end do
                         
-          !! initialize salts in reservoir water and benthic from input data
-          init = res_init(i)%salt
-          do isalt = 1, cs_db%num_salts
-            res_water(ires)%salt(isalt) = salt_water_ini(init)%water(isalt)
-            res_benthic(ires)%salt(isalt) = salt_water_ini(init)%benthic(isalt)
-          end do
-        
           !! calculate initial surface area       
           res_wat_d(ires)%area_ha = res_ob(ires)%br1 * res(ires)%flo ** res_ob(ires)%br2
 
-        end if
+          !! initialize salts in reservoir water, from database file (salt.res)
+          !rtb salt
+          if(cs_db%num_salts > 0) then
+            idat = res_ob(ires)%props
+            icon = res_dat(idat)%salt !database to use (in salt_res file)
+            if(icon > 0) then
+              do isalt = 1, cs_db%num_salts
+                res_water(ires)%saltc(isalt) = res_salt_data(icon)%c_init(isalt) !concentration (g/m3)
+                res_water(ires)%salt(isalt) = res_water(ires)%saltc(isalt) * res(ires)%flo / 1000. !g/m3 * m3 / 1000. = kg
+              enddo
+						else
+              do isalt = 1, cs_db%num_salts
+                res_water(ires)%saltc(isalt) = 0. !concentration (g/m3)
+                res_water(ires)%salt(isalt) = 0. !kg
+              enddo 
+            endif
+          endif
+          
+          !! initialize constituents in reservoir water, from database file (cs_res)
+          !rtb cs
+          if(cs_db%num_cs > 0) then
+            idat = res_ob(ires)%props
+            icon = res_dat(idat)%cs !database to use (in cs.res file)
+            if(icon > 0) then
+              !seo4
+              res_water(ires)%csc(1) = res_cs_data(icon)%c_seo4 !concentration (g/m3)
+              res_water(ires)%cs(1) = res_water(ires)%csc(1) * res(ires)%flo / 1000. !g/m3 * m3 / 1000. = kg
+              !seo3
+              res_water(ires)%csc(2) = res_cs_data(icon)%c_seo3 !concentration (g/m3)
+              res_water(ires)%cs(2) = res_water(ires)%csc(2) * res(ires)%flo / 1000. !g/m3 * m3 / 1000. = kg
+              !boron
+              res_water(ires)%csc(3) = res_cs_data(icon)%c_born !concentration (g/m3)
+              res_water(ires)%cs(3) = res_water(ires)%csc(3) * res(ires)%flo / 1000. !g/m3 * m3 / 1000. = kg
+            else
+              !seo4
+              res_water(ires)%csc(1) = 0.
+              res_water(ires)%cs(1) = 0.
+              !seo3
+              res_water(ires)%csc(2) = 0.
+              res_water(ires)%cs(2) = 0.
+              !boron
+              res_water(ires)%csc(3) = 0.
+              res_water(ires)%cs(3) = 0.
+            endif
+          endif
+          
+        endif
+        
       end do
-                                   
       close(105)
 
       return

@@ -6,7 +6,7 @@
       use calibration_data_module
       use plant_data_module
       use landuse_data_module
-      use hru_module, only : hru, ihru, ipl
+      use hru_module, only : hru, ihru
       use plant_module
       use output_landscape_module
       use organic_mineral_mass_module
@@ -14,7 +14,6 @@
       implicit none
       
       integer, dimension(:), allocatable :: iarea
-      integer, dimension(:), allocatable :: idp
       integer :: ireg
       integer :: ielem
       real :: area_ha
@@ -25,7 +24,6 @@
       integer :: ilum_db
       real :: constnb
       integer :: icu
-      integer :: j
       real :: constwb
       real :: constpw
               

@@ -4,7 +4,7 @@
       use mgt_operations_module
       use hydrograph_module
       use hru_module, only : hru
-      use plant_module, only : pcom, pcom_init
+      use plant_module, only : pcom
       use maximum_data_module
       use fertilizer_data_module
       

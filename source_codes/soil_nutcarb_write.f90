@@ -6,8 +6,6 @@
 !!    ~ ~ ~ INCOMING VARIABLES ~ ~ ~
 !!    name          |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-!!    etday         |mm H2O        |actual amount of evapotranspiration that
-!!                                 |occurs on day in HRU
 !!    gw_q(:)       |mm H2O        |groundwater contribution to streamflow from
 !!                                 |HRU on current day
 !!    hru_ha(:)     |ha            |area of HRU in hectares
@@ -28,14 +26,10 @@
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
-      use hru_module, only : etday, ihru, tillage_factor
       use soil_module
-      use time_module
-      use basin_module
       use organic_mineral_mass_module
       use hydrograph_module
       use calibration_data_module
-      use output_landscape_module
       
       implicit none
       
@@ -44,29 +38,19 @@
       integer :: iihru          !none        |counter
       integer :: j              !none        |counter
       integer :: iob
-      real :: soilp_prev = 0.
-      real :: plantp_prev = 0. 
-      real :: rsdp_prev = 0.
-      real :: bal0
-      
+           
       !! basin output - zero daily basin outputs before summing
       bsn_org_soil = soil_org_z
       bsn_org_pl = soil_org_z
       bsn_org_rsd = soil_org_z
-      bsn_mn = 0.
-      bsn_mp = 0.
         
       !! sum the output for the entire soil profile
       do j = 1, sp_ob%hru
+        iob = sp_ob1%hru + j - 1   !!!!!! added for new output write  !!nbs
         soil1(j)%tot_org = soil_org_z
         soil_prof_hact = soil_org_z
         soil_prof_hsta = soil_org_z
-        soil_prof_mn = soil_mn_z
-        soil_prof_mp = soil_mp_z
         do ly = 1, soil(j)%nly
-          soil_prof_mn = soil_prof_mn + soil1(j)%mn(ly)
-          soil_prof_mp = soil_prof_mp + soil1(j)%mp(ly)
-          soil1(j)%tot_org = soil1(j)%tot_org + soil1(j)%tot(ly)
           soil_prof_hact = soil_prof_hact + soil1(j)%hact(ly)
           soil_prof_hsta = soil_prof_hsta + soil1(j)%hsta(ly)
           soil_prof_str = soil_prof_str + soil1(j)%str(ly)
@@ -78,33 +62,21 @@
           soil_prof_microb = soil_prof_microb + soil1(j)%microb(ly)
           soil_prof_water = soil_prof_water + soil1(j)%water(ly)
         end do
-        soil1(j)%tot_mn = soil_prof_mn%no3 + soil_prof_mn%nh4
-        !soil1(j)%tot_mp = soil_prof_mp%wsol + soil_prof_mp%lab + soil_prof_mp%act + soil_prof_mp%sta
-        soil1(j)%tot_mp = soil_prof_mp%lab
-
-        ! write all carbon, organic n and p, and mineral n and p for the soil profile
-        !write (2610,*) time%day, time%yrc, ihru, soil_prof_mn, soil_prof_mp, soil_prof_tot, soil_prof_str,  &
-        !  soil_prof_lig, soil_prof_meta, soil_prof_man, soil_prof_hs, soil_prof_hp, soil_prof_microb,       &
-        !  soil_prof_water
+        soil1(j)%tot_org = soil_prof_hact + soil_prof_hsta + soil_prof_microb
         
-        ! write all carbon, organic n and p, and mineral n and p for the soil profile, plants, and residue
-        !write (2610,100) time%day, time%mo, time%day_mo, time%yrc, j, ob(j)%gis_id, ob(j)%name,soil1(j)%tot_mn, &
-        !  soil1(j)%tot_mp, soil1(j)%tot_org%c, soil1(j)%tot_org%n, soil1(j)%tot_org%p, pl_mass(j)%tot_com%c,    &
-        !  pl_mass(j)%tot_com%n, pl_mass(j)%tot_com%p, rsd1(j)%tot_com%c, rsd1(j)%tot_com%n, rsd1(j)%tot_com%p
-    
-        ! write all carbon, organic n and p, and mineral n and p for the soil profile, plants, and residue
-        !!write (2610,100) time%day, time%mo, time%day_mo, time%yrc, j, ob(j)%gis_id, ob(j)%name, soil1(j)%tot_mn, &
-        !!  soil_prof_hact%n, soil_prof_hsta%n, pl_mass(j)%tot_com%n, rsd1(j)%tot_com%n, soil1(j)%tot_mp,          &
-        !!  pl_mass(j)%tot_com%p, rsd1(j)%tot_com%p
-    
-      !! labile p balance - labp gain from rsd = 1/(1+0.2)*rsd_laborg_p
-      bal0 = (soilp_prev - soil_prof_mp%lab) + (plantp_prev - pl_mass(j)%tot_com%p) +               &
-        .8 * (rsdp_prev - rsd1(j)%tot_com%p) +                                                      &
-        hnb_d(j)%fertp + hnb_d(j)%org_lab_p - .8 * hnb_d(j)%rsd_laborg_p - hnb_d(j)%puptake -       &
-        hnb_d(j)%lab_min_p - hls_d(j)%lchlabp + hls_d(j)%tilelabp - hls_d(j)%surqsolp
-      soilp_prev = soil_prof_mp%lab
-      rsdp_prev = rsd1(j)%tot_com%p
-      plantp_prev = pl_mass(j)%tot_com%p
+        !write all organic carbon for the plant community
+        write (4560,*) time%day, time%mo, time%day_mo, time%yrc, j, ob(iob)%gis_id, ob(iob)%name, &
+            pl_mass(j)%tot_com%c, pl_mass(j)%ab_gr_com%c, pl_mass(j)%leaf_com%c,                  &
+            pl_mass(j)%stem_com%c, pl_mass(j)%seed_com%c, pl_mass(j)%root_com%c
+        
+        !write all organic carbon for the residue (all plants)
+        write (4561,*) time%day, time%mo, time%day_mo, time%yrc, j, ob(iob)%gis_id, ob(iob)%name, &
+            rsd1(j)%tot_com%c, rsd1(j)%tot_meta%c, rsd1(j)%tot_str%c, rsd1(j)%tot_lignin%c
+        
+        !write all organic carbon for the soil profile
+        write (4562,*) time%day, time%mo, time%day_mo, time%yrc, j, ob(iob)%gis_id, ob(iob)%name, &
+            soil1(j)%tot_org%c, soil_prof_str%c, soil_prof_lig%c, soil_prof_meta%c,               &
+            soil_prof_man%c, soil_prof_hs%c, soil_prof_hp%c, soil_prof_microb%c
       
       end do    !! hru loop
       
@@ -124,12 +96,8 @@
       end do
               
       !! write all carbon, organic n and p, and mineral n and p for the soil profile, plants, and residue
-      !write (2610,*) time%day, time%yrc, ihru, bsn_mn, bsn_mp, bsn_org_soil%c,      &
-      !  bsn_org_soil%n, bsn_org_soil%p, bsn_org_pl%c, bsn_org_pl%n, bsn_org_pl%p,   &
-      !  bsn_org_rsd%c, bsn_org_rsd%n, bsn_org_rsd%p
-      
-100   format (6i12,5x,a12,11f16.3)
-    
+      write (4566,*) time%day, time%yrc, ' basin ', bsn_org_soil%c, bsn_org_pl%c, bsn_org_rsd%c
+          
       return
 
       end subroutine soil_nutcarb_write

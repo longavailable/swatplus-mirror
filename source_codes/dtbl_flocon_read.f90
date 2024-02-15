@@ -9,7 +9,6 @@
                   
       character (len=80) :: titldum   !           |title of file
       character (len=80) :: header    !           |header of file
-      character (len=13) :: file
       integer :: eof                  !           |end of file
       integer :: i                    !none       |counter 
       integer :: mdtbl                !none       |ending of loop

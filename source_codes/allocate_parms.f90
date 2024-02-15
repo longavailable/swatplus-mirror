@@ -12,6 +12,10 @@
       use time_module
       use hydrograph_module
       use constituent_mass_module
+
+      implicit none
+      
+      integer :: mhru, mch, mpc
       
 !! initialize variables    
       mhyd = 1  !!added for jaehak vars
@@ -23,7 +27,7 @@
       allocate (ranrns_hru(mhru))
       
       !dimension plant arrays used each day and not saved
-       mpc = 10
+       mpc = 20
        allocate (uno3d(mpc))
        allocate (uapd(mpc))
        allocate (un2(mpc))
@@ -51,7 +55,7 @@
       allocate (plqm(mhru))
       allocate (itb(mhru))
       
-      if (time%step > 0) allocate (hhqday(mhru,time%step))
+      allocate (hhqday(mhru,time%step))
       
  !!  added per JGA for Srini by gsm 9/8/2011
  !! arrays for mangement output (output.mgt)  
@@ -97,10 +101,10 @@
       allocate (pplnt(mhru))
       allocate (qdr(mhru))
 
-      allocate (gwtranq(mhru)) !rtb gwflow
+      allocate (gwsoilq(mhru)) !rtb gwflow
       allocate (satexq(mhru)) !rtb gwflow
-      allocate (gwtrann(mhru)) !rtb gwflow
-      allocate (gwtranp(mhru)) !rtb gwflow
+      allocate (gwsoiln(mhru)) !rtb gwflow
+      allocate (gwsoilp(mhru)) !rtb gwflow
       allocate (satexn(mhru)) !rtb gwflow
       
 !    Drainmod tile equations  01/2006 
@@ -140,11 +144,32 @@
       allocate (usle_cfac(mhru))
       allocate (usle_eifac(mhru))
       allocate (wfsh(mhru))
-
-      allocate (bss(4,mhru))
+      !rtb salt
+      allocate (surqsalt(mhru,8))
+      allocate (latqsalt(mhru,8))
+      allocate (tilesalt(mhru,8))
+      allocate (percsalt(mhru,8))
+      allocate (gwupsalt(mhru,8))
+      allocate (urbqsalt(mhru,8))
+      allocate (wetqsalt(mhru,8))
+      allocate (wtspsalt(mhru,8))
+      !rtb cs
+      allocate (surqcs(mhru,10))
+      allocate (latqcs(mhru,10))
+      allocate (tilecs(mhru,10))
+      allocate (perccs(mhru,10))
+      allocate (gwupcs(mhru,10))
+      allocate (sedmcs(mhru,10))
+      allocate (urbqcs(mhru,10))
+      allocate (wetqcs(mhru,10))
+      allocate (wtspcs(mhru,10))
+      allocate (irswcs(mhru,10))
+      allocate (irgwcs(mhru,10))
+      
+      allocate (bss(40,mhru)) !rtb salt/cs (changed to 40)
       allocate (bss_ex(10,mhru)) !rtb gwflow
       allocate (wrt(2,mhru))
-      allocate (surf_bs(17,mhru))  
+      allocate (surf_bs(55,mhru)) !rtb salt/cs (changed to 55)
 
 !! sj aug 09 end
 	  allocate (hhsurf_bs(2,mhru,time%step))

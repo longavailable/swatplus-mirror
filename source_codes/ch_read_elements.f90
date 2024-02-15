@@ -20,7 +20,6 @@
       integer :: nspu                  !units     |description
       integer :: isp                   !none      |counter
       integer :: ielem1                !units     |description
-      integer :: ii                    !none      |counter
       integer :: icha                  !none      |counter 
       integer :: ireg                  !none      |counter
       integer :: ires                  !none      |counter

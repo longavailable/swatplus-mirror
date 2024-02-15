@@ -28,7 +28,6 @@
       implicit none
       
       integer :: j              !none             |hru number
-      integer :: k              !none             |counter
       real :: reduc             !none             |fraction of water uptake by plants achieved 
 
       j = 0

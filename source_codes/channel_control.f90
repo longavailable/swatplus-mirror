@@ -55,23 +55,6 @@
       real :: revapday    !m^3 H2O       |amount of water moving from bank storage
                           !              |into the soil profile or being taken
                           !              |up by plant roots in the bank storage zone
-      real :: sedcon      !g/m^3         |sediment concentration
-      real :: reactw      !mg pst        |amount of pesticide in reach that is lost
-                          !              |through reactions  
-      real :: volatpst    !mg pst        |amount of pesticide lost from reach by
-                          !              |volatilization
-      real :: setlpst     !mg pst        |amount of pesticide moving from water to
-                          !              |sediment due to settling
-      real :: resuspst    !mg pst        |amount of pesticide moving from sediment to
-                          !              |reach due to resuspension
-      real :: difus       !mg pst        |diffusion of pesticide from sediment to reach
-      real :: reactb      !mg pst        |amount of pesticide in sediment that is lost
-                          !              |through reactions
-                          !              |up by plant roots in the bank storage zone
-      real :: bury        !mg pst        |loss of pesticide from active sediment layer
-                          !              |by burial
-      real :: sedpest     !mg pst        |pesticide in river bed sediment 
-      real :: soxy             !mg O2/L       |saturation concetration of dissolved oxygen
       real :: chlin            !mg chl-a/L    |chlorophyll-a concentration in inflow
       real :: algin            !mg alg/L      |algal biomass concentration in inflow
       real :: orgnin           !mg N/L        |organic N concentration in inflow
@@ -84,9 +67,7 @@
       real :: disoxin          !mg O2/L       |dissolved oxygen concentration in inflow
       real :: cinn             !mg N/L        |effective available nitrogen concentration
       real :: rttlc_d
-      real :: rtdelt
       real :: rtevp_d
-      integer :: inum1
                          
       ch_d(jrch)%flo_out = 0.
       ch_d(jrch)%evap = 0.
@@ -148,6 +129,7 @@
         ben_area = ch_hyd(jhyd)%l *ch_hyd(jhyd)%w 
         
 !        if (cs_db%num_pests > 0) then
+
 !          call ch_rtpest 
 !        end if
         
@@ -174,10 +156,8 @@
         rch_sag = 0.
         rch_lag = 0.
         rch_gra = 0.
-        call ch_rthsed
-
-        end do
-      
+        
+        end do    
       endif
 
 !! average daily water depth for sandi doty 09/26/07

@@ -1,5 +1,5 @@
 wst_dat Generated from Y:\HUC8_models\models\07120002.accdb Time: 8/1/2019 1:23:23 PM
-         NAME      WGN              PCP              TMP   SLR   HMD   WND WND_DIR     ATMO_DEP
+         NAME      WGN              PCP              TMP   SLR   HMD   WND     PET     ATMO_DEP
  071200020101 in125535 071200020101.pcp 071200020101.tem   sim   sim   sim     sim 071200020101
  071200020102 in129511 071200020102.pcp 071200020102.tem   sim   sim   sim     sim 071200020102
  071200020103 in127298 071200020103.pcp 071200020103.tem   sim   sim   sim     sim 071200020103

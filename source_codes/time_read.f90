@@ -25,6 +25,7 @@
          if (eof < 0) exit
          read (107,*,iostat=eof) time%day_start, time%yrc_start, time%day_end, time%yrc_end, time%step
          if (eof < 0) exit
+         if (time%step <= 0) time%step = 1
          if (time%day_start <= 0) time%day_start = 1
          time%nbyr = time%yrc_end - time%yrc_start + 1
          call xmon (time%day_start, mo, day_mo)

@@ -34,13 +34,8 @@
       
       implicit none      
       
-      integer :: icrop       !none      |land cover code
       integer :: j           !none      |hru number
-      integer :: l           !none      |counter (soil layer)
-      real :: uno3l          !kg N/ha   |plant nitrogen demand
-      integer :: ir          !none      |flag to denote bottom of root zone reached
       integer :: idp         !          |       
-      real :: gx             !mm        |lowest depth in layer from which nitrogen may be removed
       real :: matur_frac     !frac      |fraction to maturity - use hu for annuals and years to maturity for perennials
 
       j = ihru

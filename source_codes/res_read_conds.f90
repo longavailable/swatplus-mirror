@@ -5,8 +5,8 @@
 
       implicit none
       
-      character (len=80) :: title, header
-      integer :: max_table, tnum_conds, ii, ictbl, icon, isub_con, icc, imod, iconds
+      character (len=80) :: title
+      integer :: max_table, tnum_conds, ii, ictbl, isub_con, icc, imod
       integer :: i_exist, eof
       
       inquire (file="res_conds.dat", exist=i_exist)

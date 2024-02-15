@@ -12,7 +12,6 @@
 !!    latksatf(:) |none          |multiplication factor to determine conk(j1,j) from sol_k(j1,j) for HRU
 !!    pc(:)       |mm/hr         |pump capacity (default pump capacity = 1.042mm/hr or 25mm/day)
 !!    sdrain(:)   |mm            |distance between two drain tubes or tiles
-!!    sstmaxd(:)  |mm            |static maximum depressional storage; read from .sdr
 !!    stmaxd(:)   |mm            |maximum surface depressional storage for the day in a given HRU
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -41,9 +40,8 @@
 
       use basin_module
       use hydrograph_module
-      use climate_module, only : wst
-      use hru_module, only : hru, ihru, wnan, stmaxd, sstmaxd, surfq, etday, inflpcp, &  
-          mlyr, precip_eff, qtile, wt_shall
+      use hru_module, only : hru, ihru, wnan, stmaxd, surfq, etday, inflpcp, &  
+           precip_eff, qtile, wt_shall
       use soil_module
       use time_module
       use reservoir_module
@@ -62,7 +60,6 @@
       real:: hdrain              !mm            |equivalent depth from water surface in drain tube to
                                  !              |impermeable layer
       real:: gee                 !none          |factor -g- in Kirkham equation
-      real:: e                   !              |
       real:: gee1                !              | 
       real:: gee2                !              | 
       real:: gee3                !              | 
@@ -89,7 +86,9 @@
       real :: ddranp             !              |
       real :: dot                !mm            |actual depth from impermeable layer to water level
                                  !              |above drain during subsurface irrigation
-   
+      real :: cosh
+      real :: cos
+      
       !! initialize variables
 
       j = ihru

@@ -25,7 +25,8 @@
       type input_cli
        character(len=25) :: weat_sta = "weather-sta.cli"
        character(len=25) :: weat_wgn = "weather-wgn.cli"
-       character(len=25) :: wind_dir = "wind-dir.cli"
+       character(len=25) :: pet_cli = "pet.cli"
+       !character(len=25) :: wind_dir = "wind-dir.cli"
        character(len=25) :: pcp_cli = "pcp.cli"
        character(len=25) :: tmp_cli = "tmp.cli"
        character(len=25) :: slr_cli = "slr.cli"
@@ -277,29 +278,34 @@
       type (input_regions) :: in_regs
       
       type input_path_pcp
-        character(len=50) :: pcp = " "  
+        character(len=80) :: pcp = " "  
       end type input_path_pcp
       type (input_path_pcp) :: in_path_pcp
       
      type input_path_tmp
-        character(len=50) :: tmp = " "  
+        character(len=80) :: tmp = " "  
       end type input_path_tmp
       type (input_path_tmp) :: in_path_tmp
       
      type input_path_slr
-        character(len=50) :: slr = " "  
+        character(len=80) :: slr = " "  
       end type input_path_slr
       type (input_path_slr) :: in_path_slr
            
      type input_path_hmd
-        character(len=50) :: hmd = " "  
+        character(len=80) :: hmd = " "  
       end type input_path_hmd
       type (input_path_hmd) :: in_path_hmd
       
      type input_path_wnd
-        character(len=50) :: wnd = " "  
+        character(len=80) :: wnd = " "  
       end type input_path_wnd
       type (input_path_wnd) :: in_path_wnd
+      
+    type input_path_pet
+        character(len=80) :: peti = " "  
+      end type input_path_pet
+      type (input_path_pet) :: in_path_pet
       
       contains
 

@@ -5,7 +5,11 @@
       use output_landscape_module
       use hydrograph_module, only : sp_ob1, ob
 
+      implicit none
+
       integer, intent (in) :: isd
+      integer :: iob
+      real :: const
       
       iob = sp_ob1%hru_lte + isd - 1
               

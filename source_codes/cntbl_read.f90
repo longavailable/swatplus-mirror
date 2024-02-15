@@ -9,7 +9,6 @@
       character (len=80) :: titldum   !           |title of file
       character (len=80) :: header    !           |header of file
       integer :: eof                  !           |end of file
-      integer :: i                    !           | 
       integer :: imax                 !           |
       integer :: icno                 !none       |counter
       logical :: i_exist              !none       |check to determine if file exists

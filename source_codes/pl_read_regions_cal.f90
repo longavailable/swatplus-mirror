@@ -18,8 +18,7 @@
       integer :: mreg                 !           |
       integer :: i                    !none       |counter 
       integer :: isp                  !none       |counter 
-      integer :: ielem1               !none       |counter 
-      integer :: ii                   !none       |counter  
+      integer :: ielem1               !none       |counter  
       integer :: ihru                 !none       |counter 
       integer :: iihru                !none       |counter 
       integer :: ilum_mx              !           | 

@@ -76,6 +76,7 @@
       type (organic_mass) :: soil_prof_microb                       !       |total litter pool
       type (organic_mass) :: soil_prof_water                        !       |total litter pool
       type (organic_mass) :: soil_org_z                             !       |total litter pool
+      type (organic_mass) :: soil_prof_rsd                          !       |total litter pool
       type (mineral_nitrogen) :: soil_prof_mn                       !       |stable humus pool
       type (mineral_phosphorus) :: soil_prof_mp                     !       |active humus pool
       type (mineral_nitrogen) :: soil_mn_z
@@ -86,18 +87,17 @@
       real :: bsn_mn                                                !       |total mineral n pool (no3+nh4) in soil profile
       real :: bsn_mp                                                !       |mineral p pool (wsol+lab+act+sta) in soil profile
 
-      type residue_mass1
+      type residue_mass1        !surface residue
         character (len=16) :: name
         type (organic_mass), dimension(:), allocatable :: tot       !       |total mass surface residue litter pool-dimensioned by plant
-        type (organic_mass), dimension(:), allocatable :: ls        !       |structural litter pool-dimensioned by plant
-        type (organic_mass), dimension(:), allocatable :: lignin    !       |lignin pool-dimensioned by plant
-        type (organic_mass), dimension(:), allocatable :: lm        !       |metabolic litter pool-dimensioned by plant
+        type (organic_mass), dimension(:), allocatable :: meta      !       |metabolic litter pool-dimensioned by plant
+        type (organic_mass), dimension(:), allocatable :: str       !       |structural litter pool-dimensioned by plant
+        type (organic_mass), dimension(:), allocatable :: lignin                   !       |lignin pool-dimensioned by plant
         type (organic_mass) :: tot_com                              !kg/ha  |total
-        type (organic_mass) :: meta                                 !       |
-        type (organic_mass) :: str                                  !       |
-        type (organic_mass) :: lig                                  !       |
-        type (organic_mass) :: bm                                   !       |microbial biomass pool
-        type (organic_mass) :: man                                  !       |manure pool
+        type (organic_mass) :: tot_meta                             !       |
+        type (organic_mass) :: tot_str                              !       |
+        type (organic_mass) :: tot_lignin                           !       |
+        type (organic_mass) :: man                                  !       |
       end type residue_mass1
       !soil profile object - dimensioned to number of hrus, using the hru pointer
       type (residue_mass1), dimension(:), allocatable :: rsd1

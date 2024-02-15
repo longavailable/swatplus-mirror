@@ -4,24 +4,19 @@
       use channel_module
       use ru_module
       use maximum_data_module
-      use hru_module, only : hru, hru_db
+      use hru_module, only : hru
       
       implicit none
       
       character (len=3) :: iobtyp   !none          |object type
-      integer :: isdc               !none          |counter
       integer :: ics                !none          |counter 
       integer :: ii                 !none          |counter 
       integer :: i                  !units         |description  
       integer :: iob                !units         |description   
       integer :: ihru               !none          |counter 
-      integer :: ith                !units         |description    
-      integer :: ifld               !units         |description   
-      integer :: iele               !units         |description   
       integer :: ichan
       real :: tot_ha                !units         |description 
       integer :: iobtypno
-      integer :: ires  
 
       tot_ha = 0
       
@@ -56,13 +51,13 @@
             iru = ch_sur(ics)%obtypno(ii)
 
             !set flood plain link and landscape element (1==closest to river)
-                do ihru = 1, ru_def(iru)%num_tot
-                iob = ru_def(iru)%num(ihru)
-                ob(iob)%flood_ch_lnk = ichan   !pointer back to channel
-                ob(iob)%flood_ch_elem = ics   !pointer to link
-                tot_ha = tot_ha + ob(iob)%area_ha
- 
-                end do
+            do ihru = 1, ru_def(iru)%num_tot
+              iob = ru_def(iru)%num(ihru)
+              ob(iob)%flood_ch_lnk = ichan   !pointer back to channel
+              ob(iob)%flood_ch_elem = ics   !pointer to link
+              tot_ha = tot_ha + ob(iob)%area_ha
+              hru(iob)%wet_fp = "y"
+            end do
             
           case ("cha")   !channel
             !

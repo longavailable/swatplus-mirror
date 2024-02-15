@@ -1,5 +1,5 @@
 weather-sta.cli
-NAME          WGN        PGAGE        TGAGE        SGAGE   HGAGE   WGAGE   WNDIR  ATMODEP
+NAME          WGN        PGAGE        TGAGE        SGAGE   HGAGE   WGAGE     PET  ATMODEP
 wea1        wgn007      gage7.pcp    tgage2.tem     sim     sim     sim     null   null
 wea2        wgn042     gage42.pcp    tgage8.tem     sim     sim     sim     null   null
 wea3        wgn062     gage62.pcp    tgage14.tem    sim     sim     sim     null   null

@@ -65,7 +65,7 @@
         sumn = sumn + soil1(j)%mn(l)%no3
       end do
       if (sumn > 300.) fxn = 0.
-      if (sumn > 100. .and. sumn <= 300.) fxn = 1.5 - .0005 * sumn
+      if (sumn > 100. .and. sumn <= 300.) fxn = 1.5 - .005 * sumn
       if (sumn <= 100.) fxn = 1.
 
       !! compute growth stage factor

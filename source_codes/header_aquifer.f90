@@ -2,7 +2,7 @@
 
       use aquifer_module
       use basin_module
-      use hydrograph_module, only : sp_ob, ob
+      use hydrograph_module, only : sp_ob
       implicit none 
          
 !!!  AQUIFER

@@ -12,6 +12,9 @@
       
       implicit none
 
+      !! reset basin soil water for next simulation
+      pco%sw_init = "n"
+      
       !! re-initialize all hru parameters
       if (sp_ob%hru > 0) then
         hru = hru_init

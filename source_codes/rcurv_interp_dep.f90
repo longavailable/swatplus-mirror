@@ -24,7 +24,7 @@
             if (ielev > 1) then
               rto = (flow_dep - ch_rcurv(icha)%elev(ielev-1)%dep) /     &
                 (ch_rcurv(icha)%elev(ielev)%dep - ch_rcurv(icha)%elev(ielev-1)%dep)
-              call chrc_interp (ch_rcurv(icha)%elev(ielev-1), ch_rcurv(icha)%elev(ielev), ielev, rto, rcurv)
+              call chrc_interp (ch_rcurv(icha)%elev(ielev-1), ch_rcurv(icha)%elev(ielev), rto, rcurv)
               exit
             end if
           end if

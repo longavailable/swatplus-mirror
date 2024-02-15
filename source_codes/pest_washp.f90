@@ -6,7 +6,7 @@
 
       use pesticide_data_module
       use output_ls_pesticide_module
-      use hru_module, only : hru, ihru
+      use hru_module, only :  ihru
       use soil_module
       use constituent_mass_module
       use plant_module
@@ -17,7 +17,6 @@
       integer :: k        !none          |counter
       integer :: ipest_db !none          |pesticide number from pest.dat
       real :: pest_soil   !kg/ha         |amount of pesticide in soil   
-      integer :: icmd     !              |
 
       j = ihru
 

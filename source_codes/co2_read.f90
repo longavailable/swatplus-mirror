@@ -12,7 +12,6 @@
        character (len=1) :: done
        integer :: eof                   !             |end of file
        logical :: i_exist               !             |check to determine if file exists
-       integer:: i
        integer:: iyr_start, iyrc
        integer :: itot, iyr, iyr_co2
        real :: co2_end 
@@ -29,8 +28,8 @@
       type (co2_annual) :: co2_inc
       
       !! output annual CO2 
-      !open (2222,file="co2.out")
-      !write (2222,*) "         YR    CO2(ppm)"
+      open (2222,file="co2.out")
+      write (2222,*) "         YR    CO2(ppm)"
          
        eof = 0
       
@@ -102,10 +101,10 @@
             
         !! write to co2.out
         iyrc = time%yrc_start
-        !do iyr = 1, time%nbyr
-        !  write (2222,*) iyrc, co2y(iyr)
-        !  iyrc = iyrc + 1
-        !end do
+        do iyr = 1, time%nbyr
+          write (2222,*) iyrc, co2y(iyr)
+          iyrc = iyrc + 1
+        end do
             
        return
       end subroutine co2_read

@@ -9,7 +9,7 @@
 !!!  SWAT-DEG CHANNEL - SUBDAILY OUTPUT
       if (sp_ob%chandeg > 0) then
         if (pco%sd_chan%d == "y") then
-          if (time%step > 0.) then
+          if (time%step > 1) then
 !!!!!!!! SD_CHANNEL
             open (2508,file="channel_sd_subday.txt",recl = 1500)
             write (2508,*) bsn%name, prog

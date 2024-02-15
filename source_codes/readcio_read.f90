@@ -1,11 +1,14 @@
        subroutine readcio_read 
     
        use input_file_module
+
+       implicit none
            
        character (len=80) :: titldum
        character (len=15) :: name
        integer :: eof
        logical :: i_exist              !none       |check to determine if file exists
+       integer :: i
        
        eof = 0
        

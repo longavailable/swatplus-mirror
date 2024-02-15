@@ -2,13 +2,16 @@
       
       use plant_data_module
       use basin_module
-      use hru_module, only : hru, uapd, uno3d, par, bioday, ep_day, es_day,              &
-         ihru, ipl, pet_day, rto_no3, rto_solp, sum_no3, sum_solp, uapd_tot, uno3d_tot, vpd
+      use hru_module, only : hru, uapd, uno3d, par, bioday,              &
+         ihru, ipl, rto_no3, rto_solp, sum_no3, sum_solp, uapd_tot, uno3d_tot, vpd
       use plant_module
       use carbon_module
       use organic_mineral_mass_module
       use climate_module
       use hydrograph_module
+      use constituent_mass_module !rtb salt
+      use salt_module, only : salt_uptake_on
+      use salt_data_module, only : salt_effect
       
       implicit none 
       
@@ -21,7 +24,7 @@
       integer :: idp            !                   |
       integer :: iob            !                   |
       integer :: iwgn
-      real :: ppet
+      !real :: ppet
 
       j = ihru
       idp = pcom(j)%plcur(ipl)%idplt
@@ -82,7 +85,11 @@
           ! uapd(ipl) = uapd(ipl) * rto_solp
           call pl_nup
           call pl_pup
-
+          if(cs_db%num_salts > 0 .and. salt_uptake_on == 1) then
+            call salt_uptake !rtb salt
+          endif
+          if(cs_db%num_cs > 0) call cs_uptake !rtb cs
+          
           !! try water stress as function of precip/pet
           !ppet = wgn_pms(iwgn)%precip_sum / wgn_pms(iwgn)%pet_sum
           !if (ppet < 0.5) then
@@ -90,7 +97,7 @@
           !else
           !  pcom(j)%plstr(ipl)%strsw = 1.
           !end if
-          !pcom(j)%plstr(ipl)%strsw = amax1 (0., pcom(j)%plstr(ipl)%strsw)
+          !pcom(j)%plstr(ipl)%strsw = max (0., pcom(j)%plstr(ipl)%strsw)
           !pcom(j)%plstr(ipl)%strsw = amin1 (1., pcom(j)%plstr(ipl)%strsw)
           
           !! code to turn off all plant stress
@@ -100,6 +107,7 @@
             pcom(j)%plstr(ipl)%strsn = 1.
             pcom(j)%plstr(ipl)%strsp = 1.
             pcom(j)%plstr(ipl)%strsa = 1.
+            pcom(j)%plstr(ipl)%strss = 1. !rtb salt
           end if
    
           !! code to turn off nutrient plant stress only
@@ -114,8 +122,19 @@
         !  end if
         !end if
           !! reduce predicted biomass due to stress on plant
-          pcom(j)%plstr(ipl)%reg = Min(pcom(j)%plstr(ipl)%strsw, pcom(j)%plstr(ipl)%strst,      &
-            pcom(j)%plstr(ipl)%strsn, pcom(j)%plstr(ipl)%strsp, pcom(j)%plstr(ipl)%strsa)
+          if(salt_effect == 1) then !salinity stress applied after other stresses
+            pcom(j)%plstr(ipl)%reg = Min(pcom(j)%plstr(ipl)%strsw, pcom(j)%plstr(ipl)%strst,      &
+                                         pcom(j)%plstr(ipl)%strsn, pcom(j)%plstr(ipl)%strsp,      &
+                                         pcom(j)%plstr(ipl)%strsa)
+            !! reduce predicted biomass due to salt stress on plant (rtb salt)
+            if(cs_db%num_salts > 0) then
+              pcom(j)%plstr(ipl)%reg = pcom(j)%plstr(ipl)%reg * pcom(j)%plstr(ipl)%strss
+            endif
+          else
+            pcom(j)%plstr(ipl)%reg = Min(pcom(j)%plstr(ipl)%strsw, pcom(j)%plstr(ipl)%strst,      &
+                                         pcom(j)%plstr(ipl)%strsn, pcom(j)%plstr(ipl)%strsp,      & 
+                                         pcom(j)%plstr(ipl)%strsa, pcom(j)%plstr(ipl)%strss)
+          endif 
           if (pcom(j)%plstr(ipl)%reg < 0.) pcom(j)%plstr(ipl)%reg = 0.
           if (pcom(j)%plstr(ipl)%reg > 1.) pcom(j)%plstr(ipl)%reg = 1.
 
@@ -124,7 +143,7 @@
                 
           !! increase in plant c
           if (bsn_cc%cswat == 2) then
-            cbn_loss(j)%nppc_d = cbn_loss(j)%nppc_d + bioday * pcom(j)%plstr(ipl)%reg * 0.42
+            hpc_d(j)%npp_c = hpc_d(j)%npp_c + bioday * pcom(j)%plstr(ipl)%reg * 0.42
           end if
 
           !! sum plant stresses

@@ -6,10 +6,13 @@
       use constituent_mass_module
       use maximum_data_module
       use exco_module
+
+      implicit none
  
       character (len=80) :: titldum, header
       integer :: eof, imax, ob1, ob2
       logical :: i_exist              !none       |check to determine if file exists
+      integer :: ii, iexco, iexco_om, iob
 
       eof = 0
       imax = 0
