@@ -45,8 +45,10 @@
       pl_mass(j)%root(ipl) = plt_mass_z
       
       do k = 1, cs_db%num_pests
-        cs_soil(j)%ly(1)%pest(k) = cs_soil(j)%ly(1)%pest(k) !+ cs_pl(j)%pest(k)
-        cs_pl(j)%pest(k) = 0.
+        cs_soil(j)%ly(1)%pest(k) = cs_soil(j)%ly(1)%pest(k) + cs_pl(j)%pl_in(ipl)%pest(k)   &
+                                                             + cs_pl(j)%pl_on(ipl)%pest(k)
+        cs_pl(j)%pl_in(ipl)%pest(k) = 0.
+        cs_pl(j)%pl_on(ipl)%pest(k) = 0.
       end do
 
 	  !! reset plant variables

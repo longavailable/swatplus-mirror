@@ -58,6 +58,7 @@
         real :: harv_idx = 0.           !! fraction     |harvest index - grain fraction of above ground plant mass
         real :: pest_stress = 0.        !! fraction     |pest (insect, disease) stress on harvest index
         real :: epco = 0.               !! fraction     |water uptake compensation factor for each plant
+        real, dimension(:), allocatable :: uptake       !! mm   |water uptake by layer 
       end type plant_status
       
       type plant_stress

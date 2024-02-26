@@ -24,6 +24,7 @@
       
       integer :: j               !none     |hru number
       integer :: k               !none     |seqential pesticide number being simulated
+      integer :: ipl             !none     |plant number
       integer :: ipest_db        !none     |pesticide number from pesticide data base
       integer :: l               !none     |layer number
       integer :: ipseq           !none     |sequential basin pesticide number
@@ -68,21 +69,24 @@
           hpestb_d(j)%pest(k)%decay_s = pst_decay_s
 
           !! calculate degradation on plant foliage
-          pest_init = cs_pl(j)%pest(k)
-          if (pest_init > 1.e-12) then
-            pest_end = pest_init * pestcp(ipest_db)%decay_f
-            cs_pl(j)%pest(k) = pest_end
-            hpestb_d(j)%pest(k)%decay_f = pest_init - pest_end
-            !! add decay to daughter pesticides
-            do imeta = 1, pestcp(ipest_db)%num_metab
-              ipseq = pestcp(ipest_db)%daughter(imeta)%num
-              ipdb = cs_db%pest_num(ipseq)
-              mol_wt_rto = pestdb(ipdb)%mol_wt / pestdb(ipest_db)%mol_wt
-              hpestb_d(j)%pest(ipseq)%metab_f = hpestb_d(j)%pest(ipseq)%metab_f + (pest_init - pest_end) *     &
+	      !! adjust foliar pesticide for wash off
+          do ipl = 1, pcom(j)%npl
+            pest_init = cs_pl(j)%pl_on(ipl)%pest(k)
+            if (pest_init > 1.e-12) then
+              pest_end = pest_init * pestcp(ipest_db)%decay_f
+              cs_pl(j)%pl_on(ipl)%pest(k) = pest_end
+              hpestb_d(j)%pest(k)%decay_f = pest_init - pest_end
+              !! add decay to daughter pesticides
+              do imeta = 1, pestcp(ipest_db)%num_metab
+                ipseq = pestcp(ipest_db)%daughter(imeta)%num
+                ipdb = cs_db%pest_num(ipseq)
+                mol_wt_rto = pestdb(ipdb)%mol_wt / pestdb(ipest_db)%mol_wt
+                hpestb_d(j)%pest(ipseq)%metab_f = hpestb_d(j)%pest(ipseq)%metab_f + (pest_init - pest_end) *     &
                                            pestcp(ipest_db)%daughter(imeta)%soil_fr * mol_wt_rto
-              cs_pl(j)%pest(ipseq) = cs_pl(j)%pest(ipseq) + hpestb_d(j)%pest(ipseq)%metab_f
-            end do
-          end if
+                cs_pl(j)%pl_on(ipl)%pest(ipseq) = cs_pl(j)%pl_on(ipl)%pest(ipseq) + hpestb_d(j)%pest(ipseq)%metab_f
+              end do
+            end if 
+          end do
         end if
       end do
       

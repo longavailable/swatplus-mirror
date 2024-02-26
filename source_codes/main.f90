@@ -10,7 +10,7 @@
       integer :: date_time(8)           !              |
       character*10 b(3)                 !              |
     
-      prog = " SWAT+ Feb 15 2024        MODULAR Rev 2024.61.0"
+      prog = " SWAT+ Feb 26 2024        MODULAR Rev 2024.61.0"
 
       write (*,1000)
       open (9003,file='simulation.out')
@@ -108,6 +108,7 @@
       else
         call time_control
       end if
+      
       
       if (cal_soft == "y") call calsoft_control
       

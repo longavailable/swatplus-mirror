@@ -40,11 +40,12 @@
       
       implicit none
 
-      integer :: mpath                 !          |
-      integer :: ly                    !none      |counter
-      integer :: ipath                  !none      |counter
-      integer :: ipath_db               !          |
+      integer :: mpath          !          |
+      integer :: ly             !none      |counter
+      integer :: ipath          !none      |counter
+      integer :: ipath_db       !          |
       integer :: isp_ini
+      integer :: ipl            !none      |plant number
 
       do ihru = 1, sp_ob%hru  
         !! allocate pathogens
@@ -54,7 +55,11 @@
           do ly = 1, soil(ihru)%nly
             allocate (cs_soil(ihru)%ly(ly)%path(mpath))
           end do
-          allocate (cs_pl(ihru)%path(mpath))
+          do ipl = 1, pcom(ihru)%npl
+            allocate (cs_pl(ihru)%pl_in(ipl)%pest(mpath))
+            allocate (cs_pl(ihru)%pl_on(ipl)%pest(mpath))
+            allocate (cs_pl(ihru)%pl_up(ipl)%pest(mpath))
+          end do
           allocate (cs_irr(ihru)%path(mpath))
         end if
 

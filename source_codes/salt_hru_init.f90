@@ -35,7 +35,7 @@
             allocate (cs_soil(ihru)%ly(ly)%salt_min(5))
             allocate (cs_soil(ihru)%ly(ly)%saltc(npmx))
           end do
-          allocate (cs_pl(ihru)%salt(npmx))
+          !allocate (cs_pl(ihru)%salt(npmx))
           allocate (cs_irr(ihru)%saltc(npmx))
         end if
 
@@ -47,7 +47,7 @@
         
         !loop through the salt ions
         do isalt=1,npmx
-          cs_pl(ihru)%salt(isalt) = salt_soil_ini(isalt_db)%plt(isalt)
+          !cs_pl(ihru)%salt(isalt) = salt_soil_ini(isalt_db)%plt(isalt)
           do ly = 1, soil(ihru)%nly
             !soil water salt ion concentration (mg/L)
             cs_soil(ihru)%ly(ly)%saltc(isalt) = salt_soil_ini(isalt_db)%soil(isalt) !g/m3 concentration

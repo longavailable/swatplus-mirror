@@ -185,6 +185,8 @@
         real :: aqu_in_mm = 0.          !(mm)          |aquifer inflow rate total sum for each time step
         real :: flo_mm = 0.             !(mm)          |outflow rate total sum for each time step
         real :: sed_stor = 0.           !(tons)        |sed storage at end of timestep 
+        !real :: n_tot = 0.              !(kg N)        |total nitrogen leaving the reach 
+        !real :: p_tot = 0.              !(kg N)        |total phosphorus leaving the reach
       end type sd_ch_output
       
       type (sd_ch_output), dimension(:), allocatable, save :: chsd_d

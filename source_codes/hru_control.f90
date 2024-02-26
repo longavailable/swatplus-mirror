@@ -464,6 +464,9 @@
  
         !! compute pesticide washoff   
         if (w%precip >= 2.54) call pest_washp
+        
+        !! compute pesticide uptake
+        call pest_pl_up
 
         !! compute pesticide degradation
         call pest_decay

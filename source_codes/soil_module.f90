@@ -26,26 +26,26 @@
       type (soilayer), dimension(:), allocatable :: layer1
       
       type soil_physical_properties
-        real :: d = 0.            !! mm            depth to bottom of soil layer
-        real :: thick = 0.        !! mm            thichness of soil layer
-        real :: bd = 0.           !! Mg/m**3       bulk density of the soil
-        real :: k = 0.            !! mm/hr         saturated hydraulic conductivity of soil layer. Index:(layer,HRU)
-        real :: clay = 0.         !! none          fraction clay content in soil material (UNIT CHANGE!)
-        real :: silt = 0.         !! %             percent silt content in soil material
-        real :: sand = 0.         !! none          fraction of sand in soil material
-        real :: rock = 0.         !! %             percent of rock fragments in soil layer 
-        real :: conv_wt = 0.       !! none          factor which converts kg/kg to kg/ha
-        real :: crdep = 0.         !! mm            maximum or potential crack volume
-        real :: awc = 0.           !! mm H20/mm     soil available water capacity of soil layer
-        real :: fc = 0.           !! mm H2O         amount of water available to plants in soil layer at field capacity (fc - wp),Index:(layer,HRU)
-        real :: hk = 0.           !! none           beta coefficent to calculate hydraulic conductivity
-        real :: por = 0.         !! none           total porosity of soil layer expressed as a fraction of the total volume, Index:(layer,HRU)
-        real :: st = 0.          !! mm H2O         amount of water stored in the soil layer on any given day (less wp water)
-        real :: tmp = 0.         !! deg C          daily average temperature of second soil layer
-        real :: ul = 0.          !! mm H2O         amount of water held in the soil layer at saturation (sat - wp water)
-        real :: up = 0.          !! mm H2O/mm      soil water content of soil at -0.033 MPa (field capacity)
-        real :: wp = 0.          !! mm H20/mm      soil water content of soil at -1.5 MPa (wilting point)
-        real :: wpmm = 0.        !! mm H20         water content of soil at -1.5 MPa (wilting point)
+        real :: d = 0.              !! mm           ! depth to bottom of soil layer
+        real :: thick = 0.          !! mm           ! thichness of soil layer
+        real :: bd = 0.             !! Mg/m**3      ! bulk density of the soil
+        real :: k = 0.              !! mm/hr        ! saturated hydraulic conductivity of soil layer. Index:(layer,HRU)
+        real :: clay = 0.           !! none         ! fraction clay content in soil material (UNIT CHANGE!)
+        real :: silt = 0.           !! %            ! percent silt content in soil material
+        real :: sand = 0.           !! none         ! fraction of sand in soil material
+        real :: rock = 0.           !! %            ! percent of rock fragments in soil layer 
+        real :: conv_wt = 0.        !! none         ! factor which converts kg/kg to kg/ha
+        real :: crdep = 0.          !! mm           ! maximum or potential crack volume
+        real :: awc = 0.            !! mm H20/mm    | soil available water capacity of soil layer
+        real :: fc = 0.             !! mm H2O       | amount of water available to plants in soil layer at field capacity (fc - wp),Index:(layer,HRU)
+        real :: hk = 0.             !! none         ! beta coefficent to calculate hydraulic conductivity
+        real :: por = 0.            !! none         ! total porosity of soil layer expressed as a fraction of the total volume, Index:(layer,HRU)
+        real :: st = 0.             !! mm H2O       ! amount of water stored in the soil layer on any given day (less wp water)
+        real :: tmp = 0.            !! deg C        ! daily average temperature of second soil layer
+        real :: ul = 0.             !! mm H2O       ! amount of water held in the soil layer at saturation (sat - wp water)
+        real :: up = 0.             !! mm H2O/mm    ! soil water content of soil at -0.033 MPa (field capacity)
+        real :: wp = 0.             !! mm H20/mm    ! soil water content of soil at -1.5 MPa (wilting point)
+        real :: wpmm = 0.           !! mm H20       ! water content of soil at -1.5 MPa (wilting point)
       end type soil_physical_properties
       type (soil_physical_properties),dimension (:), allocatable:: phys1
 

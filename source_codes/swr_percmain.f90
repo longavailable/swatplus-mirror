@@ -27,7 +27,7 @@
 !!                               |stored in soil layer on the current day
 !!    new water table depth  equations   01/2009
 !!    new water table depth  equations   01/2009
-!!    wt_shall    |mm H2O        |shallow water table depth above the impervious layer
+!!    wt_shall    |mm H2O        |shallow water table height above bottom of soil profile
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!	  w2          |mm            |
 !!	  y1          |mm 		     |dummy variable for wat
@@ -146,7 +146,7 @@
       !! drainmod tile equations   08/11/2006
       if (soil(j)%phys(2)%tmp > 0.) then   !Daniel 1/29/09
         por_air = 0.9
-        d = soil(j)%zmx - hru(j)%lumv%sdr_dep   !distance above water table
+        d = soil(j)%zmx - hru(j)%lumv%sdr_dep   !height of tiles above bottom of soil profile
         !! drainmod wt_shall equations   10/23/2006
         if (bsn_cc%wtdn == 0) then !compute wt_shall using original eq-Daniel 10/23/06
           if (soil(j)%sw > soil(j)%sumfc) then

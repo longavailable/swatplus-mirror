@@ -103,8 +103,10 @@
         reduc_salt = 1.
         reduc_salt_min = 1.
         depth = 0.
+        pcom(j)%plcur(ipl)%uptake(:) = 0.
 
         do k = 1, soil(j)%nly
+          
           if (ir > 0) exit
 
           if (pcom(j)%plg(ipl)%root_dep <= soil(j)%phys(k)%d) then
@@ -197,12 +199,13 @@
             !compute salinity stress on crop - take maximum from all soil layers
             if(reduc_salt .lt. reduc_salt_min) then
               reduc_salt_min = reduc_salt
-				    endif
+            endif
 
           endif
           endif
           
           soil(j)%phys(k)%st = Max(1.e-6, soil(j)%phys(k)%st - wuse)
+          pcom(j)%plcur(ipl)%uptake(k) = wuse
           
         end do      !! soil layer loop
         
@@ -221,7 +224,8 @@
         endif
         
         !new epco adjustment requires epmax adjustment of water stress is too high
-        pcom(j)%plstr(ipl)%strsw = sum_wuse / epmax(ipl) !* hru(j)%hyd%epco)
+        pcom(j)%plstr(ipl)%strsw = sum_wuse / epmax(ipl)
+        
         ep_day = ep_day + sum_wuse
       end if
 

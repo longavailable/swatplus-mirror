@@ -447,7 +447,7 @@
         !! arc length = 0.33 * meander wavelength * sinuosity  -> protected length 
         arc_len = 0.33 *  (12. * sd_ch(ich)%chw) * sd_ch(ich)%sinu
         hyd_radius = rcurv%xsec_area / rcurv%wet_perim
-        prot_len = 0.71 * (hyd_radius ** 1.1666) / sd_ch(ich)%chn
+        prot_len = 0.71 * (rchdep ** 1.1666) / sd_ch(ich)%chn
         ebank_t = ebank_m * sd_ch(ich)%chd * (arc_len + prot_len) * sd_ch(ich)%ch_bd
         ebank_t = max (0., ebank_t)
         
@@ -455,7 +455,7 @@
           if (sd_ch(ich)%chs > 0.000001) then       !sd_ch(ich)%chseq) then
           !! calc critical shear and shear on bottom of channel
           shear_btm_cr = sd_ch(ich)%d50
-          shear_btm = 9800. * hyd_radius * sd_ch(ich)%chs   !! Pa = N/m^2 * m * m/m
+          shear_btm = 9800. * rcurv%dep * sd_ch(ich)%chs   !! Pa = N/m^2 * m * m/m
             !! if bottom shear > d50 -> downcut - widen to maintain width depth ratio
             if (shear_btm > shear_btm_cr) then
               ebtm_m = sd_ch(ich)%cherod * sd_ch(ich)%cov *  (shear_btm - shear_btm_cr)    !! cm = hr * cm/hr/Pa * Pa
@@ -478,8 +478,8 @@
         dep = sd_ch(ich)%chseq * ht1%sed           !((peakrate - bf_flow) / peakrate) * ht1%sed
       end if
       
-      !! compute sediment leaving the channel
-	  sedout = ht1%sed - dep + hc_sed + ebtm_t + ebank_t
+      !! compute sediment leaving the channel - washload only
+	  sedout = ht1%sed - dep + hc_sed + ebank_t     !  + ebtm_t
       
       !! set values for outflow hydrograph
       !! calculate flow velocity and travel time  ht2 = ht1   !***jga 
@@ -727,11 +727,12 @@
         enddo
       endif
       
-      !ht2 = ob(icmd)%hd(1)  !! reset ht2 for printing
+      !! calculate stream temperature
       ob(icmd)%hd(1)%temp = 5. + .75 * wst(iwst)%weat%tave
       ht2%temp = 5. + .75 * wst(iwst)%weat%tave
       ch_stor(isdch)%temp = 5. + .75 * wst(iwst)%weat%tave
       
+      !! set constituents for routing
       if (cs_db%num_pests > 0) then
         obcs(icmd)%hd(1)%pest = hcs2%pest
       end if
@@ -767,7 +768,8 @@
       chsd_d(isdch)%slope = sd_ch(isdch)%chs
       chsd_d(isdch)%deg_btm_m = ebtm_m
       chsd_d(isdch)%deg_bank_m = ebank_m
-      chsd_d(isdch)%hc_m = hc
+      !chsd_d(isdch)%n_tot = ob(icmd)%hd(1)%orgn + ob(icmd)%hd(1)%no3 + ob(icmd)%hd(1)%nh3 + ob(icmd)%hd(1)%no2
+      !chsd_d(isdch)%p_tot = ob(icmd)%hd(1)%sedp + ob(icmd)%hd(1)%solp
       
       !! set pesticide output variables
       do ipest = 1, cs_db%num_pests
@@ -793,9 +795,9 @@
         !concentration of channel water (= concentration of outflow water)
         if(ht2%flo > 0) then 
           chsalt_d(ich)%salt(isalt)%conc = (hcs2%salt(isalt) * 1000.) / ht2%flo !g/m3 = mg/L 
-				else
+        else
           chsalt_d(ich)%salt(isalt)%conc = 0.
-				endif
+        endif
       enddo
       
       !rtb cs - set constituent output variables
@@ -805,9 +807,9 @@
         chcs_d(ich)%cs(ics)%water = ch_water(ich)%cs(ics) !kg mass stored in channel (for current day)
         if(ht2%flo > 0) then !concentration of outflow water
           chcs_d(ich)%cs(ics)%conc = (hcs2%cs(ics) * 1000.) / ht2%flo !g/m3 = mg/L 
-				else
+        else
           chcs_d(ich)%cs(ics)%conc = 0.
-				endif
+        endif
       enddo
       
         

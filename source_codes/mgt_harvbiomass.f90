@@ -14,7 +14,7 @@
       implicit none
      
       integer :: j                      !none               |HRU number
-      integer :: k                      !none               |counter
+      integer :: k                      !none               |pesticide counter
       integer :: idp                    !                   |
       integer, intent (in) :: jj        !none               |counter
       integer, intent (in) :: iplant    !                   |plant number xwalked from hlt_db()%plant and plants.plt
@@ -26,6 +26,7 @@
       real :: hi_ovr                    !kg/ha)/(kg/ha)     |harvest index target specified at harvest
       real :: harveff                   !0-1                |harvest efficiency
       real :: clip                      !0-1                |1.-harveff
+      real :: yld_rto                   !0-1            |yield to total biomass ratio
 
       j = jj
       ipl = iplant
@@ -48,6 +49,23 @@
       hrc_d(j)%plant_c = hrc_d(j)%plant_c + pl_yield%c
       hpc_d(j)%drop_c = hpc_d(j)%drop_c + pl_yield%c
       
+	  !! adjust foliar and internal pesticide for plant removal
+      do k = 1, cs_db%num_pests
+        !! calculate amount of pesticide removed with yield and clippings
+        yld_rto = (hi_tot * pl_mass(j)%ab_gr(ipl)%m) / pl_mass(j)%tot(ipl)%m
+        yldpst = yld_rto * (cs_pl(j)%pl_in(ipl)%pest(k) + cs_pl(j)%pl_on(ipl)%pest(k))
+        cs_pl(j)%pl_in(ipl)%pest(k) = cs_pl(j)%pl_in(ipl)%pest(k) - (1. - yld_rto) *    &
+                                                           cs_pl(j)%pl_in(ipl)%pest(k)
+        cs_pl(j)%pl_in(ipl)%pest(k) = Max (0., cs_pl(j)%pl_in(ipl)%pest(k))
+        cs_pl(j)%pl_on(ipl)%pest(k) = cs_pl(j)%pl_on(ipl)%pest(k) - (1. - yld_rto) *    &
+                                                           cs_pl(j)%pl_on(ipl)%pest(k)
+        cs_pl(j)%pl_on(ipl)%pest(k) = Max (0., cs_pl(j)%pl_on(ipl)%pest(k))
+
+        clippst = (1. - harveff) * (cs_pl(j)%pl_in(ipl)%pest(k) + cs_pl(j)%pl_on(ipl)%pest(k))
+        if (clippst < 0.) clippst = 0.
+        !! add pesticide in clippings to soil surface
+        cs_soil(j)%ly(1)%pest(k) = cs_soil(j)%ly(1)%pest(k) + clippst
+      end do   
       
       !! update remaining plant organic pools
       pl_mass(j)%seed(ipl) = pl_mass(j)%seed(ipl) - harv_seed
@@ -72,20 +90,7 @@
         pl_mass(j)%tot(ipl)%m = 0.
         pcom(j)%plg(ipl)%lai = 0.
         pcom(j)%plcur(ipl)%phuacc = 0.
-      endif
-
-	  !! adjust foliar pesticide for plant removal
-      do k = 1, cs_db%num_pests
-        !! calculate amount of pesticide removed with yield and clippings
-        hi_tot = hi_ovr * harveff
-        yldpst = hi_tot * cs_pl(j)%pest(k)
-        cs_pl(j)%pest(k) = cs_pl(j)%pest(k) - yldpst
-        if (cs_pl(j)%pest(k) < 0.) cs_pl(j)%pest(k) = 0.
-        clippst = (1. - harveff) * cs_pl(j)%pest(k)
-        if (clippst < 0.) clippst = 0.
-        !! add pesticide in clippings to soil surface
-        cs_soil(j)%ly(1)%pest(k) = cs_soil(j)%ly(1)%pest(k) + clippst
-      end do   
+      end if
 
       return
       end subroutine mgt_harvbiomass

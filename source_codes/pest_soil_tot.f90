@@ -14,14 +14,18 @@
       
       integer :: j        !none          |HRU number
       integer :: k        !none          |sequential pesticide number 
-      integer :: ly       !none          |soil layer   
+      integer :: ly       !none          |soil layer
+      integer :: ipl             !none     |plant number
 
       j = ihru
 
       if (cs_db%num_pests == 0) return
 
       do k = 1, cs_db%num_pests
-        hpestb_d(j)%pest(k)%plant = cs_pl(j)%pest(k)    !store for each plant in future
+        do ipl = 1, pcom(j)%npl
+          hpestb_d(j)%pest(k)%plant = cs_pl(j)%pl_on(ipl)%pest(k)
+          hpestb_d(j)%pest(k)%in_plant = cs_pl(j)%pl_in(ipl)%pest(k) 
+        end do
         hpestb_d(j)%pest(k)%soil = 0.
         do ly = 1, soil(j)%nly
           hpestb_d(j)%pest(k)%soil = hpestb_d(j)%pest(k)%soil + cs_soil(j)%ly(ly)%pest(k)

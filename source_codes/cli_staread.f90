@@ -83,8 +83,9 @@
                if (wst(i)%wco%wgage == 0 .and. wst(i)%wco_c%wgage /= "sim" ) write (9001,*) &
                     wst(i)%wco_c%wgage, "file not found (wgage)"
                if (db_mx% petfiles > 0) call search (petm_n, db_mx%petfiles, wst(i)%wco_c%petgage, wst(i)%wco%petgage)  
-               if (wst(i)%wco%petgage == 0 .and. wst(i)%wco_c%petgage /= "sim" ) write (9001,*) &
-                    wst(i)%wco_c%petgage, "file not found (petgage)"
+               !if (wst(i)%wco%petgage == 0 .and. wst(i)%wco_c%petgage /= "sim" ) write (9001,*) &
+               if (wst(i)%wco%petgage == 0 .and. wst(i)%wco_c%petgage /= "null" ) write (9001,*) &
+                   wst(i)%wco_c%petgage, "file not found (petgage)"
                if (db_mx%atmodep > 0) call search (atmo_n, db_mx%atmodep, wst(i)%wco_c%atmodep, wst(i)%wco%atmodep)  
                if (wst(i)%wco%atmodep == 0 .and. wst(i)%wco_c%atmodep /= "null" ) write (9001,*) &
                     wst(i)%wco_c%atmodep, "file not found (atmodep)"

@@ -99,6 +99,10 @@
         allocate (rsd1(j)%meta(ipl))
         allocate (rsd1(j)%str(ipl))
         allocate (rsd1(j)%lignin(ipl))
+        !! allocate water uptake by layer
+        do ipl = 1, pcom(j)%npl
+          allocate (pcom(j)%plcur(ipl)%uptake(soil(j)%nly))
+        end do
 
         pcom(j)%rsd_covfac = 0.
         cvm_com(j) = 0.

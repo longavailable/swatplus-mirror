@@ -98,8 +98,14 @@
       end type soil_constituent_mass
       type (soil_constituent_mass), dimension (:), allocatable :: cs_soil
 
-      ! plant constituent mass
-      type (constituent_mass), dimension (:), allocatable :: cs_pl
+      ! plant constituent mass - dimensioned by hru
+      type plant_constituent_mass
+        type (constituent_mass), dimension (:), allocatable :: pl_in    !constituent in plant
+        type (constituent_mass), dimension (:), allocatable :: pl_on    !constituent on plant
+        type (constituent_mass), dimension (:), allocatable :: pl_up    !constituent uptake by plant
+      end type plant_constituent_mass
+      
+      type (plant_constituent_mass), dimension (:), allocatable :: cs_pl
 
       ! aquifer constituent mass
       type (constituent_mass), dimension (:), allocatable :: cs_aqu

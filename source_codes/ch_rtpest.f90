@@ -79,7 +79,7 @@
       use channel_module
       use sd_channel_module
       use ch_pesticide_module
-      use hydrograph_module, only : jrch, ht1, ch_stor
+      use hydrograph_module, only : jrch, ht1, ht2, ch_stor
       use constituent_mass_module
       use pesticide_data_module
 
@@ -103,6 +103,7 @@
       real :: por               !none          |porosity of bottom sediments
       real :: pest_init         !mg            |amount of pesticide before decay
       real :: pest_end          !mg            |amount of pesticide after decay
+      real :: rto_out           !none          |ratio of outflow to sum of outflow and storage
 
       !! zero outputs
       chpst_d(jrch) = chpstz
@@ -154,12 +155,12 @@
           !! calculate flow duration
           tday = rttime / 24.0
           if (tday > 1.0) tday = 1.0
-          tday = 1.0
+          !tday = 1.0
 
           !! calculate amount of pesticide that undergoes chemical or biological degradation on day in reach
           pest_init = chpstmass
           if (pest_init > 1.e-12) then
-            pest_end = chpstmass * pestcp(jpst)%decay_a
+            pest_end = chpstmass * pestcp(jpst)%decay_a * tday
             chpstmass = pest_end
             chpst%pest(ipest)%react = pest_init - pest_end
             !! add decay to daughter pesticides
@@ -270,6 +271,11 @@
         end if
         ch_benthic(jrch)%pest(ipest) = sedpstmass
 
+        !! calculate outflow and storage in water column
+        rto_out = ht2%flo / (ht2%flo + ch_stor(jrch)%flo)
+        hcs2%pest(ipest) = rto_out * chpstmass
+        ch_water(jrch)%pest(ipest) = (1. - rto_out) * chpstmass
+        
       end do
 
       return

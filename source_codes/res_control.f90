@@ -71,7 +71,7 @@
 	    else
 	      ictbl = res_dat(idat)%release                              !! Osvaldo
           call res_rel_conds (ictbl, res(jres)%flo, ht1%flo, 0.)
-        endif
+        endif 
         
         !! calculate water balance for day
         res_wat_d(jres)%evap = 10. * res_hyd(ihyd)%evrsv * wst(iwst)%weat%pet * res_wat_d(jres)%area_ha
@@ -132,21 +132,29 @@
         call res_nutrient (inut, iob)
 
         !! perform reservoir pesticide transformations
-        call res_pest (jres)
+        if (cs_db%num_pests > 0) then
+          call res_pest (jres)
+          obcs(icmd)%hd(1)%pest = hcs2%pest
+        end if
 
         !! perform reservoir salt process (rtb salt)
-        if(cs_db%num_salts > 0) then
+        if (cs_db%num_salts > 0) then
           call res_salt(jres)
+          obcs(icmd)%hd(1)%salt = hcs2%salt
         endif
         
         !! perform reservoir constituent process (rtb cs)
         if(cs_db%num_cs > 0) then
           icon = res_dat(idat)%cs
           call res_cs(jres, icon, iob)
+          obcs(icmd)%hd(1)%cs = hcs2%cs
         endif
         
         !! set values for outflow variables
         ob(icmd)%hd(1) = ht2
+        if (cs_db%num_tot > 0) then
+          obcs(icmd)%hd(1) = hcs2
+        end if
 
         !! total incoming to output to SWIFT
         ob(icmd)%hin_tot = ob(icmd)%hin_tot + ob(icmd)%hin     

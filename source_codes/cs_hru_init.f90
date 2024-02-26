@@ -19,6 +19,7 @@
       integer :: ics             !none          |counter
       integer :: ics_db          !              | 
       integer :: isp_ini         !              |
+      integer :: ipl
       real :: wt1                !              |
       real :: hru_area_m2,water_volume,soil_volume,soil_mass,mass_sorbed
         
@@ -33,7 +34,6 @@
             allocate (cs_soil(ihru)%ly(ly)%cs_sorb(npmx))
             allocate (cs_soil(ihru)%ly(ly)%csc_sorb(npmx))
           end do
-          allocate (cs_pl(ihru)%cs(npmx))
           allocate (cs_irr(ihru)%csc(npmx))
         end if
 
@@ -44,9 +44,9 @@
         hru_area_m2 = hru(ihru)%area_ha * 10000.
         
         !loop through the constituents
-        do ics=1,npmx
+        do ics = 1, npmx
           !plant mass
-          cs_pl(ihru)%cs(ics) = cs_soil_ini(ics_db)%plt(ics)
+          !cs_pl(ihru)%cs(ics) = cs_soil_ini(ics_db)%plt(ics)
           !soil water constituent concentration and mass
           do ly = 1, soil(ihru)%nly
             !soil water constituent ion concentration (mg/L)
