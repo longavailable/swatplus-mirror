@@ -30,7 +30,7 @@
       
       
       !only proceed if canal-cell exchange is active
-      if(gw_canal_flag) then
+      if (gw_canal_flag == 1) then
       
         !loop through the canal cells
         do i=1,gw_canal_ncells_out
@@ -39,7 +39,7 @@
           cell_id = gw_canl_out_info(i)%cell_id
           
           !only proceed if the cell is active
-          if(gw_state(cell_id)%stat == 1) then
+          if (gw_state(cell_id)%stat == 1) then
             
             !only proceed if canal is "on" (i.e., has water)
             if(time%day.ge.gw_canl_out_info(i)%dayb .and. time%day.le.gw_canl_out_info(i)%daye) then
@@ -69,8 +69,10 @@
               
               !store values in gwflow source/sink arrays
               if(Q < 0) then !groundwater --> canal
-                if((Q*-1).ge.gw_state(cell_id)%stor) then !can only remove what is there
-                  Q = gw_state(cell_id)%stor * (-1)
+                !if((Q*-1 == 1).ge.gw_state(cell_id)%stor) then !can only remove what is there
+                if (-Q .ge.gw_state(cell_id)%stor) then !can only remove what is there
+                  !Q = gw_state(cell_id)%stor * (-1)
+                  Q = -gw_state(cell_id)%stor
                 endif
                 gw_state(cell_id)%stor = gw_state(cell_id)%stor + Q !update available groundwater in the cell 
               endif  
@@ -78,7 +80,7 @@
               gw_ss_sum(cell_id)%canl = gw_ss_sum(cell_id)%canl + Q !store for annual water 
               
               !calculate solute mass (g/day) transported between cell and channel
-              if(gw_solute_flag) then
+              if (gw_solute_flag == 1) then
                 if(Q < 0) then !mass is leaving the cell --> canal
                   do s=1,gw_nsolute !loop through the solutes
                     solmass(s) = Q * gwsol_state(cell_id)%solute(s)%conc !g
@@ -106,10 +108,6 @@
         enddo !go to next canal cells
       
       endif !check if canal-cell exchange is active
-      
-      
+       
       return
-      end subroutine gwflow_canl_out
-      
-           
-      
+      end subroutine gwflow_canl_out      

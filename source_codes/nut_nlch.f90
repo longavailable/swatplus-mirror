@@ -58,7 +58,7 @@
 
       
       !rtb gwflow: add nitrate mass transferred to soil profile from the aquifer
-      if(gw_soil_flag == 1 .and. gw_solute_flag) then
+      if (gw_soil_flag == 1 .and. gw_solute_flag == 1) then
         do jj = 1, soil(j)%nly
           soil1(j)%mn(jj)%no3 = soil1(j)%mn(jj)%no3 + hru_soil(j,jj,1) !kg/ha
           gwsoiln(j) = gwsoiln(j) + hru_soil(j,jj,1) !HRU total

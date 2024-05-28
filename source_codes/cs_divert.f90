@@ -72,7 +72,9 @@
             if(ion_mass.lt.0) ion_mass = 0.
             !remove cs mass from the reservoir
             res_water(ires)%cs(ics) = res_water(ires)%cs(ics) - ion_mass
-            rescs_d(ires)%cs(ics)%div = rescs_d(ires)%cs(ics)%div + (ion_mass*-1) !kg - include in reservoir cs balance
+            !rescs_d(ires)%cs(ics)%div = rescs_d(ires)%cs(ics)%div + (ion_mass*-1) !kg - include in reservoir cs balance
+            rescs_d(ires)%cs(ics)%div = rescs_d(ires)%cs(ics)%div + (-ion_mass) !kg - include in reservoir cs balance
+
             !add cs mass to receiving demand object
             if(obj_type_dem == "cha") then
               ch_water(dem_id)%cs(ics) = ch_water(dem_id)%cs(ics) + ion_mass !kg
@@ -99,7 +101,8 @@
             if(ion_mass.lt.0) ion_mass = 0.
             !remove cs mass from the aquifer
             cs_aqu(iaq)%cs(ics) = cs_aqu(iaq)%cs(ics) - ion_mass !kg
-            acsb_d(iaq)%cs(ics)%div = acsb_d(iaq)%cs(ics)%div + (ion_mass*-1) !kg
+            !acsb_d(iaq)%cs(ics)%div = acsb_d(iaq)%cs(ics)%div + (ion_mass*-1) !kg
+            acsb_d(iaq)%cs(ics)%div = acsb_d(iaq)%cs(ics)%div + (-ion_mass) !kg      
             !add cs mass to receiving demand object
             if(obj_type_dem == "cha") then
               ch_water(dem_id)%cs(ics) = ch_water(dem_id)%cs(ics) + ion_mass !kg
@@ -135,7 +138,8 @@
               if(ion_mass.lt.0) ion_mass = 0.
               !remove cs mass from channel
               ch_water(ichan)%cs(ics) = ch_water(ichan)%cs(ics) - ion_mass !kg
-              chcs_d(ichan)%cs(ics)%div = chcs_d(ichan)%cs(ics)%div + (ion_mass*-1) !kg - include in channel cs balance
+              !chcs_d(ichan)%cs(ics)%div = chcs_d(ichan)%cs(ics)%div + (ion_mass*-1) !kg - include in channel cs balance
+              chcs_d(ichan)%cs(ics)%div = chcs_d(ichan)%cs(ics)%div + (-ion_mass) !kg - include in channel cs balance
               !add cs mass to receiving demand object
               if(obj_type_dem == "cha") then
                 ch_water(dem_id)%cs(ics) = ch_water(dem_id)%cs(ics) + ion_mass !kg

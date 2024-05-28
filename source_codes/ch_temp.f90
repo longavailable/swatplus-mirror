@@ -1,4 +1,4 @@
-      subroutine ch_temp
+      subroutine ch_temp1
       
       use basin_module
       use input_file_module
@@ -68,4 +68,4 @@
       ob(iob)%hd(1)%temp = ht1%temp + t_heat_exch
     
       return    
-      end subroutine ch_temp
+      end subroutine ch_temp1

@@ -382,25 +382,26 @@
 
       real CharBal(7),a_size(7),I_Prep_in
       DATA CharBal/2.0, -2.0, -2.0, -1.0, 2.0, 1.0, 1.0/
-      DATA a_size/6.0, 4.0, 4.5, 4.0, 8.0, 4.5, 3.0/ 
-      real :: A,B,ii
+      DATA a_size/6.0, 4.0, 4.5, 4.0, 8.0, 4.5, 3.0/
+      integer :: ii
+      real :: A,B
       A = 0.5 !at 298 K
       B = 0.33 !at 298 K
       
       if (I_Prep_in.LE.1e-1) then
         do ii = 1,7
-          LAMDA(ii)= 10.0**(-A*CharBal(ii)**2.0&       
+          LAMDA(ii)= 10.0**(-A*CharBal(ii)**2.0  &       
               *(I_Prep_in**0.5/(1+B*a_size(ii)*I_Prep_in**0.5)))
         enddo
       elseif (I_Prep_in.GE.5) then
         I_Prep_in = 0.5
         do ii = 1,7
-          LAMDA(ii)= 10.0**(-A*CharBal(ii)**2.0&    
+          LAMDA(ii)= 10.0**(-A*CharBal(ii)**2.0  &    
               *(I_Prep_in**0.5/(1+I_Prep_in**0.5)-0.3*I_Prep_in))
         enddo
       else
         do ii = 1,7
-          LAMDA(ii)= 10.0**(-A*CharBal(ii)**2.0&    
+          LAMDA(ii)= 10.0**(-A*CharBal(ii)**2.0  &    
               *(I_Prep_in**0.5/(1+I_Prep_in**0.5)-0.3*I_Prep_in))
         enddo
       endif
@@ -853,9 +854,3 @@
 
       return 
       end ! end subroutine cation exchange 
-      
-      
-
-
-
-

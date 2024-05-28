@@ -4,10 +4,13 @@
       use input_file_module
       use maximum_data_module
       use cs_data_module
+      
+      implicit none
  
       character (len=80) :: titldum
       character (len=80) :: header
       character (len=12) :: plant_name
+      integer :: iplant
       logical :: i_exist              !none       |check to determine if file exists
 
 

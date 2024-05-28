@@ -172,45 +172,50 @@
 !! Potential ET: Read in data !!
       do iwst = 1, db_mx%wst
         iwgn = wst(iwst)%wco%wgn
-        if (wst(iwst)%wco_c%petgage == "sim") then
-            
-            !! HARGREAVES POTENTIAL EVAPOTRANSPIRATION METHOD
-            !! extraterrestrial radiation
-            !! 37.59 is coefficient in equation 2.2.6 !!extraterrestrial
-            !! 30.00 is coefficient in equation 2.2.7 !!max at surface
+        ig = wst(iwst)%wco%petgage
+        !! if using a measured data
+        if (ig > 0) then
+          out_bounds = "n"
+          cur_day = time%day
+          call cli_bounds_check (petm(ig)%start_day, petm(ig)%start_yr,       &
+                petm(ig)%end_day, petm(ig)%end_yr, out_bounds)
+          if (out_bounds == "y") then 
+            wst(iwst)%weat%pet = -98.
+          else
+            yrs_to_start = time%yrs - petm(ig)%yrs_start
+            wst(iwst)%weat%pet = petm(ig)%ts(time%day,yrs_to_start)
+          end if
+          if (wst(iwst)%weat%pet <= -97.) then
+            !! Use HARGREAVES POTENTIAL EVAPOTRANSPIRATION METHOD
             ramm = wst(iwst)%weat%solradmx * 37.59 / 30. 
             if (wst(iwst)%weat%tmax > wst(iwst)%weat%tmin) then
-                xl = 2.501 - 2.361e-3 * wst(iwst)%weat%tave
-                wst(iwst)%weat%pet = .0023 * (ramm / xl) * (wst(iwst)%weat%tave      &
-                + 17.8) * (wst(iwst)%weat%tmax - wst(iwst)%weat%tmin) ** 0.5
-                wst(iwst)%weat%pet = Max(0., wst(iwst)%weat%pet)
+              xl = 2.501 - 2.361e-3 * wst(iwst)%weat%tave
+              wst(iwst)%weat%pet = .0023 * (ramm / xl) * (wst(iwst)%weat%tave      &
+              + 17.8) * (wst(iwst)%weat%tmax - wst(iwst)%weat%tmin) ** 0.5
+              wst(iwst)%weat%pet = Max(0., wst(iwst)%weat%pet)
             else
-                wst(iwst)%weat%pet = 0.
-            endif
-        else    
-            ig = wst(iwst)%wco%petgage
-            out_bounds = "n"
-            cur_day = time%day
-            call cli_bounds_check (petm(ig)%start_day, petm(ig)%start_yr,       &
-                petm(ig)%end_day, petm(ig)%end_yr, out_bounds)
-            if (out_bounds == "y") then 
-                wst(iwst)%weat%pet = -98.
-            else
-                yrs_to_start = time%yrs - petm(ig)%yrs_start
-                wst(iwst)%weat%pet = petm(ig)%ts(time%day,yrs_to_start)
-            endif
-            !!if (wst(iwst)%weat%pet <= -97.) then
-                !! HARGREAVES POTENTIAL EVAPOTRANSPIRATION METHOD
-          !!end if
-        endif
-    end do
+              wst(iwst)%weat%pet = 0.
+            end if
+          end if
+        end if
+      end do
 
 !! Update CMI and Precip minus PET 30 day moving sum
       ppet_mce = ppet_mce + 1
       if (ppet_mce > ppet_ndays) ppet_mce = 1
       do iwst = 1, db_mx%wst
         !! calculate climatic moisture index - cumulative p/pet
-        if (wst(iwst)%weat%pet > 0.5) then
+        !! Use Hargreaves Potential ET Method 
+        ramm = wst(iwst)%weat%solradmx * 37.59 / 30. 
+        if (wst(iwst)%weat%tmax > wst(iwst)%weat%tmin) then
+          xl = 2.501 - 2.361e-3 * wst(iwst)%weat%tave
+          wst(iwst)%weat%pet = .0023 * (ramm / xl) * (wst(iwst)%weat%tave      &
+                + 17.8) * (wst(iwst)%weat%tmax - wst(iwst)%weat%tmin) ** 0.5
+          wst(iwst)%weat%pet = Max(0., wst(iwst)%weat%pet)
+        else
+          wst(iwst)%weat%pet = 0.
+        endif
+        if (wst(iwst)%weat%pet > 0.1) then
           wst(iwst)%weat%ppet = wst(iwst)%weat%ppet + wst(iwst)%weat%precip / wst(iwst)%weat%pet
         end if
         !! subtract the 30 day previous and add the current day precip/pet

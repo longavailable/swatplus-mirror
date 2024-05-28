@@ -5,6 +5,8 @@
       use constituent_mass_module
       use cs_data_module
       
+      implicit none
+      
       character (len=80) :: titldum
       character (len=80) :: header
       integer :: eof,icount,igroup,irct,ishale,group

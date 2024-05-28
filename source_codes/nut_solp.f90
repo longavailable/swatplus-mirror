@@ -38,7 +38,7 @@
       j = ihru
       
       !rtb gwflow: add P mass transferred to soil profile from the aquifer
-      if(gw_soil_flag.eq.1 .and. gw_solute_flag) then
+      if(gw_soil_flag.eq.1 .and. gw_solute_flag == 1) then
         do jj = 1,soil(j)%nly
           soil1(j)%mp(jj)%lab = soil1(j)%mp(jj)%lab + hru_soil(j,jj,2) !kg/ha
           gwsoilp(j) = gwsoilp(j) + hru_soil(j,jj,2) !HRU total
@@ -86,7 +86,7 @@
          endif
 	   endif
      !rtb gwflow: store phosphorus leaching concentration for gwflow module
-     if(bsn_cc%gwflow .and. gw_solute_flag) then
+     if(bsn_cc%gwflow == 1 .and. gw_solute_flag == 1) then
        gwflow_percsol(j,2) = hls_d(j)%lchlabp  
      endif
       end do

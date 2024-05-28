@@ -50,20 +50,20 @@
       use basin_module
       use gwflow_module, only : gwflow_percsol,gw_solute_flag,hru_soil
       
+      implicit none
+      
       integer :: j,jj
       integer :: isalt
-      integer :: sol_index
+      integer :: sol_index,gw_soil_flag
       real :: cosalt,cosurfsalt,percsaltlyr(8),ssfsaltlyr,vsalt
       real :: hru_area_m2,water_volume,salt_mass_kg
-      real :: ro_mass,wet_ro_mass
-
+      real :: ro_mass,wet_ro_mass,sro,vv,ww
 
       j = 0
       j = ihru
-
-      
+     
       !rtb gwflow: add salt ion mass transferred to soil profile from the aquifer; store for salt balance
-      if(gw_soil_flag == 1 .and. gw_solute_flag) then
+      if (gw_soil_flag == 1 .and. gw_solute_flag == 1) then
         do jj = 1, soil(j)%nly
           sol_index = 2
           do isalt=1,cs_db%num_salts
@@ -151,7 +151,7 @@
         percsalt(j,isalt) = percsaltlyr(isalt)
 
         !! if gwflow: store in array for use input_file_module gwflow_rech
-        if(bsn_cc%gwflow .and. gw_solute_flag) then
+        if(bsn_cc%gwflow == 1 .and. gw_solute_flag == 1) then
           gwflow_percsol(j,sol_index) = percsaltlyr(isalt)
         endif
         
@@ -177,6 +177,5 @@
         enddo
       enddo
 
-      
       return
       end

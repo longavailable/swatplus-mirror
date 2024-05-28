@@ -21,7 +21,8 @@
       real :: frac_hum_microb           !0-1        |fraction of humus in microbial pool - CENTURY
       real :: frac_hum_slow             !0-1        |fraction of humus in slow pool - CENTURY
       real :: frac_hum_passive          !0-1        |fraction of humus in passive pool - CENTURY
-      real :: actp, solp, ssp
+      real :: actp, solp, ssp    
+      real :: psp                       !              | 
 
       nly = soil(ihru)%nly
 
@@ -63,28 +64,28 @@
         soil1(ihru)%mp(ly)%lab = soil1(ihru)%mp(ly)%lab * wt1   !! mg/kg => kg/ha
 
         !! set active mineral P pool based on dynamic PSP MJW
-	    if (bsn_cc%sol_P_model == 0) then 
+	    if (bsn_cc%sol_P_model == 1) then 
 	      !! Allow Dynamic PSP Ratio
           !! convert to concentration
           solp = soil1(ihru)%mp(ly)%lab / wt1
 	      !! PSP = -0.045*log (% clay) + 0.001*(Solution P, mg kg-1) - 0.035*(% Organic C) + 0.43
 	      if (soil(ihru)%phys(ly)%clay > 0.) then
-            bsn_prm%psp = -0.045 * log(soil(ihru)%phys(ly)%clay) + (0.001 * solp) 
-            bsn_prm%psp = bsn_prm%psp - (0.035 * soil1(ihru)%tot(ly)%c) + 0.43 
-          else
-            bsn_prm%psp = 0.4
+            psp = -0.045 * log(soil(ihru)%phys(ly)%clay) + (0.001 * solp) 
+            psp = psp - (0.035 * soil1(ihru)%cbn(ly)) + 0.43 
           endif   		
           !! Limit PSP range
-          if (bsn_prm%psp < .05) then
-            bsn_prm%psp = 0.05
-          else if (bsn_prm%psp > 0.9) then
-            bsn_prm%psp = 0.9
+          if (psp < .10) then
+            psp = 0.10
+          else if (psp > 0.7) then
+            psp = 0.7
           end if
+        else
+          psp = bsn_prm%psp
         end if
-        soil1(ihru)%mp(ly)%act = soil1(ihru)%mp(ly)%lab * (1. - bsn_prm%psp) / bsn_prm%psp
+        soil1(ihru)%mp(ly)%act = soil1(ihru)%mp(ly)%lab * (1. - psp) / psp
 
         !! Set Stable pool based on dynamic coefficient
-	    if (bsn_cc%sol_P_model == 0) then  !! From White et al 2009 
+	    if (bsn_cc%sol_P_model == 1) then  !! From White et al 2009 
             !! convert to concentration for ssp calculation
 	        actp = soil1(ihru)%mp(ly)%act / wt1
 		    solp = soil1(ihru)%mp(ly)%lab / wt1
@@ -100,7 +101,6 @@
 	   end if
       end do
 
-      
       !! set initial organic pools - originally by Zhang
 	  do ly = 1, nly
 
@@ -119,14 +119,14 @@
         !initialize active humus pool
         soil1(ihru)%hact(ly)%m = frac_hum_active * soil1(ihru)%tot(ly)%m
         soil1(ihru)%hact(ly)%c = frac_hum_active * soil1(ihru)%tot(ly)%c
-        soil1(ihru)%hact(ly)%n = soil1(ihru)%hact(ly)%c / 10.   !solt_db(isolt)%hum_c_n        !assume 10:1 C:N ratio
-        soil1(ihru)%hact(ly)%p = soil1(ihru)%hact(ly)%c / 80.   !solt_db(isolt)%hum_c_p        !assume 80:1 C:P ratio
+        soil1(ihru)%hact(ly)%n = soil1(ihru)%hact(ly)%c / solt_db(isolt)%hum_c_n
+        soil1(ihru)%hact(ly)%p = soil1(ihru)%hact(ly)%c / solt_db(isolt)%hum_c_p
             
         !initialize stable humus pool
         soil1(ihru)%hsta(ly)%m = (1. - frac_hum_active) * soil1(ihru)%tot(ly)%m
         soil1(ihru)%hsta(ly)%c = (1. - frac_hum_active) * soil1(ihru)%tot(ly)%c
-        soil1(ihru)%hsta(ly)%n = soil1(ihru)%hsta(ly)%c / 10.   !solt_db(isolt)%hum_c_n        !assume 10:1 C:N ratio
-        soil1(ihru)%hsta(ly)%p = soil1(ihru)%hsta(ly)%c / 80.   !solt_db(isolt)%hum_c_p        !assume 80:1 C:P ratio
+        soil1(ihru)%hsta(ly)%n = soil1(ihru)%hsta(ly)%c / solt_db(isolt)%hum_c_n
+        soil1(ihru)%hsta(ly)%p = soil1(ihru)%hsta(ly)%c / solt_db(isolt)%hum_c_p
         
         !set root and incorporated residue pool to zero
         soil1(ihru)%rsd(ly) = orgz
@@ -172,7 +172,9 @@
         soil1(ihru)%lig(ly)%c = .8 * soil1(ihru)%str(ly)%c
         soil1(ihru)%lig(ly)%n = .2 * soil1(ihru)%str(ly)%c
         soil1(ihru)%lig(ly)%p = .02 * soil1(ihru)%str(ly)%c
-                        
+                         
+        soil1(ihru)%tot(ly)%c = soil1(ihru)%hs(ly)%c + soil1(ihru)%hp(ly)%c + soil1(ihru)%microb(ly)%c +      &
+                                     soil1(ihru)%meta(ly)%c + soil1(ihru)%str(ly)%c + soil1(ihru)%lig(ly)%c
         !initialize water soluble pool
         !soil1(ihru)%water(ly)%m = 
         !soil1(ihru)%water(ly)%c = 

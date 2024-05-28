@@ -18,9 +18,11 @@
       use ch_salt_module, only : chsalt_d
       use gwflow_module, only : gw_solute_flag,gwsol_ss,ncell,gw_state,gwsol_state
 
-      integer :: i,m,ob_ctr,num_days
+      implicit none
+      
+      integer :: i,m,ob_ctr,num_days,jj
       real :: saltsum,hru_area_m2,sol_thick,soil_volume,soil_mass, &
-              aquifer_thickness,aquifer_volume,aquifer_mass, sub_ha
+              aquifer_thickness,aquifer_volume,aquifer_mass, sub_ha,soil_thick
       real :: sum_conc,avg_conc(cs_db%num_salts),sum_load,avg_load(11)
       real :: salt_basin(28)
 
@@ -39,7 +41,7 @@
       !groundwater salt loading to channels
       saltsum = 0.
       if(bsn_cc%gwflow == 1) then !gwflow is active; loop through cells
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do i=1,ncell
             do m=1,cs_db%num_salts
               saltsum = saltsum + (gwsol_ss(i)%solute(2+m)%gwsw * (-1) / 1000.) !kg  
@@ -89,7 +91,7 @@
       !tile drain salt loading to stream
       saltsum = 0.
       if(bsn_cc%gwflow == 1) then !gwflow is active (add to tile drainage from HRU soils)
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do i=1,ncell
             do m=1,cs_db%num_salts
               saltsum = saltsum + (gwsol_ss(i)%solute(2+m)%tile * (-1) / 1000.) !kg  
@@ -237,7 +239,7 @@
       !recharge to aquifer
       saltsum = 0.
       if(bsn_cc%gwflow == 1) then !gwflow is active (add to tile drainage from HRU soils)
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do i=1,ncell
             do m=1,cs_db%num_salts
               saltsum = saltsum + (gwsol_ss(i)%solute(2+m)%rech / 1000.) !kg  
@@ -311,7 +313,7 @@
       !total groundwater salt (dissolved)
       saltsum = 0.
       if(bsn_cc%gwflow == 1) then !gwflow is active
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do i=1,ncell
             if(gw_state(i)%stat > 0) then
               do m=1,cs_db%num_salts
@@ -465,7 +467,7 @@
       
       !if gwflow active: zero out daily cell values for recharge (others are zeroed out in gwflow_simulate)
       if(bsn_cc%gwflow == 1) then
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do i=1,ncell
             do m=1,cs_db%num_salts
               gwsol_ss(i)%solute(2+m)%rech = 0.
@@ -473,8 +475,7 @@
           enddo
         endif
       endif
-      
-      
+          
 7000  format(i8,i8,i8,35e16.8)
 7001  format(20e16.8)
 

@@ -130,7 +130,7 @@
         hru_pump_mo(i) = hru_pump_mo(i) + hru_pump(i)  
         hru_pump_yr(i) = hru_pump_yr(i) + hru_pump(i)
       enddo
-      if(hru_pump_flag) then !pumping output for specified HRUs
+      if (hru_pump_flag == 1) then !pumping output for specified HRUs
         do i=1,num_hru_pump_obs    
           hru_pump_obs(i) = hru_pump(hru_pump_ids(i))
         enddo
@@ -145,7 +145,7 @@
       !discharge from groundwater to tile drains ------------------------------
       !gwflow_tile called in sd_channel_control
       !retrieve information for tile cell groups
-      if(gw_tile_flag) then
+      if (gw_tile_flag == 1) then
         !computer flow rate and solute concentration for the tile cell groups
         if(gw_tile_group_flag.eq.1) then
           do i=1,gw_tile_num_group
@@ -154,7 +154,7 @@
               sum_tile(i) = sum_tile(i) + gw_ss(gw_tile_groups(i,j))%tile !m3 
             enddo
             sum_tile(i) = (sum_tile(i)*(-1)) / 86400. !m3 --> m3/sec
-            if(gw_solute_flag) then
+            if (gw_solute_flag == 1) then
               do s=1,gw_nsolute !loop through the solutes
                 sum_mass(i,s) = 0.
               enddo
@@ -175,7 +175,7 @@
               endif
             endif
           enddo
-          if(gw_solute_flag) then
+          if (gw_solute_flag == 1) then
             write(out_tile_cells,102) time%day,time%yrc, &
                                      (sum_tile(i),i=1,gw_tile_num_group), &
                                      (c_tile(i,1),i=1,gw_tile_num_group), &
@@ -208,12 +208,12 @@
       !m3 for water; g for solutes
       do i=1,ncell 
         if(gw_state(i)%stat == 1) then  
-          gw_ss(i)%totl = gw_ss(i)%rech + gw_ss(i)%gwet + gw_ss(i)%gwsw + gw_ss(i)%swgw + &
-													gw_ss(i)%satx + gw_ss(i)%ppag + gw_ss(i)%ppex + gw_ss(i)%tile + &
-                          gw_ss(i)%resv + gw_ss(i)%wetl + gw_ss(i)%canl + gw_ss(i)%fpln  
+          gw_ss(i)%totl = gw_ss(i)%rech + gw_ss(i)%gwet + gw_ss(i)%gwsw + gw_ss(i)%swgw +   &
+                            gw_ss(i)%satx + gw_ss(i)%ppag + gw_ss(i)%ppex + gw_ss(i)%tile + &
+                            gw_ss(i)%resv + gw_ss(i)%wetl + gw_ss(i)%canl + gw_ss(i)%fpln  
         endif
       enddo     
-      if(gw_solute_flag) then
+      if (gw_solute_flag == 1) then
         do i=1,ncell
           if(gw_state(i)%stat == 1) then  
             do s=1,gw_nsolute !loop through the solutes
@@ -244,7 +244,7 @@
         endif
       enddo
       !compute cell solute mass at the beginning of the day
-      if(gw_solute_flag) then
+      if (gw_solute_flag == 1) then
         do i=1,ncell
           if(gw_state(i)%stat == 1) then
             do s=1,gw_nsolute !loop through the solutes
@@ -256,7 +256,7 @@
       
       !determine number of flow time steps; determine size of transport time step
       num_ts = int(1./gw_time_step)
-      if(gw_solute_flag) then
+      if (gw_solute_flag == 1) then
         gw_trans_time_step = gw_time_step / num_ts_transport
       endif
       
@@ -265,7 +265,7 @@
         gw_state(i)%hnew = 0.
         gw_state(i)%hold = 0.
 			enddo
-      if(gw_solute_flag) then
+      if (gw_solute_flag == 1) then
         do i=1,ncell
           do s=1,gw_nsolute
             gwsol_state(i)%solute(s)%cnew = 0.
@@ -360,7 +360,7 @@
 				enddo
         
         !simulate fate and transport of solutes - calculate new concentrations
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do t=1,num_ts_transport
             do i=1,ncell
               if(gw_state(i)%stat == 1) then !interior cell
@@ -407,7 +407,8 @@
                   area = min(area1,area2) !smaller of the two
                   conn_length = sqrt(area)
                   do s=1,gw_nsolute !loop through the solutes
-                    mass_dsp(s) = mass_dsp(s) + (gw_long_disp * ((gwsol_state(cell_id)%solute(s)%conc - gwsol_state(i)%solute(s)%conc)/conn_length) * face_sat) !g
+                    mass_dsp(s) = mass_dsp(s) + (gw_long_disp * ((gwsol_state(cell_id)%solute(s)%conc -   &
+                         gwsol_state(i)%solute(s)%conc)/conn_length) * face_sat) !g
                   enddo
                 enddo !go to next connected cell
                 
@@ -418,7 +419,8 @@
 
                 !calculate change in mass (g)
                 do s=1,gw_nsolute !loop through the solutes
-                  m_change(s) = (mass_adv(s) + mass_dsp(s) + mass_rct(s) + gwsol_ss(i)%solute(s)%totl) * (gw_trans_time_step/gwsol_sorb(s))    
+                  m_change(s) = (mass_adv(s) + mass_dsp(s) + mass_rct(s) + gwsol_ss(i)%solute(s)%totl) * & 
+                       (gw_trans_time_step/gwsol_sorb(s))    
                 enddo
                   
                 !calculate mass removed due to sorption (g)
@@ -490,7 +492,7 @@
         gw_state(i)%hdmo = gw_state(i)%hdmo + gw_state(i)%head
         gw_state(i)%hdyr = gw_state(i)%hdyr + gw_state(i)%head
       enddo
-      if(gw_solute_flag) then
+      if (gw_solute_flag == 1) then
         do i=1,ncell
           do s=1,gw_nsolute !loop through the solutes
             gwsol_state(i)%solute(s)%cnmo = gwsol_state(i)%solute(s)%cnmo + gwsol_state(i)%solute(s)%conc
@@ -519,7 +521,7 @@
           write(out_gwheads,120) (gw_state(i)%head,i=1,ncell)
         endif
         write(out_gwheads,*)
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do s=1,gw_nsolute !loop through the solutes
             write(out_gwconc,*) gwsol_nm(s),'concentration for:',time%yrc,time%day
             if(grid_type == "structured") then
@@ -556,27 +558,27 @@
       !print out head values and solute concentration values for observation cells (each time step)
       do k=1,gw_num_obs_wells
         gw_obs_head(k) = gw_state(gw_obs_cells(k))%head
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do s=1,gw_nsolute !loop through the solutes
             gw_obs_solute(k,s) = gwsol_state(gw_obs_cells(k))%solute(s)%conc
           enddo 
         endif
         !is usgs wells, store for end-of-year analysis
-        if(usgs_obs) then
+        if(usgs_obs == 1) then
           gw_obs_head_annual(k,time%day) = gw_state(gw_obs_cells(k))%head
           gw_obs_sat_annual(k,time%day) = gw_state(gw_obs_cells(k))%head - &
                                           gw_state(gw_obs_cells(k))%botm
         endif
       enddo
       write(out_gwobs,119) time%yrc,time%day,(gw_obs_head(k),k=1,gw_num_obs_wells)
-      if(gw_solute_flag) then
+      if (gw_solute_flag == 1) then
         write(out_gwobs_sol,119) time%yrc,time%day,(gw_obs_solute(k,1),k=1,gw_num_obs_wells), &
                                                    (gw_obs_solute(k,2),k=1,gw_num_obs_wells)
 																									 !need to continue if there are more solutes...
       endif
       
       !if the end of the month has been reached, then store flow rates for specified channels
-      if(stream_obs) then
+      if (stream_obs == 1) then
         if(gw_num_obs_chan.gt.0) then
           if (time%end_mo == 1) then
             do chan_count=1,gw_num_obs_chan 
@@ -594,7 +596,7 @@
         endif
       enddo
       !compute solute mass at the end of the day
-      if(gw_solute_flag) then
+      if (gw_solute_flag == 1) then
         do i=1,ncell
           if(gw_state(i)%stat == 1) then
             do s=1,gw_nsolute !loop through the solutes
@@ -625,7 +627,7 @@
       write(out_gwobs_ss,102)  time%yrc,time%day,(gw_cell_obs_ss_vals(i),i=1,17)     
       
       !sum groundwater budget terms for each HUC12 (if national model mode)
-      if(nat_model) then
+      if (nat_model == 1) then
         do n=1,sp_ob%outlet !loop through the HUC12 catchments
           do k=1,huc12_ncell(n) !loop through the cells within each HUC12 catchment
             cell_id = huc12_cells(n,k)
@@ -771,7 +773,7 @@
       ss_grid_tt%canl = ss_grid_tt%canl + canl_grid
       ss_grid_tt%fpln = ss_grid_tt%fpln + fpln_grid
       
-      if(gw_solute_flag) then !if solutes are simulated
+      if (gw_solute_flag == 1) then !if solutes are simulated
                                 
         !loop through the solutes
         do s=1,gw_nsolute
@@ -903,7 +905,7 @@
           gw_state(i)%hdmo = 0.
         enddo
         !monthly average solute concentration        
-        if(gw_solute_flag) then
+        if(gw_solute_flag == 1) then
           write(out_conc_mo,*) time%yrc,time%mo
           do s=1,gw_nsolute
             !calculate average concentration
@@ -972,7 +974,7 @@
           gw_state(i)%hdyr = 0.
         enddo
         !annual average solute concentration        
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           write(out_conc_yr,*) time%yrc
           do s=1,gw_nsolute
             !calculate average concentration
@@ -1025,7 +1027,7 @@
         enddo
 
         !compute average daily solute fluxes (kg/day) for the year 
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do i=1,ncell
             do s=1,gw_nsolute
               gwsol_ss_sum(i)%solute(s)%rech = (gwsol_ss_sum(i)%solute(s)%rech/1000.) / time%day_end_yr !g --> kg
@@ -1065,7 +1067,7 @@
           write(out_gw_rech,121) (gw_ss_sum(i)%rech,i=1,ncell)
         endif
         write(out_gw_rech,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_rech,*) gwsol_nm(s),'recharge flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1122,7 +1124,7 @@
           write(out_gwsw,121) (gw_ss_sum(i)%gwsw,i=1,ncell)
         endif
         write(out_gwsw,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_gwsw,*) gwsol_nm(s),'gw-channel flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1162,7 +1164,7 @@
           write(out_gw_satex,121) (gw_ss_sum(i)%satx,i=1,ncell)
         endif
         write(out_gw_satex,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_satx,*) gwsol_nm(s),'sat. excess flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1203,7 +1205,7 @@
           write(out_gw_soil,121) (gw_ss_sum(i)%soil,i=1,ncell) 
         endif
         write(out_gw_soil,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_soil,*) gwsol_nm(s),'gw-->soil flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1262,7 +1264,7 @@
           write(out_gw_tile,121) (gw_ss_sum(i)%tile,i=1,ncell)  
         endif
         write(out_gw_tile,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_tile,*) gwsol_nm(s),'tile drain flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1302,7 +1304,7 @@
           write(out_gw_pumpag,121) (gw_ss_sum(i)%ppag,i=1,ncell)
         endif
         write(out_gw_pumpag,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_ppag,*) gwsol_nm(s),'ag pumping flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1347,7 +1349,7 @@
         endif
         write(out_gw_pumpdef,*)
         !pumping (user specified)
-        if(gw_pumpex_flag) then
+        if (gw_pumpex_flag == 1) then
         write(out_gw_pumpex,*) 'Pumping rate for year (m3/day):',time%yrc
         if(grid_type == "structured") then
           grid_val = 0.
@@ -1365,7 +1367,7 @@
           write(out_gw_pumpex,121) (gw_ss_sum(i)%ppex,i=1,ncell)
         endif
         write(out_gw_pumpex,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_ppex,*) gwsol_nm(s),'ex pumping flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1388,7 +1390,7 @@
         endif
         endif
         !groundwater-reservoir exchange
-        if(gw_res_flag) then
+        if (gw_res_flag == 1) then
         write(out_gw_res,*) 'Groundwater-Reservoir Exchange Volumes for:',time%yrc
         if(grid_type == "structured") then
           grid_val = 0.
@@ -1406,7 +1408,7 @@
           write(out_gw_res,121) (gw_ss_sum(i)%resv,i=1,ncell)	  	
         endif
         write(out_gw_res,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_resv,*) gwsol_nm(s),'gw-reservoir flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1429,7 +1431,7 @@
         endif
         endif
         !groundwater-wetland exchange
-        if(gw_wet_flag) then
+        if (gw_wet_flag == 1) then
         write(out_gw_wet,*) 'Groundwater outflow to wetlands for:',time%yrc	
         if(grid_type == "structured") then
           grid_val = 0.
@@ -1447,7 +1449,7 @@
           write(out_gw_wet,121) (gw_ss_sum(i)%wetl,i=1,ncell)	 	
         endif
         write(out_gw_wet,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_wetl,*) gwsol_nm(s),'gw-wetland flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1470,7 +1472,7 @@
         endif
         endif
         !groundwater-canal exchange
-        if(gw_canal_flag) then	
+        if (gw_canal_flag == 1) then	
         write(out_gw_canal,*) 'Groundwater-Canal Exchange Volumes for:',time%yrc	
         if(grid_type == "structured") then
           grid_val = 0.
@@ -1488,7 +1490,7 @@
           write(out_gw_canal,121) (gw_ss_sum(i)%canl,i=1,ncell)	 	
         endif
         write(out_gw_canal,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_canl,*) gwsol_nm(s),'gw-canal flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1511,7 +1513,7 @@
         endif
         endif
         !floodplain exchange
-        if(gw_fp_flag) then
+        if (gw_fp_flag == 1) then
         write(out_gw_fp,*) 'Floodplain Exchange Volumes for:',time%yrc	
         if(grid_type == "structured") then
           grid_val = 0.
@@ -1529,7 +1531,7 @@
           write(out_gw_fp,121) (gw_ss_sum(i)%fpln,i=1,ncell)		
         endif
         write(out_gw_fp,*)
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_fpln,*) gwsol_nm(s),'gw-floodplain flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1552,7 +1554,7 @@
         endif
         endif
         !chemical reaction
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_rctn,*) gwsol_nm(s),'chem. reaction flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1574,7 +1576,7 @@
           enddo
         endif
         !sorption
-        if(gw_solute_flag) then !solute mass flux
+        if (gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_sorb,*) gwsol_nm(s),'sorption flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1645,7 +1647,7 @@
                                   ss_grid_yr%fpln,ss_grid_yr%ppdf
         endif
         !if usgs wells are used, calculate and store annual average values for usgs wells and observation cells
-        if(usgs_obs) then
+        if (usgs_obs == 1) then
           do k=1,gw_num_obs_wells
             !compute the average head value for the year, for the current observation cell 
             !also, compute the average saturated thickness for the year
@@ -1680,15 +1682,15 @@
         ss_grid_yr%canl = 0.
         ss_grid_yr%fpln = 0.
         !solute mass values
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do s=1,gw_nsolute !loop through the solutes
             !write out annual values
             if(gwflag_yr.eq.1) then
               write(out_solbal_yr+s,105) time%yrc, &
-                                         sol_grid_chng_yr,sol_grid_rech_yr,sol_grid_gwsw_yr,sol_grid_swgw_yr,sol_grid_satx_yr, &
-														 		         sol_grid_soil_yr,sol_grid_advn_yr,sol_grid_disp_yr,sol_grid_rctn_yr,sol_grid_sorb_yr, &
-                                         sol_grid_ppag_yr,sol_grid_ppex_yr,sol_grid_tile_yr,sol_grid_resv_yr,sol_grid_wetl_yr, &
-                                         sol_grid_canl_yr,sol_grid_fpln_yr
+                                sol_grid_chng_yr,sol_grid_rech_yr,sol_grid_gwsw_yr,sol_grid_swgw_yr,sol_grid_satx_yr, &
+                                sol_grid_soil_yr,sol_grid_advn_yr,sol_grid_disp_yr,sol_grid_rctn_yr,sol_grid_sorb_yr, &
+                                sol_grid_ppag_yr,sol_grid_ppex_yr,sol_grid_tile_yr,sol_grid_resv_yr,sol_grid_wetl_yr, &
+                                sol_grid_canl_yr,sol_grid_fpln_yr
             endif
             !zero out values for next year
             sol_grid_chng_yr = 0.
@@ -1751,7 +1753,7 @@
         endif
         
         !average annual solute values
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do s=1,gw_nsolute
             sol_grid_chng_tt(s) = sol_grid_chng_tt(s) + (sol_grid_maft-sol_grid_mbef)
             sol_grid_rech_tt(s) = sol_grid_rech_tt(s) / time%nbyr
@@ -1772,16 +1774,16 @@
             sol_grid_fpln_tt(s) = sol_grid_fpln_tt(s) / time%nbyr
             if(gwflag_aa.eq.1) then
               write(out_solbal_aa+s,105) time%yrc, &
-                                        sol_grid_chng_tt(s),sol_grid_rech_tt(s),sol_grid_gwsw_tt(s),sol_grid_swgw_tt(s),sol_grid_satx_tt(s), &
-																		    sol_grid_soil_tt(s),sol_grid_advn_tt(s),sol_grid_disp_tt(s),sol_grid_rctn_tt(s),sol_grid_sorb_tt(s), &
-                                        sol_grid_ppag_tt(s),sol_grid_ppex_tt(s),sol_grid_tile_tt(s),sol_grid_resv_tt(s),sol_grid_wetl_tt(s), &
-                                        sol_grid_canl_tt(s),sol_grid_fpln_tt(s)
+                sol_grid_chng_tt(s),sol_grid_rech_tt(s),sol_grid_gwsw_tt(s),sol_grid_swgw_tt(s),sol_grid_satx_tt(s), &
+                sol_grid_soil_tt(s),sol_grid_advn_tt(s),sol_grid_disp_tt(s),sol_grid_rctn_tt(s),sol_grid_sorb_tt(s), &
+                sol_grid_ppag_tt(s),sol_grid_ppex_tt(s),sol_grid_tile_tt(s),sol_grid_resv_tt(s),sol_grid_wetl_tt(s), &
+                sol_grid_canl_tt(s),sol_grid_fpln_tt(s)
             endif
           enddo !next solute
         endif
         
         !write out observed and simulated annual averaged gw head values at USGS well locations
-        if(usgs_obs) then
+        if (usgs_obs == 1) then
           if(gw_flow_cal.eq.0) then
             !first, calculate mean absolute error (MAE) (meters) for gw head values
             val_count = 0
@@ -1923,7 +1925,8 @@
             write(out_gwobs_usgs,*) 'MAE (m), SAT/MAE per well, #Meas per well'
             write(out_gwobs_usgs,*) 'Observed values - Simulated values'
             do k=1,gw_num_obs_wells
-              write(out_gwobs_usgs,116) usgs_id(k),head_mae_well(k,1),head_mae_well(k,2),sat_div_well(k,1),sat_div_well(k,2),num_gw_meas_well(k,1),num_gw_meas_well(k,2)
+              write(out_gwobs_usgs,116) usgs_id(k),head_mae_well(k,1),head_mae_well(k,2),sat_div_well(k,1),sat_div_well(k,2), &
+                   num_gw_meas_well(k,1),num_gw_meas_well(k,2)
             enddo
           endif
           write(out_gwobs_usgs,*)
@@ -1932,7 +1935,8 @@
             write_yr = time%yrc_start
             usgs_yr = time%yrc_start - 1920 + 1 !get the right year from the USGS data set
             do j=1,time%nbyr
-              write(out_gwobs_usgs,110) write_yr,usgs_id(k),gw_obs_cells(k),usgs_head_vals(k,usgs_yr),sim_head_vals(k,j),sim_sat_vals(k,j)
+              write(out_gwobs_usgs,110) write_yr,usgs_id(k),gw_obs_cells(k),usgs_head_vals(k,usgs_yr),  &
+                   sim_head_vals(k,j),sim_sat_vals(k,j)
               write_yr = write_yr + 1
               usgs_yr = usgs_yr + 1
             enddo
@@ -1940,7 +1944,7 @@
         endif
         
         !write out monthly flow rates for specified channels
-        if(stream_obs) then
+        if (stream_obs == 1) then
           if(gw_num_obs_chan.gt.0) then
           !first, calculate Nash-Sutcliffe model efficiciency coefficient (NSE) for each specified channel
           allocate(stream_nse(gw_num_obs_chan,2))
@@ -2030,7 +2034,8 @@
             write(out_strobs,*) 'Statistics for specified channels'
             write(out_strobs,*) 'Channel, count, NSE, NSE1, NNSE, PBIAS, KGE'
             do i=1,gw_num_obs_chan
-              write(out_strobs,114) obs_channels(i),month_count,stream_nse(i,1),stream_nse1(i,1),stream_nnse(i,1),stream_pbias(i,1),stream_kg(i,1)
+              write(out_strobs,114) obs_channels(i),month_count,stream_nse(i,1),stream_nse1(i,1),stream_nnse(i,1),  &
+                   stream_pbias(i,1),stream_kg(i,1)
             enddo
           else !calculate statistics for calibration and testing periods
             num_months_calb = 12 * gw_flow_cal_yrs
@@ -2158,7 +2163,8 @@
                 sum_den2 = 0.
                 do j=1,num_months
                   if(obs_flow_vals(i,j+num_months_calb).gt.0) then
-                    sum_num = sum_num + ((obs_flow_vals(i,j+num_months_calb)-mean_obs_flow)*(sim_flow_vals(i,j+num_months_calb)-mean_sim_flow))
+                    sum_num = sum_num + ((obs_flow_vals(i,j+num_months_calb)-mean_obs_flow)*(sim_flow_vals(i,j+num_months_calb)- &
+                         mean_sim_flow))
                     sum_den1 = sum_den1 + (obs_flow_vals(i,j+num_months_calb) - mean_obs_flow)**2
                     sum_den2 = sum_den2 + (sim_flow_vals(i,j+num_months_calb) - mean_sim_flow)**2
                   endif
@@ -2183,8 +2189,10 @@
             write(out_strobs,*) 'Statistics for specified channels (calib/testing)'
             write(out_strobs,*) 'Channel, count, NSE, NSE1, NNSE, PBIAS, KGE'
             do i=1,gw_num_obs_chan
-              write(out_strobs,114) obs_channels(i),month_count_calb,stream_nse(i,1),stream_nse1(i,1),stream_nnse(i,1),stream_pbias(i,1),stream_kg(i,1)
-              write(out_strobs,114) obs_channels(i),month_count_test,stream_nse(i,2),stream_nse1(i,2),stream_nnse(i,2),stream_pbias(i,2),stream_kg(i,2)
+              write(out_strobs,114) obs_channels(i),month_count_calb,stream_nse(i,1),stream_nse1(i,1),stream_nnse(i,1), &
+                   stream_pbias(i,1),stream_kg(i,1)
+              write(out_strobs,114) obs_channels(i),month_count_test,stream_nse(i,2),stream_nse1(i,2),stream_nnse(i,2), &
+                   stream_pbias(i,2),stream_kg(i,2)
             enddo         
           endif
           write(out_strobs,*)
@@ -2201,7 +2209,7 @@
         endif    
 
         !write out average annual groundwater budgets for each HUC12 catchment
-        if(nat_model) then
+        if (nat_model == 1) then
           do n=1,sp_ob%outlet !loop through the HUC12 catchments
             write(out_huc12wb,112) huc12(n),(gw_huc12_wb(i,n),i=1,14)
           enddo
@@ -2242,7 +2250,7 @@
       enddo   
       satx_count = 0
       !solutes
-      if(gw_solute_flag) then
+      if (gw_solute_flag == 1) then
         do i=1,ncell
           do s=1,2 !only for no3 and p
             gwsol_ss(i)%solute(s)%rech = 0.
@@ -2309,9 +2317,10 @@
 116   format(f20.1,f12.3,f12.3,f12.3,f12.3,i8,i8)
 119   format(i8,i8,1000(f12.3))
 
-120   format(<out_cols>(f12.3))
-121   format(<out_cols>(e12.3)) 
+!120   format(<out_cols>(f12.3))
+!121   format(<out_cols>(e12.3))
+120   format(f12.3)
+121   format(e12.3) 
       
-
       return
       end subroutine gwflow_simulate

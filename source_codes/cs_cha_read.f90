@@ -59,8 +59,8 @@
       end if
 
       !determine if daily channel concentrations and loads should be output
-      inquire (file="cs_streamobs", exist=cs_obs_file)
-      if(cs_obs_file) then
+      inquire (file="cs_streamobs", exist=i_exist)
+      if (cs_obs_file == 1) then
         open(107,file='cs_streamobs')
         read(107,*)
         read(107,*) cs_str_nobs

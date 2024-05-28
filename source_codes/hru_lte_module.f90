@@ -1,4 +1,6 @@
       module hru_lte_module
+    
+      implicit none
 
       real, dimension(12) :: awct = 0.
       real, dimension(12) :: port = 0.

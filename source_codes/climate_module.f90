@@ -216,7 +216,9 @@
       type (atmospheric_deposition_control), save :: atmodep_cont
       
       !rtb salt / rtb cs
-      logical :: salt_atmo,cs_atmo
+      character(len=1) :: salt_atmo = "n"
+      character(len=1) :: cs_atmo = "n"
+      
       type atmospheric_deposition_cs
         real :: rf                                  !! concentration in rainfall - mg/l
         real :: dry                                 !! dry deposition - kg/ha/yr

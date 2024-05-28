@@ -74,6 +74,7 @@
       type (organic_mass) :: soil_prof_hs                           !       |total litter pool
       type (organic_mass) :: soil_prof_hp                           !       |total litter pool
       type (organic_mass) :: soil_prof_microb                       !       |total litter pool
+      type (organic_mass) :: soil_prof_somc
       type (organic_mass) :: soil_prof_water                        !       |total litter pool
       type (organic_mass) :: soil_org_z                             !       |total litter pool
       type (organic_mass) :: soil_prof_rsd                          !       |total litter pool

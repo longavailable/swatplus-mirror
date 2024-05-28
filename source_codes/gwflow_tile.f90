@@ -26,7 +26,7 @@
       
       
       !only proceed if tile drainage is active
-      if(gw_tile_flag) then
+      if (gw_tile_flag == 1) then
       
         !record starting channel volume (m3)
         chan_volume = ch_stor(chan_id)%flo
@@ -62,7 +62,7 @@
               ch_stor(chan_id)%flo = ch_stor(chan_id)%flo + Q
               
               !transfer solute mass from groundwater to channel
-              if(gw_solute_flag) then
+              if (gw_solute_flag == 1) then
                 do s=1,gw_nsolute !loop through the solutes
                   solmass(s) = Q * gwsol_state(cell_id)%solute(s)%conc !g
                   if(solmass(s) > gwsol_state(cell_id)%solute(s)%mass) then !can only remove what is there
@@ -76,14 +76,14 @@
                 ch_stor(chan_id)%solp = ch_stor(chan_id)%solp + (solmass(2)/1000.) !kg
                 sol_index = 2
                 !salts
-                if(gwsol_salt) then
+                if (gwsol_salt == 1) then
                   do isalt=1,cs_db%num_salts
                     sol_index = sol_index + 1
                     ch_water(chan_id)%salt(isalt) = ch_water(chan_id)%salt(isalt) + (solmass(sol_index)/1000.) !kg   
                   enddo
                 endif
                 !constituents
-                if(gwsol_cons) then
+                if (gwsol_cons == 1) then
                   do ics=1,cs_db%num_cs
                     sol_index = sol_index + 1
                     ch_water(chan_id)%cs(ics) = ch_water(chan_id)%cs(ics) + (solmass(sol_index)/1000.) !kg  
@@ -100,7 +100,4 @@
       endif !check if tile drainage is active
       
       return
-      end subroutine gwflow_tile
-      
-           
-      
+      end subroutine gwflow_tile      

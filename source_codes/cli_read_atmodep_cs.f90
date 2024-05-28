@@ -30,8 +30,8 @@
       if(cs_db%num_cs > 0) then
       
       inquire (file='cs_atmo.cli',exist=i_exist)
-      cs_atmo = i_exist
       if(i_exist) then
+        cs_atmo = "y"
         
         !open the file; skip first two lines (commentary)
         open(5050,file='cs_atmo.cli')
@@ -41,7 +41,6 @@
       
         !allocate arrays
         allocate(atmodep_cs(0:atmodep_cont%num_sta))
-        
         
         !loop through the stations (num_sta is set in cli_read_atmodep subroutine)
         do iadep = 1, atmodep_cont%num_sta

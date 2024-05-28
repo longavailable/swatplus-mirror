@@ -213,7 +213,8 @@
 
         write (2053,103) time%day, time%mo, time%day_mo, time%yrc, "       1", "       1", bsn%name, bwb_a, cal_sim, cal_adj
         if (pco%csvout == "y") then 
-          write (2057,'(*(G0.3,:","))') time%day, time%mo, time%day_mo, time%yrc, "       1", "       1", bsn%name, bwb_a, cal_sim, cal_adj
+          write (2057,'(*(G0.3,:","))') time%day, time%mo, time%day_mo, time%yrc, "       1", "       1", bsn%name, bwb_a,    &
+                    cal_sim, cal_adj
         end if
         ban_precip_aa = bwb_a%precip
         bwb_a = hwbz

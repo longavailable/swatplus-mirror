@@ -157,42 +157,65 @@
               if(ihtypno.eq.1) then !only sum up salt fluxes once
               if(ob(iob)%typ == "hru") then
                 hru_num = ob(iob)%num
-                ru_hru_saltb_d(iru)%salt(isalt)%wtsp = ru_hru_saltb_d(iru)%salt(isalt)%wtsp + (hsaltb_d(hru_num)%salt(isalt)%wtsp*hru(hru_num)%area_ha) !kg
-                ru_hru_saltb_d(iru)%salt(isalt)%irsw = ru_hru_saltb_d(iru)%salt(isalt)%irsw + (hsaltb_d(hru_num)%salt(isalt)%irsw*hru(hru_num)%area_ha) !kg
-                ru_hru_saltb_d(iru)%salt(isalt)%irgw = ru_hru_saltb_d(iru)%salt(isalt)%irgw + (hsaltb_d(hru_num)%salt(isalt)%irgw*hru(hru_num)%area_ha) !kg
-                ru_hru_saltb_d(iru)%salt(isalt)%irwo = ru_hru_saltb_d(iru)%salt(isalt)%irwo + (hsaltb_d(hru_num)%salt(isalt)%irwo*hru(hru_num)%area_ha) !kg
-                ru_hru_saltb_d(iru)%salt(isalt)%rain = ru_hru_saltb_d(iru)%salt(isalt)%rain + (hsaltb_d(hru_num)%salt(isalt)%rain*hru(hru_num)%area_ha) !kg
-                ru_hru_saltb_d(iru)%salt(isalt)%dryd = ru_hru_saltb_d(iru)%salt(isalt)%dryd + (hsaltb_d(hru_num)%salt(isalt)%dryd*hru(hru_num)%area_ha) !kg
-                ru_hru_saltb_d(iru)%salt(isalt)%road = ru_hru_saltb_d(iru)%salt(isalt)%road + (hsaltb_d(hru_num)%salt(isalt)%road*hru(hru_num)%area_ha) !kg
-                ru_hru_saltb_d(iru)%salt(isalt)%fert = ru_hru_saltb_d(iru)%salt(isalt)%fert + (hsaltb_d(hru_num)%salt(isalt)%fert*hru(hru_num)%area_ha) !kg
-                ru_hru_saltb_d(iru)%salt(isalt)%amnd = ru_hru_saltb_d(iru)%salt(isalt)%amnd + (hsaltb_d(hru_num)%salt(isalt)%amnd*hru(hru_num)%area_ha) !kg
-                ru_hru_saltb_d(iru)%salt(isalt)%uptk = ru_hru_saltb_d(iru)%salt(isalt)%uptk + (hsaltb_d(hru_num)%salt(isalt)%uptk*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%wtsp = ru_hru_saltb_d(iru)%salt(isalt)%wtsp +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%wtsp*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%irsw = ru_hru_saltb_d(iru)%salt(isalt)%irsw +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%irsw*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%irgw = ru_hru_saltb_d(iru)%salt(isalt)%irgw +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%irgw*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%irwo = ru_hru_saltb_d(iru)%salt(isalt)%irwo +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%irwo*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%rain = ru_hru_saltb_d(iru)%salt(isalt)%rain +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%rain*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%dryd = ru_hru_saltb_d(iru)%salt(isalt)%dryd +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%dryd*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%road = ru_hru_saltb_d(iru)%salt(isalt)%road +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%road*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%fert = ru_hru_saltb_d(iru)%salt(isalt)%fert +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%fert*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%amnd = ru_hru_saltb_d(iru)%salt(isalt)%amnd +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%amnd*hru(hru_num)%area_ha) !kg
+                ru_hru_saltb_d(iru)%salt(isalt)%uptk = ru_hru_saltb_d(iru)%salt(isalt)%uptk +   &
+                   (hsaltb_d(hru_num)%salt(isalt)%uptk*hru(hru_num)%area_ha) !kg
                 if(isalt.eq.1) then !dissolution is for all salts
-                  ru_hru_saltb_d(iru)%salt(1)%diss = ru_hru_saltb_d(iru)%salt(1)%diss + (hsaltb_d(hru_num)%salt(1)%diss*hru(hru_num)%area_ha) !kg
+                  ru_hru_saltb_d(iru)%salt(1)%diss = ru_hru_saltb_d(iru)%salt(1)%diss +   &
+                     (hsaltb_d(hru_num)%salt(1)%diss*hru(hru_num)%area_ha) !kg
                 endif
               endif
               endif
             enddo
             !rtb cs
             do ics = 1, cs_db%num_cs
-              obcs(icmd)%hd(ihtypno)%cs(ics) = obcs(icmd)%hd(ihtypno)%cs(ics) + hcs1%cs(ics) !add constituent loads to routing unit object
+              obcs(icmd)%hd(ihtypno)%cs(ics) = obcs(icmd)%hd(ihtypno)%cs(ics) +    &
+                 hcs1%cs(ics) !add constituent loads to routing unit object
               if(ob(iob)%typ == "hru") then !only store fluxes if they come from HRUs
                 rucsb_d(iru)%hd(ihtypno)%cs(ics) = rucsb_d(iru)%hd(ihtypno)%cs(ics) + hcs1%cs(ics)
               endif
               if(ihtypno.eq.1) then !only sum up constituent fluxes once
               if(ob(iob)%typ == "hru") then
                 hru_num = ob(iob)%num
-                ru_hru_csb_d(iru)%cs(ics)%sedm = ru_hru_csb_d(iru)%cs(ics)%sedm + (hcsb_d(hru_num)%cs(ics)%sedm*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%wtsp = ru_hru_csb_d(iru)%cs(ics)%wtsp + (hcsb_d(hru_num)%cs(ics)%wtsp*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%irsw = ru_hru_csb_d(iru)%cs(ics)%irsw + (hcsb_d(hru_num)%cs(ics)%irsw*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%irgw = ru_hru_csb_d(iru)%cs(ics)%irgw + (hcsb_d(hru_num)%cs(ics)%irgw*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%irwo = ru_hru_csb_d(iru)%cs(ics)%irwo + (hcsb_d(hru_num)%cs(ics)%irwo*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%rain = ru_hru_csb_d(iru)%cs(ics)%rain + (hcsb_d(hru_num)%cs(ics)%rain*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%dryd = ru_hru_csb_d(iru)%cs(ics)%dryd + (hcsb_d(hru_num)%cs(ics)%dryd*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%fert = ru_hru_csb_d(iru)%cs(ics)%fert + (hcsb_d(hru_num)%cs(ics)%fert*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%uptk = ru_hru_csb_d(iru)%cs(ics)%uptk + (hcsb_d(hru_num)%cs(ics)%uptk*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%rctn = ru_hru_csb_d(iru)%cs(ics)%rctn + (hcsb_d(hru_num)%cs(ics)%rctn*hru(hru_num)%area_ha) !kg
-                ru_hru_csb_d(iru)%cs(ics)%sorb = ru_hru_csb_d(iru)%cs(ics)%sorb + (hcsb_d(hru_num)%cs(ics)%sorb*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%sedm = ru_hru_csb_d(iru)%cs(ics)%sedm +   &
+                   (hcsb_d(hru_num)%cs(ics)%sedm*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%wtsp = ru_hru_csb_d(iru)%cs(ics)%wtsp +   & 
+                   (hcsb_d(hru_num)%cs(ics)%wtsp*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%irsw = ru_hru_csb_d(iru)%cs(ics)%irsw +   &
+                   (hcsb_d(hru_num)%cs(ics)%irsw*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%irgw = ru_hru_csb_d(iru)%cs(ics)%irgw +   & 
+                   (hcsb_d(hru_num)%cs(ics)%irgw*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%irwo = ru_hru_csb_d(iru)%cs(ics)%irwo +   &
+                   (hcsb_d(hru_num)%cs(ics)%irwo*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%rain = ru_hru_csb_d(iru)%cs(ics)%rain +   &
+                   (hcsb_d(hru_num)%cs(ics)%rain*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%dryd = ru_hru_csb_d(iru)%cs(ics)%dryd +   &
+                   (hcsb_d(hru_num)%cs(ics)%dryd*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%fert = ru_hru_csb_d(iru)%cs(ics)%fert +   &
+                   (hcsb_d(hru_num)%cs(ics)%fert*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%uptk = ru_hru_csb_d(iru)%cs(ics)%uptk +   &
+                   (hcsb_d(hru_num)%cs(ics)%uptk*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%rctn = ru_hru_csb_d(iru)%cs(ics)%rctn +   &
+                   (hcsb_d(hru_num)%cs(ics)%rctn*hru(hru_num)%area_ha) !kg
+                ru_hru_csb_d(iru)%cs(ics)%sorb = ru_hru_csb_d(iru)%cs(ics)%sorb +   &
+                   (hcsb_d(hru_num)%cs(ics)%sorb*hru(hru_num)%area_ha) !kg
               endif
               endif
             enddo

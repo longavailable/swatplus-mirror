@@ -41,7 +41,7 @@
       
       
       !only proceed if canal-cell exchange is active
-      if(gw_canal_flag) then
+      if (gw_canal_flag == 1) then
       
         !record starting channel volume (m3) and solute concentrations (g/m3)
         chan_csol = 0.
@@ -50,19 +50,19 @@
         conc_dox = 0.
         conc_orgn = 0.
         chan_volume = ch_stor(chan_id)%flo
-        if(chan_volume > 10.) then
+        if (chan_volume > 10.) then
           chan_csol(1) = (ch_stor(chan_id)%no3 * 1000.) / chan_volume
           chan_csol(2) = (ch_stor(chan_id)%solp * 1000.) / chan_volume
           sol_index = 2
           !salts
-          if(gwsol_salt) then
+          if (gwsol_salt == 1) then
             do isalt=1,cs_db%num_salts
               sol_index = sol_index + 1
               chan_csol(sol_index) = (ch_water(chan_id)%salt(isalt) * 1000.) / chan_volume    
             enddo
           endif
           !constituents
-          if(gwsol_cons) then
+          if (gwsol_cons  == 1) then
             do ics=1,cs_db%num_cs
               sol_index = sol_index + 1
               chan_csol(sol_index) = (ch_water(chan_id)%cs(ics) * 1000.) / chan_volume
@@ -86,7 +86,7 @@
           day_end = gw_chan_canl_info(chan_id)%daye(c)
         
           !only proceed if canal is "on"
-          if(time%day.ge.day_beg .and. time%day.le.day_end) then
+          if (time%day.ge.day_beg .and. time%day.le.day_end) then
             
             !loop through the cells that are connected to the current canal
             do k=1,gw_canl_info(canal_id)%ncon  
@@ -95,7 +95,7 @@
               cell_id = gw_canl_info(canal_id)%cells(k)
               
               !only proceed if the cell is active
-              if(gw_state(cell_id)%stat == 1) then
+              if (gw_state(cell_id)%stat == 1) then
               
                 !attributes of the cell
                 length = gw_canl_info(canal_id)%leng(k) 
@@ -119,8 +119,9 @@
                 
                 !store values in gwflow source/sink arrays
                 if(Q < 0) then !groundwater --> canal
-                  if((Q*-1).ge.gw_state(cell_id)%stor) then !can only remove what is there
-                    Q = gw_state(cell_id)%stor * (-1)
+                  !if ((Q*-1 == 1).ge.gw_state(cell_id)%stor) then !can only remove what is there
+                  if (-Q .ge. gw_state(cell_id)%stor) then !can only remove what is there                  
+                    Q = -gw_state(cell_id)%stor 
                   endif
                   gw_ss(cell_id)%canl = gw_ss(cell_id)%canl + Q
                   gw_state(cell_id)%stor = gw_state(cell_id)%stor + Q !update available groundwater in the cell 
@@ -136,7 +137,7 @@
                 gw_ss_sum(cell_id)%canl = gw_ss_sum(cell_id)%canl + Q !store for annual water 
                 
                 !calculate solute mass (g/day) transported between cell and channel
-                if(gw_solute_flag) then
+                if (gw_solute_flag == 1) then
                   if(Q < 0) then !mass is leaving the cell --> canal
                     do s=1,gw_nsolute !loop through the solutes
                       solmass(s) = Q * gwsol_state(cell_id)%solute(s)%conc !g
@@ -186,7 +187,7 @@
                     ch_stor(chan_id)%orgn = ch_stor(chan_id)%orgn - (mass_orgn/1000.) !kg
                     sol_index = 2
                     !salts
-                    if(gwsol_salt) then
+                    if (gwsol_salt == 1) then
                       do isalt=1,cs_db%num_salts
                         sol_index = sol_index + 1
                         if((solmass(sol_index)/1000.) > ch_water(chan_id)%salt(isalt)) then
@@ -196,7 +197,7 @@
                       enddo
                     endif
                     !constituents
-                    if(gwsol_cons) then
+                    if (gwsol_cons == 1) then
                       do ics=1,cs_db%num_cs
                         sol_index = sol_index + 1
                         if((solmass(sol_index)/1000.) > ch_water(chan_id)%cs(ics)) then
@@ -222,10 +223,6 @@
         enddo !go to next canal connected to the channel  
           
       endif !check if canal-cell exchange is active
-      
-      
+          
       return
-      end subroutine gwflow_canl
-      
-           
-      
+      end subroutine gwflow_canl      

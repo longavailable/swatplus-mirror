@@ -638,24 +638,20 @@
                          chg_typ, chg_val, absmin, absmax)     
  
          case ("ch_bd")
-            sd_ch(ielem)%ch_bd = chg_par(sd_ch(ielem)%ch_bd,              &
-                         chg_typ, chg_val, absmin, absmax)
+            sd_ch(ielem)%ch_bd = chg_par(sd_ch(ielem)%ch_bd, chg_typ, chg_val, absmin, absmax)
         
          case ("chss")
-            sd_ch(ielem)%chss = chg_par(sd_ch(ielem)%chss,            &
-                        chg_typ, chg_val, absmin, absmax)
+            sd_ch(ielem)%chss = chg_par(sd_ch(ielem)%chss, chg_typ, chg_val, absmin, absmax)
         
          case ("bankfull_flo")
             sd_ch(ielem)%bankfull_flo = chg_par(sd_ch(ielem)%bankfull_flo,      &
                          chg_typ, chg_val, absmin, absmax)
             
          case ("fps")
-            sd_ch(ielem)%fps = chg_par(sd_ch(ielem)%fps,            &
-                         chg_typ, chg_val, absmin, absmax)
+            sd_ch(ielem)%fps = chg_par(sd_ch(ielem)%fps, chg_typ, chg_val, absmin, absmax)
         
          case ("fpn")
-            sd_ch(ielem)%fpn = chg_par(sd_ch(ielem)%fpn,              &
-                         chg_typ, chg_val, absmin, absmax)
+            sd_ch(ielem)%fpn = chg_par(sd_ch(ielem)%fpn, chg_typ, chg_val, absmin, absmax)
 
          case ("hc_kh")
             sd_ch(ielem)%hc_kh = chg_par(sd_ch(ielem)%hc_kh,            &
@@ -667,6 +663,59 @@
         
          case ("hc_ini")
             sd_ch(ielem)%hc_ini = chg_par(sd_ch(ielem)%hc_ini,            &
+                         chg_typ, chg_val, absmin, absmax)
+            
+         case ("ch_n_conc")
+             sd_ch(ielem)%n_conc = chg_par (sd_ch(ielem)%n_conc, chg_typ, chg_val, absmin, absmax)
+          
+        case ("ch_p_conc")
+             sd_ch(ielem)%p_conc = chg_par (sd_ch(ielem)%p_conc, chg_typ, chg_val, absmin, absmax)
+          
+        case ("ch_p_bio")
+             sd_ch(ielem)%p_bio = chg_par (sd_ch(ielem)%p_bio, chg_typ, chg_val, absmin, absmax)
+             
+         case ("pk_rto")
+            sd_ch(ielem)%pk_rto = chg_par(sd_ch(ielem)%pk_rto,            &
+                         chg_typ, chg_val, absmin, absmax)
+        
+         case ("fp_inun_days")
+            sd_ch(ielem)%fp_inun_days = chg_par(sd_ch(ielem)%fp_inun_days,            &
+                         chg_typ, chg_val, absmin, absmax)
+        
+         case ("n_setl")
+            sd_ch(ielem)%n_setl = chg_par(sd_ch(ielem)%n_setl,            &
+                         chg_typ, chg_val, absmin, absmax)
+            
+         case ("p_setl")
+            sd_ch(ielem)%p_setl = chg_par(sd_ch(ielem)%p_setl,            &
+                         chg_typ, chg_val, absmin, absmax)
+        
+         case ("n_sol_part")
+            sd_ch(ielem)%n_sol_part = chg_par(sd_ch(ielem)%n_sol_part,            &
+                         chg_typ, chg_val, absmin, absmax)
+        
+         case ("p_sol_part")
+            sd_ch(ielem)%p_sol_part = chg_par(sd_ch(ielem)%p_sol_part,            &
+                         chg_typ, chg_val, absmin, absmax)
+            
+         case ("n_dep_enr")
+            sd_ch(ielem)%n_dep_enr = chg_par(sd_ch(ielem)%n_dep_enr,            &
+                         chg_typ, chg_val, absmin, absmax)
+        
+         case ("p_dep_enr")
+            sd_ch(ielem)%p_dep_enr = chg_par(sd_ch(ielem)%p_dep_enr,            &
+                         chg_typ, chg_val, absmin, absmax)
+            
+         case ("arc_len_fr")
+            sd_ch(ielem)%arc_len_fr = chg_par(sd_ch(ielem)%arc_len_fr,            &
+                         chg_typ, chg_val, absmin, absmax)
+        
+         case ("part_size")
+            sd_ch(ielem)%part_size = chg_par(sd_ch(ielem)%part_size,            &
+                         chg_typ, chg_val, absmin, absmax)
+        
+         case ("wash_bed_fr")
+            sd_ch(ielem)%wash_bed_fr = chg_par(sd_ch(ielem)%wash_bed_fr,            &
                          chg_typ, chg_val, absmin, absmax)
             
       !!RES
@@ -687,7 +736,15 @@
                          chg_typ, chg_val, absmin, absmax)
         
          case ("nsed")
-           res_sed(ielem)%nsed = chg_par(res_sed(ielem)%nsed,           &
+           res_prm(ielem)%sed%nsed = chg_par(res_prm(ielem)%sed%nsed,           &
+                         chg_typ, chg_val, absmin, absmax)
+           
+         case ("sed_stlr")
+           res_prm(ielem)%sed%sed_stlr = chg_par(res_prm(ielem)%sed%sed_stlr,           &
+                         chg_typ, chg_val, absmin, absmax)
+           
+         case ("velsetlr")
+           res_prm(ielem)%sed%velsetlr = chg_par(res_prm(ielem)%sed%velsetlr,           &
                          chg_typ, chg_val, absmin, absmax)
         
          case ("k_res")
@@ -731,27 +788,27 @@
                          chg_typ, chg_val, absmin, absmax)
         
          case ("psetlr1")
-            res_nut(ielem)%psetlr1 = chg_par(res_nut(ielem)%psetlr1,    &
+            res_prm(ielem)%nut%psetlr1 = chg_par(res_prm(ielem)%nut%psetlr1,    &
                          chg_typ, chg_val, absmin, absmax)
         
          case ("psetlr2")
-            res_nut(ielem)%psetlr2 = chg_par(res_nut(ielem)%psetlr2,    &
+            res_prm(ielem)%nut%psetlr2 = chg_par(res_prm(ielem)%nut%psetlr2,    &
                          chg_typ, chg_val, absmin, absmax)
         
          case ("nsetlr1")
-            res_nut(ielem)%nsetlr1 = chg_par(res_nut(ielem)%nsetlr1,    &
+            res_prm(ielem)%nut%nsetlr1 = chg_par(res_prm(ielem)%nut%nsetlr1,    &
                          chg_typ, chg_val, absmin, absmax)
         
          case ("nsetlr2")
-            res_nut(ielem)%nsetlr2 = chg_par(res_nut(ielem)%nsetlr2,    &
+            res_prm(ielem)%nut%nsetlr2 = chg_par(res_prm(ielem)%nut%nsetlr2,    &
                          chg_typ, chg_val, absmin, absmax)
         
          case ("chlar")
-            res_nut(ielem)%chlar = chg_par(res_nut(ielem)%chlar,        &
+            res_prm(ielem)%nut%chlar = chg_par(res_prm(ielem)%nut%chlar,        &
                          chg_typ, chg_val, absmin, absmax)
         
          case ("seccir")
-            res_nut(ielem)%seccir = chg_par(res_nut(ielem)%seccir,      &
+            res_prm(ielem)%nut%seccir = chg_par(res_prm(ielem)%nut%seccir,      &
                          chg_typ, chg_val, absmin, absmax)
             
       !! res decision tables
@@ -892,7 +949,23 @@
         case ("uslels_lte")
             hlt_db(ielem)%uslels = chg_par (hlt_db(ielem)%uslels, chg_typ, chg_val, absmin, absmax)
 
-        end select
+        !! initial soil properties
+        case ("lab_p")
+          do jj = 1, soil(ielem)%nly
+            soil1(ielem)%mp(ly)%lab = chg_par (soil1(ielem)%mp(ly)%lab, chg_typ, chg_val, absmin, absmax)
+          end do
+          
+        case ("hum_c_n")
+          do jj = 1, soil(ielem)%nly
+            soil1(ielem)%hact(ly)%n = chg_par (soil1(ielem)%hact(ly)%n, chg_typ, chg_val, absmin, absmax)
+          end do
+          
+        case ("hum_c_p")
+          do jj = 1, soil(ielem)%nly
+            soil1(ielem)%hact(ly)%p = chg_par (soil1(ielem)%hact(ly)%p, chg_typ, chg_val, absmin, absmax)
+          end do
+          
+      end select
 
       return
       end subroutine cal_parm_select

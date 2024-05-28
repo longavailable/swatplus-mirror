@@ -33,7 +33,7 @@
 
       
       !only proceed if gw-->soil exchange is active
-      if(gw_soil_flag) then
+      if (gw_soil_flag == 1) then
       
         !HRU soil thickness
         hru_soilz = soil(hru_id)%phys(soil(hru_id)%nly)%d / 1000. !m
@@ -63,7 +63,7 @@
               !sum for HRU
               hru_Q = hru_Q + Q
               !solutes
-              if(gw_solute_flag) then
+              if (gw_solute_flag == 1) then
                 !solute mass transferred from aquifer to soil
                 do s=1,gw_nsolute
                   solmass(s) = Q * gwsol_state(cell_id)%solute(s)%conc !g
@@ -112,7 +112,7 @@
             layer_transfer = (hru_Q*layer_fraction) / hru_area_m2 * 1000. !m3 --> mm
             soil(hru_id)%phys(jj)%st = soil(hru_id)%phys(jj)%st + layer_transfer !mm
             gwsoilq(hru_id) = gwsoilq(hru_id) + layer_transfer !store for hru output
-            if(gw_solute_flag) then
+            if (gw_solute_flag == 1) then
               do s=1,gw_nsolute !loop through the solutes
                 layer_transfer = (hru_mass(s)*layer_fraction) / 1000. / ob(hru_id)%area_ha !g --> kg/ha
                 hru_soil(hru_id,jj,s) = hru_soil(hru_id,jj,s) + layer_transfer !kg/ha (mass added to soil profile in nut_nlch, nut_solp, salt_lch, cs_lch)
@@ -123,9 +123,5 @@
         
       endif !check if gw-->soil transfer is active
       
-
       return
-      end subroutine gwflow_soil
-      
-           
-      
+      end subroutine gwflow_soil     

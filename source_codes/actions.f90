@@ -169,7 +169,8 @@
             if (d_tbl%act(iac)%name=='ponding') then !paddy irrigation
               hru(j)%irr_hmax = d_tbl%act(iac)%const !mm
               hru(j)%irr_hmin = d_tbl%act(iac)%const2 !mm
-              irrig(j)%applied = max(0.,d_tbl%act(iac)%const-wet_ob(j)%depth*1000.) * irrop_db(irrop)%eff * (1. - irrop_db(irrop)%surq) !mm
+              irrig(j)%applied = max(0.,d_tbl%act(iac)%const-wet_ob(j)%depth*1000.) * irrop_db(irrop)%eff * &
+                        (1. - irrop_db(irrop)%surq) !mm
               irrig(j)%runoff = max(0.,d_tbl%act(iac)%const-wet_ob(j)%depth*1000.) * irrop_db(irrop)%surq   !mm
               irrig(j)%demand = max(0.,d_tbl%act(iac)%const-wet_ob(j)%depth*1000.) * hru(j)%area_ha * 10.       ! m3 = mm * ha * 10.
             else
@@ -183,7 +184,7 @@
             select case (d_tbl%act(iac)%ob)
             case ("aqu")
               stor_m3 = aqu_d(iob)%stor * aqu_prm(iob)%area_ha * 10.
-              if (stor_m3 * 10. > irrig(j)%demand) then
+              if (stor_m3 > irrig(j)%demand) then
                 rto = irrig(j)%demand / stor_m3                 ! ratio of water removed from aquifer volume (m3)
               else
                 rto = 0.
@@ -671,7 +672,7 @@
                                    
           ! set the amount of water to be diverted
           case ("divert") 
-            ! ob_num is set in wallo_control
+            ! ob_num is set in wallo_demand
             select case (d_tbl%act(iac)%option)
                 
             case ("flo_cms")    !! flow diversion demand to m3
@@ -704,7 +705,25 @@
               end select
                 
             end select
-                                       
+                            
+          ! set the demand from a reservoir
+          case ("res_demand") 
+            j = d_tbl%act(iac)%ob_num
+            if (j == 0) j = ob_cur
+            
+            select case (d_tbl%act(iac)%option)
+            !! demand is to fill to principal spillway
+            case ("storage")
+              if (d_tbl%act(iac)%file_pointer == "pvol") then
+                dmd_m3 = d_tbl%act(iac)%const * res_ob(j)%pvol - res(j)%flo
+                dmd_m3 = Max (0., dmd_m3)
+              end if
+              if (d_tbl%act(iac)%file_pointer == "evol") then
+                dmd_m3 = d_tbl%act(iac)%const * res_ob(j)%evol - res(j)%flo
+                dmd_m3 = Max (0., dmd_m3)
+              end if
+            end select
+                                                                        
           !flow control for water allocation - needs to be modified***
           case ("flow_control") !! set flow fractions in con file
             ! ob_num is the object number of the current channel

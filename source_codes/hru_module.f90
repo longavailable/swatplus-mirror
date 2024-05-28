@@ -372,7 +372,8 @@
       real, dimension (:), allocatable :: sedminpa,sedminps,sedorgn
       real, dimension (:), allocatable :: sedorgp,sedyld,sepbtm
       real, dimension (:), allocatable :: surfq,surqno3
-      real, dimension (:,:), allocatable :: surqsalt,latqsalt,tilesalt,percsalt,gwupsalt,urbqsalt,irswsalt,irgwsalt,wetqsalt,wtspsalt !rtb salt
+      real, dimension (:,:), allocatable :: surqsalt,latqsalt,tilesalt,percsalt,gwupsalt,urbqsalt,irswsalt,irgwsalt,wetqsalt,   &
+                wtspsalt !rtb salt
       real, dimension (:,:), allocatable :: surqcs,latqcs,tilecs,perccs,gwupcs,urbqcs,sedmcs,irswcs,irgwcs,wetqcs,wtspcs !rtb cs
       real, dimension (:), allocatable :: phubase
       real, dimension (:), allocatable :: dormhr

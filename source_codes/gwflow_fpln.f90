@@ -40,7 +40,7 @@
       chan_volume = ch_stor(chan_id)%flo
       
       !only proceed if floodplain option is activated
-      if(gw_fp_flag) then
+      if (gw_fp_flag == 1) then
       
         !loop through the cells connected to the current channel
         do k=1,gw_fpln_info(chan_id)%ncon
@@ -49,7 +49,7 @@
           cell_id = gw_fpln_info(chan_id)%cells(k)
           
           !only proceed if the cell is active
-          if(gw_state(cell_id)%stat.eq.1) then 
+          if (gw_state(cell_id)%stat == 1) then 
           
             !characteristics of channel
             chan_depth = sd_ch(chan_id)%chd !depth (m) of water in channel
@@ -82,8 +82,10 @@
             
             !compare potential Q to available water in cell or channel
             if(Q < 0) then !leaving aquifer
-              if((Q*-1) >= gw_state(cell_id)%stor) then !can only remove what is there       
-                Q = gw_state(cell_id)%stor * (-1)
+              !if ((Q*-1 == 1) >= gw_state(cell_id)%stor) then !can only remove what is there
+              if (-Q >= gw_state(cell_id)%stor) then !can only remove what is there              
+                !Q = gw_state(cell_id)%stor * (-1)
+                Q = -gw_state(cell_id)%stor
               endif
               gw_state(cell_id)%stor = gw_state(cell_id)%stor + Q !remove discharged groundwater
             else !entering aquifer
@@ -94,14 +96,14 @@
             endif
 
             !store for channel object (positive value = water added to channel)
-            ch_stor(chan_id)%flo = ch_stor(chan_id)%flo + (Q*(-1)) 
+            ch_stor(chan_id)%flo = ch_stor(chan_id)%flo + (Q*(-1))
             
             !add to gwflow source/sink arrays
             gw_ss(cell_id)%fpln = gw_ss(cell_id)%fpln + Q
             gw_ss_sum(cell_id)%fpln = gw_ss_sum(cell_id)%fpln + Q
             
             !calculate solute mass (g/day) transported to/from cell
-            if(gw_solute_flag) then
+            if (gw_solute_flag == 1) then
               chan_csol = 0.
               solmass = 0.
               if(Q < 0) then !mass leaving the cell (aquifer --> channel)
@@ -118,14 +120,14 @@
                 ch_stor(chan_id)%solp = ch_stor(chan_id)%solp + (solmass(2)*(-1)/1000.) !kg
                 sol_index = 2
                 !salts
-                if(gwsol_salt) then
+                if (gwsol_salt == 1) then
                   do isalt=1,cs_db%num_salts
                     sol_index = sol_index + 1
                     ch_water(chan_id)%salt(isalt) = ch_water(chan_id)%salt(isalt) + (solmass(sol_index)*(-1)/1000.) !kg   
                   enddo
                 endif
                 !constituents
-                if(gwsol_cons) then
+                if (gwsol_cons == 1) then
                   do ics=1,cs_db%num_cs
                     sol_index = sol_index + 1
                     ch_water(chan_id)%cs(ics) = ch_water(chan_id)%cs(ics) + (solmass(sol_index)*(-1)/1000.) !kg  
@@ -138,14 +140,14 @@
                   chan_csol(2) = (ch_stor(chan_id)%solp * 1000.) / chan_volume !g/m3 in channel  
                   sol_index = 2
                   !salts
-                  if(gwsol_salt) then
+                  if (gwsol_salt == 1) then
                     do isalt=1,cs_db%num_salts
                       sol_index = sol_index + 1
                       chan_csol(sol_index) = (ch_water(chan_id)%salt(isalt) * 1000.) / chan_volume !g/m3 in channel        
                     enddo
                   endif
                   !constituents
-                  if(gwsol_cons) then
+                  if (gwsol_cons == 1) then
                     do ics=1,cs_db%num_cs
                       sol_index = sol_index + 1
                       chan_csol(sol_index) = (ch_water(chan_id)%cs(ics) * 1000.) / chan_volume !g/m3 in channel        
@@ -169,7 +171,7 @@
                 ch_stor(chan_id)%solp = ch_stor(chan_id)%solp - (solmass(2)/1000.) !kg
                 sol_index = 2
                 !salts
-                if(gwsol_salt) then
+                if (gwsol_salt == 1) then
                   do isalt=1,cs_db%num_salts
                     sol_index = sol_index + 1
                     if((solmass(sol_index)/1000.) > ch_water(chan_id)%salt(isalt)) then
@@ -179,7 +181,7 @@
                   enddo
                 endif
                 !constituents
-                if(gwsol_cons) then
+                if (gwsol_cons == 1) then
                   do ics=1,cs_db%num_cs
                     sol_index = sol_index + 1
                     if((solmass(sol_index)/1000.) > ch_water(chan_id)%cs(ics)) then
@@ -203,9 +205,5 @@
       
       endif
       
-      
       return
-      end subroutine gwflow_fpln
-      
-           
-      
+      end subroutine gwflow_fpln  

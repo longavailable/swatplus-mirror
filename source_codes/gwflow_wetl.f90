@@ -33,7 +33,7 @@
       
       
       !only proceed if groundwater-wetland exchange is active
-      if(gw_wet_flag) then
+      if (gw_wet_flag == 1) then
       
         !wetland id
         ires = hru(hru_id)%dbs%surf_stor
@@ -82,7 +82,7 @@
               !add solute mass to wetland
               !(mass is removed from the aquifer via mass balance equation in gwflow_simulate.f)
               mass_transfer = 0.
-              if(gw_solute_flag) then
+              if (gw_solute_flag == 1) then
                 solmass = 0.
                 !remove solute mass from gwflow cell
                 do s=1,gw_nsolute
@@ -114,7 +114,7 @@
         !copy values into the wetland object
         wet_wat_d(hru_id)%seep = wet_seep
         wet_in_d(hru_id)%flo = wet_in_d(hru_id)%flo + wet_inflow
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           wet_in_d(hru_id)%no3 = wet_in_d(hru_id)%no3 + wet_inflow_no3
           wet_in_d(hru_id)%solp = wet_in_d(hru_id)%solp + wet_inflow_solp
           !salts
@@ -122,8 +122,6 @@
         endif
         
       endif !check if groundwater-wetland exchange is active
-      
-      
+          
       return
-      end subroutine gwflow_wetl
-      
+      end subroutine gwflow_wetl    

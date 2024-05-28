@@ -33,7 +33,7 @@
       
       
       !only proceed if reservoir-cell exchange is active
-      if(gw_res_flag) then
+      if (gw_res_flag == 1) then
       
         !record starting reservoir volume (m3)
         res_volume = res(res_id)%flo
@@ -70,10 +70,12 @@
                   Q = res(res_id)%flo
                 endif
               elseif(Q < 0) then !aquifer --> reservoir
-                if((Q*-1).ge.gw_state(cell_id)%stor) then	
-                  Q = gw_state(cell_id)%stor * (-1)	
+                !if((Q*-1 == 1).ge.gw_state(cell_id)%stor) then
+                if (-Q .ge.gw_state(cell_id)%stor) then
+                  !Q = gw_state(cell_id)%stor * (-1)
+                  Q = -gw_state(cell_id)%stor	
                   gw_state(cell_id)%stor = gw_state(cell_id)%stor + Q	
-								endif	
+                endif	
               endif
 
               !store for gwflow water balance calculations (in gwflow_simulate)
@@ -84,7 +86,7 @@
               res_wat_d(res_id)%seep = Q
               
               !calculate solute mass (g/day) transported to/from cell
-              if(gw_solute_flag) then
+              if (gw_solute_flag == 1) then
                 resv_csol = 0.
                 solmass = 0.
                 if(Q < 0) then !mass leaving the cell (aquifer --> reservoir)
@@ -101,14 +103,14 @@
                   res(res_id)%solp = res(res_id)%solp + (solmass(2)*(-1)/1000.) !kg
                   sol_index = 2
                   !salts
-                  if(gwsol_salt) then
+                  if (gwsol_salt == 1) then
                     do isalt=1,cs_db%num_salts
                       sol_index = sol_index + 1
                       res_water(res_id)%salt(isalt) = res_water(res_id)%salt(isalt) + (solmass(sol_index)*(-1)/1000.) !kg   
                     enddo
                   endif
                   !constituents
-                  if(gwsol_cons) then
+                  if (gwsol_cons == 1) then
                     do ics=1,cs_db%num_cs
                       sol_index = sol_index + 1
                       res_water(res_id)%cs(ics) = res_water(res_id)%cs(ics) + (solmass(sol_index)*(-1)/1000.) !kg  
@@ -127,14 +129,14 @@
                     endif
                     sol_index = 2
                     !salts
-                    if(gwsol_salt) then
+                    if (gwsol_salt == 1) then
                       do isalt=1,cs_db%num_salts
                         sol_index = sol_index + 1
                         resv_csol(sol_index) = (res_water(res_id)%salt(isalt) * 1000.) / res_volume !g/m3 in channel        
                       enddo
                     endif
                     !constituents
-                    if(gwsol_cons) then
+                    if (gwsol_cons == 1) then
                       do ics=1,cs_db%num_cs
                         sol_index = sol_index + 1
                         resv_csol(sol_index) = (res_water(res_id)%cs(ics) * 1000.) / res_volume !g/m3 in channel        
@@ -158,7 +160,7 @@
                   res(res_id)%solp = res(res_id)%solp - (solmass(2)/1000.) !kg
                   sol_index = 2
                   !salts
-                  if(gwsol_salt) then
+                  if (gwsol_salt == 1) then
                     do isalt=1,cs_db%num_salts
                       sol_index = sol_index + 1
                       if((solmass(sol_index)/1000.) > res_water(res_id)%salt(isalt)) then
@@ -168,7 +170,7 @@
                     enddo
                   endif
                   !constituents
-                  if(gwsol_cons) then
+                  if (gwsol_cons == 1) then
                     do ics=1,cs_db%num_cs
                       sol_index = sol_index + 1
                       if((solmass(sol_index)/1000.) > res_water(res_id)%cs(ics)) then
@@ -195,5 +197,4 @@
       endif !if reservoir-cell connection is active in the simulation
       
       return
-      end subroutine gwflow_resv
-            
+      end subroutine gwflow_resv         

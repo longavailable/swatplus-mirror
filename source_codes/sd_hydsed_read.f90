@@ -15,21 +15,17 @@
       integer :: imax                 !none         |determine max number for array (imax) and total number in file
       logical :: i_exist              !none         |check to determine if file exists
       integer :: idb                  !             |
-         
+      integer :: ts_sed               !none         |time step for channel sediment routing
+      
       eof = 0
       imax = 0
       maxint = 10
       
-      allocate (timeint(10))    !***jga
-      if (bsn_cc%i_fpwet == 0) then
-        allocate (hyd_rad(10))
-        allocate (trav_time(10))
-        allocate (flo_dep(10))
-      else
-        allocate (hyd_rad(time%step))
-        allocate (trav_time(time%step))
-        allocate (flo_dep(time%step))
-      end if
+      ts_sed = Max (10, time%step)
+      allocate (timeint(ts_sed))
+      allocate (hyd_rad(ts_sed))
+      allocate (trav_time(ts_sed))
+      allocate (flo_dep(ts_sed))
       
       inquire (file=in_cha%hyd_sed, exist=i_exist)
       if (.not. i_exist .or. in_cha%hyd_sed == "null") then
@@ -63,6 +59,41 @@
         
         do idb = 1, db_mx%ch_lte
           read (1,*,iostat=eof) sd_chd(idb)
+          if (eof < 0) exit
+        end do
+
+        exit
+      end do
+      end if
+
+      inquire (file="sed_nut.cha", exist=i_exist)
+      if (.not. i_exist .or. "sed_nut.cha" == "null") then
+        allocate (sd_chd1(1))
+      else
+      do
+        open (1,file="sed_nut.cha")
+        read (1,*,iostat=eof) titldum
+        if (eof < 0) exit
+        read (1,*,iostat=eof) header
+        if (eof < 0) exit
+          do while (eof == 0)
+            read (1,*,iostat=eof) titldum
+            if (eof < 0) exit
+            imax = imax + 1
+          end do  
+          
+        db_mx%ch_sednut = imax
+           
+        allocate (sd_chd1(0:imax))
+
+        rewind (1)
+        read (1,*,iostat=eof) titldum
+        if (eof < 0) exit
+        read (1,*,iostat=eof) header
+        if (eof < 0) exit
+        
+        do idb = 1, db_mx%ch_sednut
+          read (1,*,iostat=eof) sd_chd1(idb)
           if (eof < 0) exit
         end do
 

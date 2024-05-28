@@ -1,4 +1,6 @@
       module dr_module
+    
+      implicit none
                     
       integer, dimension(:), allocatable :: dr_om_num
       integer, dimension(:), allocatable :: dr_pest_num

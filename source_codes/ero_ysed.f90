@@ -71,11 +71,11 @@
       end if
 
 	  !! Particle size distribution of sediment yield
-	  sanyld(j) = sedyld(j) * soil(j)%det_san    !! Sand yield
-	  silyld(j) = sedyld(j) * soil(j)%det_sil    !! Silt yield
-	  clayld(j) = sedyld(j) * soil(j)%det_cla    !! Clay yield
-	  sagyld(j) = sedyld(j) * soil(j)%det_sag    !! Small Aggregate yield
-	  lagyld(j) = sedyld(j) * soil(j)%det_lag    !! Large Aggregate yield
+	  !sanyld(j) = sedyld(j) * soil(j)%det_san    !! Sand yield
+	  !silyld(j) = sedyld(j) * soil(j)%det_sil    !! Silt yield
+	  !clayld(j) = sedyld(j) * soil(j)%det_cla    !! Clay yield
+	  !sagyld(j) = sedyld(j) * soil(j)%det_sag    !! Small Aggregate yield
+	  !lagyld(j) = sedyld(j) * soil(j)%det_lag    !! Large Aggregate yield
 
       !! compute erosion with usle (written to output for comparison)
       usle = 1.292 * usle_ei * cklsp(j) / 11.8

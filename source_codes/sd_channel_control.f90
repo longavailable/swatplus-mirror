@@ -17,6 +17,7 @@
       use ch_cs_module !rtb cs
       use gwflow_module, only: flood_freq !rtb gwflow
       use ch_pesticide_module               !!!  nbs added 7-20-23
+      use channel_velocity_module
       
       implicit none     
     
@@ -43,6 +44,8 @@
       real :: washld                  !tons          |wash load  
       real :: bedld                   !tons          |bed load
       real :: dep                     !tons          |deposition
+      real :: sedp_dep                !kg            |Particulate P deposition MJW
+      real :: orgn_dep                !kg            |Particulate N deposition MJW
       real :: hc_sed                  !tons          |headcut erosion
       real :: chside                  !none          |change in horizontal distance per unit
                                       !              |change in vertical distance on channel side
@@ -93,6 +96,7 @@
       real :: salt_conc(8)            !kg            |salt concentration in channel water
       real :: cs_conc(8)              !kg            |constituent concentration in channel water
       real :: bf_flow                 !m3/s          |bankfull flow rate * adjustment factor
+      
       ich = isdch
       isd_db = sd_dat(ich)%hyd
       iwst = ob(icmd)%wst
@@ -107,6 +111,8 @@
       dep = 0.
       hc = 0.
       hc_sed = 0.
+      sedp_dep = 0.  !MJW 2024
+      orgn_dep = 0.  !MJW 2024
       
       !call ch_rtmusk
       !call ch_rthr
@@ -448,7 +454,9 @@
         arc_len = 0.33 *  (12. * sd_ch(ich)%chw) * sd_ch(ich)%sinu
         hyd_radius = rcurv%xsec_area / rcurv%wet_perim
         prot_len = 0.71 * (rchdep ** 1.1666) / sd_ch(ich)%chn
-        ebank_t = ebank_m * sd_ch(ich)%chd * (arc_len + prot_len) * sd_ch(ich)%ch_bd
+        sd_ch(ich)%cov = 0.2
+        ebank_t = ebank_m * sd_ch(ich)%chd * sd_ch(ich)%cov * sd_ch(ich)%chl * 1000. * sd_ch(ich)%ch_bd
+        ebank_t = 0.8 * ebank_t     !assume 80% wash load and 20% bed deposition
         ebank_t = max (0., ebank_t)
         
           !! no downcutting below equilibrium slope
@@ -458,7 +466,7 @@
           shear_btm = 9800. * rcurv%dep * sd_ch(ich)%chs   !! Pa = N/m^2 * m * m/m
             !! if bottom shear > d50 -> downcut - widen to maintain width depth ratio
             if (shear_btm > shear_btm_cr) then
-              ebtm_m = sd_ch(ich)%cherod * sd_ch(ich)%cov *  (shear_btm - shear_btm_cr)    !! cm = hr * cm/hr/Pa * Pa
+              ebtm_m = sd_ch(ich)%cherod * (shear_btm - shear_btm_cr)    !! cm = hr * cm/hr/Pa * Pa
               !! calc mass of sediment eroded -> t = cm * m/100cm * width (m) * length (km) * 1000 m/km * bd (t/m3)
               ebtm_t = 10. * ebtm_m * sd_ch(ich)%chw * sd_ch(ich)%chl * sd_ch(ich)%ch_bd
             end if
@@ -476,6 +484,9 @@
       bf_flow = sd_ch(ich)%bankfull_flo * ch_rcurv(ich)%elev(2)%flo_rate
       if (peakrate > bf_flow) then
         dep = sd_ch(ich)%chseq * ht1%sed           !((peakrate - bf_flow) / peakrate) * ht1%sed
+        !! deposit Particulate P and N in the floodplain
+        sedp_dep = sd_ch(ich)%chseq * ht1%sedp   !MJW 2024 May need to include a enrichment factor for transported sediment
+        orgn_dep = sd_ch(ich)%chseq * ht1%orgn   !MJW 2024
       end if
       
       !! compute sediment leaving the channel - washload only
@@ -521,6 +532,15 @@
 
         !! reset sed to tons
         ht2%sed = sedout
+        
+        !! subtract nutrients deposited in floodplain
+        ht2%sedp = ht2%sedp - sedp_dep   !MJW 2024
+        ht2%orgn = ht2%orgn - orgn_dep   !MJW 2024
+        
+        !! add nutrients from bank erosion - t * mg/kg (ppm) * kg/1000 mg * 1000 kg/t = kg
+        ht2%orgn = ht2%orgn + ebank_t * sd_ch(ich)%n_conc
+        ht2%sedp = ht2%sedp + ebank_t * sd_ch(ich)%p_conc
+        ht2%solp = ht2%solp + ebank_t * sd_ch(ich)%p_bio
         
         !! route constituents
         call ch_rtpest
@@ -754,9 +774,6 @@
       chsd_d(isdch)%sed_in = ob(icmd)%hin%sed
       chsd_d(isdch)%sed_out = sedout
       chsd_d(isdch)%sed_stor = ch_stor(isdch)%sed
-      if (sedout > 2000.) then      !***jga
-        dep = bedld
-      end if
       chsd_d(isdch)%washld = washld
       chsd_d(isdch)%bedld = bedld
       chsd_d(isdch)%dep = dep
@@ -768,8 +785,10 @@
       chsd_d(isdch)%slope = sd_ch(isdch)%chs
       chsd_d(isdch)%deg_btm_m = ebtm_m
       chsd_d(isdch)%deg_bank_m = ebank_m
-      !chsd_d(isdch)%n_tot = ob(icmd)%hd(1)%orgn + ob(icmd)%hd(1)%no3 + ob(icmd)%hd(1)%nh3 + ob(icmd)%hd(1)%no2
-      !chsd_d(isdch)%p_tot = ob(icmd)%hd(1)%sedp + ob(icmd)%hd(1)%solp
+      chsd_d(isdch)%n_tot = ob(icmd)%hd(1)%orgn + ob(icmd)%hd(1)%no3 + ob(icmd)%hd(1)%nh3 + ob(icmd)%hd(1)%no2
+      chsd_d(isdch)%p_tot = ob(icmd)%hd(1)%sedp + ob(icmd)%hd(1)%solp
+      chsd_d(ich)%dep_bf = sd_ch_vel(ich)%dep_bf
+      chsd_d(ich)%velav_bf = sd_ch_vel(ich)%vel_bf
       
       !! set pesticide output variables
       do ipest = 1, cs_db%num_pests

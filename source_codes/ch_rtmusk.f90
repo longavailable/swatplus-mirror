@@ -72,7 +72,7 @@
       
       qinday = 0
       qoutday = 0
-      ob(icmd)%hd(1) = hz
+      ht2 = hz
       ob(icmd)%hyd_flo = 0.
       hyd_rad = 0.
       trav_time = 0.
@@ -130,6 +130,8 @@
         !! add inflow to total storage
         if (ht1%flo > 1.e-6) then
           rto = inflo / ht1%flo
+          rto = Max(0., rto)
+          rto = Min(1., rto)
           tot_stor(jrch) = tot_stor(jrch) + rto * ht1
         end if
         
@@ -140,25 +142,24 @@
           sd_ch(jrch)%in1_vol = 0.
           sd_ch(jrch)%out1_vol = 0.
         else
-          !***jga
-          !sd_ch(jrch)%msk%c1 = 0.00     !0.1358
-          !sd_ch(jrch)%msk%c2 = 0.2      !0.481484
-          !sd_ch(jrch)%msk%c3 = 0.8      !0.382716
+          if (bsn_cc%rte == 1) then
           !! Muskingum flood routing method
-          outflo = sd_ch(jrch)%msk%c1 * inflo + sd_ch(jrch)%msk%c2 * sd_ch(jrch)%in1_vol +     &
+            outflo = sd_ch(jrch)%msk%c1 * inflo + sd_ch(jrch)%msk%c2 * sd_ch(jrch)%in1_vol +     &
                                                 sd_ch(jrch)%msk%c3 * sd_ch(jrch)%out1_vol
-	      outflo = Min (outflo, tot_stor(jrch)%flo)
-          outflo = Max (outflo, 0.)
+	        outflo = Min (outflo, tot_stor(jrch)%flo)
+            outflo = Max (outflo, 0.)
                
-          !! save inflow/outflow volumes for next time step (and day) for Muskingum
-          sd_ch(jrch)%in1_vol = inflo
-          sd_ch(jrch)%out1_vol = outflo
+            !! save inflow/outflow volumes for next time step (and day) for Muskingum
+            sd_ch(jrch)%in1_vol = inflo
+            sd_ch(jrch)%out1_vol = outflo
+          else
 
-          !! Variable Storage Coefficent method - sc=2*dt/(2*ttime+dt) - ttime=(in2+out1)/2
-          scoef = 2. * dthr / (ch_rcurv(jrch)%in2%ttime + ch_rcurv(jrch)%out1%ttime + dthr)
-          !scoef = Min (scoef, 1.)
-          !outflo = scoef * tot_stor(jrch)%flo
-        
+            !! Variable Storage Coefficent method - sc=2*dt/(2*ttime+dt) - ttime=(in2+out1)/2
+            scoef = 2. * dthr / (ch_rcurv(jrch)%in2%ttime + ch_rcurv(jrch)%out1%ttime + dthr)
+            scoef = Min (scoef, 1.)
+            outflo = scoef * tot_stor(jrch)%flo
+          end if
+          
           !! compute outflow rating curve for next time step
           outflo_rate = outflo / dts      !convert to cms
           call rcurv_interp_flo (jrch, outflo_rate)
@@ -167,7 +168,7 @@
           !! add outflow to daily hydrograph and subdaily flow
           rto = outflo / tot_stor(jrch)%flo
           rto = Min (1., rto)
-          ob(icmd)%hd(1) = ob(icmd)%hd(1) + rto * tot_stor(jrch)
+          ht2 = ht2 + rto * tot_stor(jrch)
           ob(icmd)%hyd_flo(1,irtstep) = ob(icmd)%hyd_flo(1,irtstep) + outflo
           !! subtract outflow from total storage
           tot_stor(jrch) = (1. - rto) * tot_stor(jrch)
@@ -188,28 +189,26 @@
           end if
         
           !! if flood plain link - fill wetlands to emergency if flood plain storage available
-          !if (bsn_cc%i_fpwet == 2) then
-            do ihru = 1, sd_ch(jrch)%fp%hru_tot
-              iihru = sd_ch(jrch)%fp%hru(ihru)
-              ires= hru(iihru)%dbs%surf_stor
-              !! wetland storage can't go above emergency in release dtbl - it becomes flood plain storage
-              if (ires > 0 .and. fp_stor(jrch)%flo > 0.) then
-                if (fp_stor(jrch)%flo > (wet_ob(iihru)%evol - wet(iihru)%flo)) then
-                  rto = (wet_ob(iihru)%evol - wet(iihru)%flo) / fp_stor(jrch)%flo
-                  if (rto > 1.e-6) then
-                    wet(iihru) = wet(iihru) + rto * fp_stor(jrch)
-                    hru(iihru)%wet_obank_in = (rto * fp_stor(jrch)%flo) / (10. * hru(iihru)%area_ha)
-                    rto1 = 1. - rto
-                    fp_stor(jrch) = rto1 * fp_stor(jrch)
-                  end if
-                else
-                  wet(iihru) = wet(iihru) + fp_stor(jrch)
-                  hru(iihru)%wet_obank_in = fp_stor(jrch)%flo /  (10. * hru(iihru)%area_ha) 
-                  fp_stor(jrch) = hz
+          do ihru = 1, sd_ch(jrch)%fp%hru_tot
+            iihru = sd_ch(jrch)%fp%hru(ihru)
+            ires= hru(iihru)%dbs%surf_stor
+            !! wetland storage can't go above emergency in release dtbl - it becomes flood plain storage
+            if (ires > 0 .and. fp_stor(jrch)%flo > 0.) then
+              if (fp_stor(jrch)%flo > (wet_ob(iihru)%evol - wet(iihru)%flo)) then
+                rto = (wet_ob(iihru)%evol - wet(iihru)%flo) / fp_stor(jrch)%flo
+                if (rto > 1.e-6) then
+                  wet(iihru) = wet(iihru) + rto * fp_stor(jrch)
+                  hru(iihru)%wet_obank_in = (rto * fp_stor(jrch)%flo) / (10. * hru(iihru)%area_ha)
+                  rto1 = 1. - rto
+                  fp_stor(jrch) = rto1 * fp_stor(jrch)
                 end if
+              else
+                wet(iihru) = wet(iihru) + fp_stor(jrch)
+                hru(iihru)%wet_obank_in = fp_stor(jrch)%flo /  (10. * hru(iihru)%area_ha) 
+                fp_stor(jrch) = hz
               end if
-            end do
-          !end if
+            end if
+          end do
         
           tot_stor(jrch) = ch_stor(jrch) + fp_stor(jrch)
           
@@ -217,24 +216,35 @@
 
       end do    ! end of sub-daily loop
       
+      !! compute water balance - precip, evap and seep
+      !! km * m * 1000 m/km * ha/10000 m2 = ha
+      ch_wat_d(ich)%area_ha = sd_ch(ich)%chl * sd_ch(ich)%chw / 10.
+      !! m3 = 10. * mm * ha
+      ch_wat_d(ich)%precip = 10. * wst(iwst)%weat%precip * ch_wat_d(ich)%area_ha
+      ch_wat_d(ich)%evap = 10. * bsn_prm%evrch * wst(iwst)%weat%pet * ch_wat_d(ich)%area_ha
+      ch_wat_d(ich)%seep = 10. * sd_ch(ich)%chk * ch_wat_d(ich)%area_ha      !k units to mm/d
+      
+      !! add precip
+      ht2%flo = ht2%flo + ch_wat_d(ich)%precip
+      
       !! calculate transmission losses
-      if (ob(icmd)%hd(1)%flo > 1.e-6) then
+      if (ht2%flo > 1.e-6) then
         !! mm/hr * km * m * 24 / nsteps = m3
         trans_loss = sd_ch(jrch)%chk * sd_ch(jrch)%chl * rcurv%wet_perim * 24.
         trans_loss = Min(trans_loss, tot_stor(jrch)%flo)
         !! subtract transmission loses from outflow
-        if (ob(icmd)%hd(1)%flo > trans_loss) then
-          rto = trans_loss / ob(icmd)%hd(1)%flo
-          ob(icmd)%hd(1) = (1. - rto) * ob(icmd)%hd(1)
+        if (ht2%flo > trans_loss) then
+          rto = trans_loss / ht2%flo
+          ht2 = (1. - rto) * ht2
           ob(icmd)%hyd_flo(1,:) = (1. - rto) * ob(icmd)%hyd_flo(1,:)
         else
-          ob(icmd)%hd(1) = hz
+          ht2 = hz
           ob(icmd)%hyd_flo(1,:) = 0.
         end if
       end if
 
       !! calculate evaporation losses
-      if (ob(icmd)%hd(1)%flo > 1.e-6) then
+      if (ht2%flo > 1.e-6) then
         !! calculate width of channel at water level - flood plain evap calculated in wetlands
         if (dep_flo <= sd_ch(jrch)%chd) then
           topw = ch_rcurv(jrch)%out2%surf_area
@@ -245,18 +255,23 @@
         !! mm/day * m2 / (1000. * sd_ch(jrch)%msk%nsteps)
         evap = bsn_prm%evrch * wst(iwst)%weat%pet * topw / 1000.
         if (evap < 0.) evap = 0.
-        if (ob(icmd)%hd(1)%flo > evap) then
-          rto = evap / outflo
-          ob(icmd)%hd(1) = (1. - rto) * ob(icmd)%hd(1)
+        if (ht2%flo > evap) then
+          if (outflo > 1.e-6) then
+            rto = evap / outflo
+            rto = Min (1., rto)
+          else
+            rto = 0.
+          end if
+          ht2 = (1. - rto) * ht2
           ob(icmd)%hyd_flo(1,:) = (1. - rto) * ob(icmd)%hyd_flo(1,:)
         else
-          ob(icmd)%hd(1) = hz
+          ht2 = hz
           ob(icmd)%hyd_flo(1,:) = 0.
         end if
       end if
 
       !! check water balance at end of day
-      sum_outflo = ob(icmd)%hd(1)%flo
+      sum_outflo = ht2%flo
       inout = sum_inflo - sum_outflo - trans_loss - evap
       !! total wetland volume at end of day
       wet_stor(jrch) = hz

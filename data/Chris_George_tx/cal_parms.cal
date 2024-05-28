@@ -1,5 +1,5 @@
 cal_parms.cal: master
-197
+ 216
 name                       obj_typ       abs_min       abs_max             units  
 cn2                            hru      35.00000      95.00000              null  
 cn3_swf                        hru       0.00000       1.00000              null  
@@ -20,7 +20,7 @@ erorgp                         hru       0.00000       5.00000              null
 dis_stream                     hru       0.00000  100000.00000                 m  
 biomix                         hru       0.00000       1.00000              null  
 perco                          hru       0.00000       1.00000          fraction  
-petco                          hru       0.7           1.3              fraction  
+petco                          hru       0.8           1.2              fraction  
 lat_orgn                       hru       0.00000     200.00000              mg/l  
 lat_orgp                       hru       0.00000     200.00000              mg/l  
 field_len                      hru       0.01000       2.00000                km  
@@ -55,6 +55,9 @@ usle_k                         sol       0.00000       0.65000              null
 ec                             sol       0.00000     100.00000              dS/m  
 cal                            sol       0.00000      65.00000                 %  
 ph                             sol       3.00000      10.00000              null  
+lab_p                          sol       0.00000      30.00000             mg/kg
+hum_c_n                        sol       0.00000      20.00000             mg/kg
+hum_c_p                        sol       0.00000     160.00000             mg/kg
 plaps                          bsn       0.00000     200.00000              null  
 tlaps                          bsn     -10.00000      10.00000              null  
 surlag                         bsn       0.05000      24.00000              days  
@@ -64,16 +67,16 @@ evrch                          bsn       0.50000       1.00000              null
 evlai                          bsn       0.00000      10.00000              null  
 ffcb                           bsn       0.00000       1.00000              null  
 cmn                            bsn       0.00100       0.00300              null  
-nperco                         bsn       0.00000       1.00000              null  
-pperco                         bsn      10.00000      17.50000              null  
-phoskd                         bsn     100.00000     200.00000              null  
+nperco                         bsn       0.00000       1.00000              null 
+nperco_lchtile                 bsn       0.00000       1.00000              null  
+pperco                         bsn       5.00000      20.00000              null  
+phoskd                         bsn     100.00000     400.00000              null  
 psp                            bsn       0.01000       0.70000              null  
 rsdco                          bsn       0.02000       0.10000              null  
 percop                         bsn       0.00000       1.00000              null  
 msk_co1                        bsn       0.00000      10.00000              null  
 msk_co2                        bsn       0.00000      10.00000              null  
 msk_x                          bsn       0.00000       0.30000              null  
-nperco_lchtile                 bsn       0.00000       1.00000              null 
 cdn                            bsn       0.00000       3.00000              null  
 tb_adj                         bsn       0.00000       1.00000              null  
 sdnco                          bsn       0.00000       1.00000              null  
@@ -81,8 +84,8 @@ n_updis                        bsn       0.00000     100.00000              null
 p_updis                        bsn       0.00000     100.00000              null  
 dorm_hr                        bsn       0.00000      24.00000             hours  
 rs1                            swq       0.15000       1.82000              m/hr  
-rs2                            swq       0.00100       0.10000  (mg_disP-P)/((m**2)*hr)  
-rs3                            swq       0.00100       0.10000  (mg_NH4-N)/((m**2)*hr)  
+rs2                            swq       0.00100       0.50000  (mg_disP-P)/((m**2)*hr)  
+rs3                            swq       0.00100       2.00000  (mg_NH4-N)/((m**2)*hr)  
 rs4                            swq       0.00100       0.10000     1/day_or_1/hr  
 rs5                            swq       0.00100       0.10000     1/day_or_1/hr  
 rs6                            swq       0.01000      10.00000             1/day  
@@ -104,7 +107,8 @@ organicn                       swq       0.00000     100.00000              mg/L
 ammonian                       swq       0.00000      50.00000              mg/L  
 nitriten                       swq       0.00000     100.00000              mg/L  
 organicp                       swq       0.00000      25.00000              mg/L  
-disolvp                        swq       0.00000      25.00000              mg/L  
+disolvp                        swq       0.00000      25.00000              mg/L 
+bankfull_flo                   rte       0.50000       1.50000          fraction 
 chw                            rte       0.00000    1000.00000                 m  
 chd                            rte       0.00000      30.00000                 m  
 chs                            rte      -0.00100      10.00000               m/m  
@@ -112,19 +116,32 @@ chl                            rte      -0.05000     500.00000                km
 chn                            rte      -0.01000       0.30000              null  
 chk                            rte      -0.01000     500.00000             mm/hr  
 cherod                         rte      -0.05000       0.60000              null  
-cov                            rte      -0.00100      10.00000              null  
-chseq                          rte       0.00001       0.01000              days  
+cov                            rte      -0.00100      10.00000              null    
 d50                            rte       0.00001    1000.00000                mm  
 ch_clay                        rte       0.00000     100.00000                 %  
 carbon                         rte       0.00000      50.00000                 %  
 ch_bd                          rte       0.90000       1.90000         (g/cm**3)  
 chss                           rte       0.00000       5.00000              null  
-bedldcoef                      rte       0.00000       1.00000              null  
+flood_sedfrac                  rte       0.10000       0.90000          fraction  
 fps                            rte       1.10000       1.90000               m/m  
 fpn                            rte       0.01000       0.50000              null  
+ch_n_conc                      rte       0.00000     500.00000             mg/kg  
+ch_p_conc                      rte       0.00000      50.90000             mg/kg  
+ch_p_bio                       rte       0.00000       1.00000              frac 
 hc_kh                          rte       0.00100       3.75000           cm3/N-s  
 hc_hgt                         rte       0.05000       5.00000                 m  
 hc_ini                         rte       0.00000   10000.00000                 m  
+pk_rto                         rte       1.00000       3.00000              null  
+fp_inun_days                   rte       0.05000      30.00000              days
+n_setl                         rte       0.05000       0.90000              frac  
+p_setl                         rte       0.05000       0.90000              frac  
+n_sol_part                     rte       0.00100       0.10000              null  
+p_sol_part                     rte       0.00100       0.10000              null  
+n_dep_enr                      rte       0.20000       1.00000              frac  
+p_dep_enr                      rte       0.20000       1.00000              frac  
+arc_len_fr                     rte       0.50000       2.00000              frac  
+part_size                      rte       0.00100       0.01000                mm  
+wash_bed_fr                    rte       0.00000       0.80000              frac  
 vol                            res      10.00000     100.00000              m**3  
 sed                            res       1.00000    5000.00000              kg/L  
 orgp                           res       0.00000       1.00000                kg  
@@ -144,6 +161,8 @@ psetlr1                        res       2.00000      20.00000             m/day
 psetlr2                        res       2.00000      20.00000             m/day  
 nsetlr1                        res       1.00000      15.00000             m/day  
 nsetlr2                        res       1.00000      15.00000             m/day  
+sed_stlr                       res       0.10000       2.00000              none   
+velsetlr                       res       0.10000      15.00000             m/day  
 chlar                          res       0.50000       2.00000              none  
 seccir                         res       0.50000       2.00000              none  
 alpha                          aqu       0.00000       1.00000              days  
@@ -159,7 +178,7 @@ minp_init                      aqu       0.00000      10.00000                kg
 no3_init                       aqu       0.00000      30.00000               ppm
 sp_yld                         aqu       0.00000       0.50000          fraction  
 flo_min                        aqu       0.00000      50.00000                 m  
-revap_co                       aqu       0.00000       0.20000              null  
+revap_co                       aqu       0.02000       0.20000              null  
 revap_min                      aqu       0.00000      50.00000                 m  
 cn2_lte                        hlt      25.00000      98.00000              null  
 awc_lte                        hlt       0.01000       1.00000         mm_H20/mm  
@@ -185,7 +204,7 @@ pst_koc                        pst       0.00000       1.00000            m**3/g
 pst_washoff                    pst       0.00000       1.00000              null  
 pst_foliar_hlife               pst       0.00000   10000.00000              days  
 pst_soil_hlife                 pst       0.00000  100000.00000              days  
-pst_solub                      pst       0.00000  11000000.00000              mg/L  
+pst_solub                      pst       0.00000  11000000.00000            mg/L  
 pst_aq_hlife                   pst       0.00000   10000.00000             1/day  
 pst_aq_volat                   pst       0.00000      10.00000             m/day  
 pst_aq_settle                  pst       0.00000      10.00000             m/day  
@@ -193,8 +212,8 @@ pst_aq_resus                   pst       0.00000       1.00000             m/day
 pst_ben_hlife                  pst       0.00000   10000.00000             1/day  
 pst_ben_bury                   pst       0.00000       0.10000             m/day  
 pst_ben_act_dep                pst       0.00000       1.00000                 m
-phu_mat                        plt       50.00000    6000.00000            deg_C
-lai_pot                        plt        0.01000      12.00000              m/m
-harv_idx                       plt        0.01000       0.95000             null
-drawdown_days                  rdt        0.05000      5000.000             days
-withdrawal_rate                rdt        0.00000    100000.000             m3/s
+phu_mat                        plt      50.00000    6000.00000             deg_C
+lai_pot                        plt       0.01000      12.00000               m/m
+harv_idx                       plt       0.01000       0.95000              null
+drawdown_days                  rdt       0.05000      5000.000              days
+withdraw_rate                  rdt       0.00000    100000.000              m3/s

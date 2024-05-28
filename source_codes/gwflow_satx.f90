@@ -24,7 +24,7 @@
 
       
       !only proceed if groundwater saturation excess flow is simulation
-      if(gw_satx_flag) then
+      if (gw_satx_flag == 1) then
       
         !loop through the cells connected to the channel
         do k=1,gw_satx_info(chan_id)%ncon
@@ -51,7 +51,7 @@
               ch_stor(chan_id)%flo = ch_stor(chan_id)%flo + satx_volume
               
               !solutes
-              if(gw_solute_flag) then
+              if (gw_solute_flag == 1) then
                 !solute mass leaving with saturation excess flow
                 do s=1,gw_nsolute
                   solmass(s) = satx_volume * gwsol_state(cell_id)%solute(s)%conc !g
@@ -66,14 +66,14 @@
                 ch_stor(chan_id)%solp = ch_stor(chan_id)%solp + (solmass(2)/1000.) !kg
                 sol_index = 2
                 !salts
-                if(gwsol_salt) then
+                if (gwsol_salt == 1) then
                   do isalt=1,cs_db%num_salts
                     sol_index = sol_index + 1
                     ch_water(chan_id)%salt(isalt) = ch_water(chan_id)%salt(isalt) + (solmass(sol_index)/1000.) !kg   
                   enddo
                 endif
                 !constituents
-                if(gwsol_cons) then
+                if (gwsol_cons == 1) then
                   do ics=1,cs_db%num_cs
                     sol_index = sol_index + 1
                     ch_water(chan_id)%cs(ics) = ch_water(chan_id)%cs(ics) + (solmass(sol_index)/1000.) !kg  
@@ -88,10 +88,6 @@
         enddo !go to next connected cell
         
       endif !check if saturation excess flow is being simulated
-              
-              
+                            
       return
-      end subroutine gwflow_satx
-      
-           
-      
+      end subroutine gwflow_satx      

@@ -87,7 +87,7 @@
           
           !add solute mass in irrigation water to HRU soil profile
           !(mass is removed from the aquifer via mass balance equation in gwflow_simulate.f)     
-          if(gw_solute_flag) then
+          if (gw_solute_flag == 1) then
             !determine the mass (kg) removed for irrigation water 
             do s=1,gw_nsolute !loop through the solutes
               gw_mass = gwsol_state(cell_id)%solute(s)%mass / 1000. !kg in cell
@@ -107,7 +107,7 @@
               wet(hru_id)%solp = wet(hru_id)%solp + irr_mass(2) !kg
               sol_index = 2
               !salts
-              if(gwsol_salt) then
+              if (gwsol_salt == 1) then
                 do isalt=1,cs_db%num_salts
                   sol_index = sol_index + 1
                   wet_water(hru_id)%salt(isalt) = wet_water(hru_id)%salt(isalt) + irr_mass(sol_index) !kg
@@ -115,7 +115,7 @@
                 enddo
               endif
               !constituents
-              if(gwsol_cons) then
+              if (gwsol_cons == 1) then
                 do ics=1,cs_db%num_cs
                   sol_index = sol_index + 1
                   wet_water(hru_id)%cs(ics) = wet_water(hru_id)%cs(ics) + irr_mass(sol_index) !kg  
@@ -128,7 +128,7 @@
               soil1(hru_id)%mp(1)%lab = soil1(hru_id)%mp(1)%lab + (irr_mass(2)/hru(hru_id)%area_ha) !kg/ha - add to soil layer
               sol_index = 2
               !salts
-              if(gwsol_salt) then
+              if (gwsol_salt == 1) then
                 do isalt=1,cs_db%num_salts
                   sol_index = sol_index + 1
                   cs_soil(hru_id)%ly(1)%salt(isalt) = cs_soil(hru_id)%ly(1)%salt(isalt) + (irr_mass(sol_index)/hru(hru_id)%area_ha) !kg/ha - add to soil layer
@@ -136,7 +136,7 @@
                 enddo
               endif
               !constituents
-              if(gwsol_cons) then
+              if (gwsol_cons == 1) then
                 do ics=1,cs_db%num_cs
                   sol_index = sol_index + 1
                   cs_soil(hru_id)%ly(1)%cs(ics) = cs_soil(hru_id)%ly(1)%cs(ics) + (irr_mass(sol_index)/hru(hru_id)%area_ha) !kg/ha - add to soil layer
@@ -158,6 +158,4 @@
       !store pumping (m3) for the HRU
       hru_pump(hru_id) = sum_pump
       
-      
-      end subroutine gwflow_ppag
-      
+      end subroutine gwflow_ppag     

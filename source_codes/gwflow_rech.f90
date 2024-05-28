@@ -42,7 +42,7 @@
         gw_rech(k) = 0.
         gw_rech(k) = ((1.-gw_delay(k))*gwflow_perc(k)) + (gw_delay(k)*recharge)
         if (gw_rech(k) < 1.e-6) gw_rech(k) = 0.
-        if(gw_solute_flag) then
+        if (gw_solute_flag == 1) then
           do s=1,gw_nsolute !loop through the solutes
             recharge_sol = gw_rechsol(k,s)
             gw_rechsol(k,s) = ((1.-gw_delay(k))*gwflow_percsol(k,s)) + (gw_delay(k)*recharge_sol)
@@ -51,13 +51,13 @@
       enddo
       
       !use hru recharge to calculate recharge (m3) cell values
-      if(lsu_cells_link) then !LSU-cell connection
+      if (lsu_cells_link == 1) then !LSU-cell connection
       
         !loop through the landscape units
         do k=1,db_mx%lsu_out
           !sum recharge (m3) for each LSU (based on collection of HRUs within the LSU)
           rech_volume = 0.
-          if(gw_solute_flag) then
+          if (gw_solute_flag == 1) then
             rech_solmass = 0.
 					endif
           do j=1,lsu_out(k)%num_tot
@@ -65,7 +65,7 @@
             ob_num = sp_ob1%hru + hru_id - 1
             hru_recharge = (gw_rech(hru_id)/1000.) * (ob(ob_num)%area_ha * 10000.) !m * m2 = m3
             rech_volume = rech_volume + hru_recharge
-            if(gw_solute_flag) then
+            if (gw_solute_flag == 1) then
               do s=1,gw_nsolute !loop through the solutes
                 rech_solmass(s) = rech_solmass(s) + (gw_rechsol(hru_id,s)*ob(ob_num)%area_ha*1000.) !g
               enddo
@@ -90,7 +90,7 @@
 			else !proceed with HRU-cell connection
       
       !map recharge from the HRUs to the grid cells
-      if(nat_model) then !national model application
+      if (nat_model == 1) then !national model application
         !loop through the HUC12 subwatersheds
         cell_received = 0
         ob_num = sp_ob1%hru  !object number of first HRU
@@ -105,7 +105,7 @@
             hru_id = huc12_hrus(n,k)
             rech_volume = (gw_rech(hru_id)/1000.) * (ob(ob_num)%area_ha * 10000.) !m * m2 = m3
             hru_total = hru_total + rech_volume
-            if(gw_solute_flag) then
+            if (gw_solute_flag == 1) then
               do s=1,gw_nsolute !loop through the solutes
                 rech_solmass(s) = gw_rechsol(hru_id,s) * ob(ob_num)%area_ha * 1000. !g
               enddo
@@ -118,7 +118,7 @@
                 hru_cell_total = hru_cell_total + cell_rech_volume
                 gw_ss(cell_id)%rech = gw_ss(cell_id)%rech + cell_rech_volume
                 gw_ss_sum(cell_id)%rech = gw_ss_sum(cell_id)%rech + cell_rech_volume
-                if(gw_solute_flag) then
+                if (gw_solute_flag == 1) then
                   do s=1,gw_nsolute !loop through the solutes
                     cell_rech_solmass(s) = rech_solmass(s) * hru_cells_fract(hru_id,i)
                     gwsol_ss(cell_id)%solute(s)%rech = gwsol_ss(cell_id)%solute(s)%rech + cell_rech_solmass(s)
@@ -128,7 +128,7 @@
               enddo      
             else
               sub_recharge = sub_recharge + rech_volume
-              if(gw_solute_flag) then
+              if (gw_solute_flag == 1) then
                 do s=1,gw_nsolute !loop through the solutes
                   sub_solmass(s) = sub_solmass(s) + rech_solmass(s)  
                 enddo
@@ -149,7 +149,7 @@
           !only proceed if there are unconnected cells (i.e. cell_count > 0)
           if(cell_count.gt.0) then
             cell_rech_volume = sub_recharge / cell_count
-            if(gw_solute_flag) then
+            if (gw_solute_flag == 1) then
               do s=1,gw_nsolute !loop through the solutes
                 cell_rech_solmass(s) = sub_solmass(s) / cell_count
               enddo
@@ -161,7 +161,7 @@
                 gw_ss(cell_id)%rech = cell_rech_volume
                 huc12_cell_total = huc12_cell_total + cell_rech_volume
                 gw_ss_sum(cell_id)%rech = gw_ss_sum(cell_id)%rech + cell_rech_volume    
-                if(gw_solute_flag) then
+                if (gw_solute_flag == 1) then
                   do s=1,gw_nsolute !loop through the solutes
                     gwsol_ss(cell_id)%solute(s)%rech = cell_rech_solmass(s)
                     gwsol_ss_sum(cell_id)%solute(s)%rech = gwsol_ss_sum(cell_id)%solute(s)%rech + cell_rech_solmass(s)
@@ -175,17 +175,17 @@
         ob_num = sp_ob1%hru  !object number of first HRU
         do k=1,sp_ob%hru
           rech_volume = (gw_rech(k)/1000.) * (ob(ob_num)%area_ha * 10000.) !m * m2 = m3
-          if(gw_solute_flag) then
+          if (gw_solute_flag == 1) then
             do s=1,gw_nsolute !loop through the solutes
               rech_solmass(s) = gw_rechsol(k,s) * ob(ob_num)%area_ha * 1000. !g
             enddo
-					endif
+          endif
           do i=1,hru_num_cells(k)
             cell_id = hru_cells(k,i)
             cell_rech_volume = rech_volume * hru_cells_fract(k,i)
             gw_ss(cell_id)%rech = gw_ss(cell_id)%rech + cell_rech_volume
             gw_ss_sum(cell_id)%rech = gw_ss_sum(cell_id)%rech + cell_rech_volume
-            if(gw_solute_flag) then
+            if (gw_solute_flag == 1) then
               do s=1,gw_nsolute !loop through the solutes
                 cell_rech_solmass(s) = rech_solmass(s) * hru_cells_fract(k,i)
                 gwsol_ss(cell_id)%solute(s)%rech = gwsol_ss(cell_id)%solute(s)%rech + cell_rech_solmass(s)
@@ -198,8 +198,6 @@
       endif
       
       endif !check for LSU-cell connection
-      
-      
+       
       return
-      end subroutine gwflow_rech
-      
+      end subroutine gwflow_rech      

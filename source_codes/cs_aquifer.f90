@@ -1,5 +1,7 @@
       !module for constituent mass balance in aquifers (rtb cs)
       module cs_aquifer
+      
+      implicit none
 
       type cs_balance_aqu
         real :: csgw = 0.            !! |kg       |mass loaded to streams from the aquifer

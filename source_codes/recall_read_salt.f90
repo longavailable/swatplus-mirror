@@ -198,7 +198,8 @@
               if (rec_salt(i)%typ == 0) then
                 !nothing
               else
-                read (108,*,iostat=eof) jday, mo, day_mo, iyr, ob_typ, ob_name, (rec_salt(i)%hd_salt(istep,iyrs)%salt(isalt),isalt=1,cs_db%num_salts)
+                read (108,*,iostat=eof) jday, mo, day_mo, iyr, ob_typ, ob_name,         &
+                   (rec_salt(i)%hd_salt(istep,iyrs)%salt(isalt),isalt=1,cs_db%num_salts)
               end if
               if (eof < 0) exit
               select case (rec_salt(i)%typ)
@@ -244,6 +245,5 @@
       enddo
       endif
       
-
       return
       end subroutine recall_read_salt

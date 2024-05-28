@@ -33,7 +33,7 @@
       mass_rct(sol_index) = gwsol_state(cell_id)%solute(sol_index)%conc * gw_vol * gwsol_rctn(sol_index)	!g/day
       
       !salt ions
-      if(gwsol_salt) then
+      if (gwsol_salt == 1) then
         do isalt=1,cs_db%num_salts
           sol_index = sol_index + 1
           mass_rct(sol_index) = gwsol_state(cell_id)%solute(sol_index)%conc * gw_vol * gwsol_rctn(sol_index)	!g/day
@@ -41,7 +41,7 @@
       endif
       
       !constituents
-      if(gwsol_cons) then
+      if (gwsol_cons == 1) then
       
         !retrieve current concentrations (g/m3) in the cell
         cno3 = gwsol_state(cell_id)%solute(1)%conc
@@ -64,7 +64,7 @@
         se_prod_no3 = 0.
         do n=1,gwsol_chem(cell_id)%nshale
           !if cell contains shale
-          if(gwsol_chem(cell_id)%shale(n) == 1) then
+          if (gwsol_chem(cell_id)%shale(n) == 1) then
             !reduction of o2
             ko2a = gwsol_chem(cell_id)%shale_o2a(n)
             o2red = ko2a * o2 !g/m3-d
@@ -97,9 +97,5 @@
         mass_rct(sol_index) = gwsol_state(cell_id)%solute(sol_index)%conc * gw_vol * gwsol_rctn(sol_index)	!g/day
         
       endif !if constituents are active
-      
-      
-      end subroutine gwflow_chem
-      
-           
-      
+         
+      end subroutine gwflow_chem     

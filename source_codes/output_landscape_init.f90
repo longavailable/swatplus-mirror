@@ -454,6 +454,12 @@
  !!!NEW SOIL TRANSFORMATIONS CARBON OUTPUT     
        
 !!! NEW SOILC_STAT/RESC_STAT/PLC_STAT CARBON OUTPUT FILES
+
+        !! write carbon in soil by layer
+        open (9999,file = "hru_cbn_lyr.txt", recl = 1500)
+          write (9999,*)  bsn%name, prog
+          write (9999,*) "        jday        mon          day       year hru     name               total soil carbon (kg/ha) by layer "
+    
         !! write carbon in soil, plant, and residue
         open (4560,file = "hru_plc_stat.txt", recl = 1500)
         if (pco%nb_hru%a == "y") then

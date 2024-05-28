@@ -20,7 +20,7 @@
       
       
       !only proceed if external pumping has been specified
-      if(gw_pumpex_flag) then
+      if (gw_pumpex_flag == 1) then
       
         !loop through pumps and specified pumping periods; apply rate to the associated grid cells
         do i=1,gw_npumpex
@@ -47,7 +47,7 @@
                 gw_ss(cell_id)%ppex = gw_ss(cell_id)%ppex - Q !negative = leaving the aquifer
                 gw_ss_sum(cell_id)%ppex = gw_ss_sum(cell_id)%ppex - Q 
                 !if chemical transport simulated, calculate the mass of N and P removed via pumping
-                if(gw_solute_flag) then
+                if (gw_solute_flag == 1) then
                   do s=1,gw_nsolute !loop through the solutes
                     solmass(s) = Q * gwsol_state(cell_id)%solute(s)%conc !g
                     gwsol_ss(cell_id)%solute(s)%ppex = gwsol_ss(cell_id)%solute(s)%ppex - solmass(s)
@@ -63,7 +63,5 @@
         enddo !go to next pump
         
       endif
-      
-      
-      end subroutine gwflow_ppex
-      
+       
+      end subroutine gwflow_ppex     

@@ -128,7 +128,8 @@
       IF(soil1(j)%microb(1)%c > .01) THEN
           PRMT_21 = 0.  !KOC FOR CARBON LOSS IN WATER AND SEDIMENT(500._1500.) KD = KOC * C
           PRMT_21 = 1000.
-          soil1(j)%water(1)%c = rsd1(j)%tot_str%c + rsd1(j)%tot_meta%c + soil1(j)%hsta(1)%c + soil1(j)%hact(1)%c + soil1(j)%microb(1)%c 
+          soil1(j)%water(1)%c = rsd1(j)%tot_str%c + rsd1(j)%tot_meta%c + soil1(j)%hsta(1)%c + soil1(j)%hact(1)%c + &
+                soil1(j)%microb(1)%c 
           DK = .0001 * PRMT_21 * soil1(j)%water(1)%c
           !X1=PO(LD1)-S15(LD1)
           X1 = soil(j)%phys(1)%por*soil(j)%phys(1)%d-soil(j)%phys(1)%wpmm !mm

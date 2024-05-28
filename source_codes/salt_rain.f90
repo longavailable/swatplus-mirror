@@ -50,7 +50,8 @@
             hsaltb_d(j)%salt(isalt)%rain = .01 * atmodep_salt(iadep)%salt(isalt)%rfmo(ist) * w%precip  !kg/ha
             hsaltb_d(j)%salt(isalt)%dryd = atmodep_salt(iadep)%salt(isalt)%drymo(ist) / const  !kg/ha
             !add both to soil profile  
-            cs_soil(j)%ly(1)%salt(isalt) = cs_soil(j)%ly(1)%salt(isalt) + (hsaltb_d(j)%salt(isalt)%rain + hsaltb_d(j)%salt(isalt)%dryd)
+            cs_soil(j)%ly(1)%salt(isalt) = cs_soil(j)%ly(1)%salt(isalt) + (hsaltb_d(j)%salt(isalt)%rain + & 
+                hsaltb_d(j)%salt(isalt)%dryd)
 					enddo
         end if 
         
@@ -62,7 +63,8 @@
             hsaltb_d(j)%salt(isalt)%rain = .01 * atmodep_salt(iadep)%salt(isalt)%rfyr(ist) * w%precip  !kg/ha
             hsaltb_d(j)%salt(isalt)%dryd = atmodep_salt(iadep)%salt(isalt)%dryyr(ist) / 365.  !kg/ha
             !add both to soil profile  
-            cs_soil(j)%ly(1)%salt(isalt) = cs_soil(j)%ly(1)%salt(isalt) + (hsaltb_d(j)%salt(isalt)%rain + hsaltb_d(j)%salt(isalt)%dryd)
+            cs_soil(j)%ly(1)%salt(isalt) = cs_soil(j)%ly(1)%salt(isalt) + (hsaltb_d(j)%salt(isalt)%rain +   &
+               hsaltb_d(j)%salt(isalt)%dryd)
 					enddo  
         endif
         
@@ -76,12 +78,12 @@
           hsaltb_d(j)%salt(isalt)%rain = .01 * atmodep_salt(iadep)%salt(isalt)%rf * w%precip  !kg/ha
           hsaltb_d(j)%salt(isalt)%dryd = atmodep_salt(iadep)%salt(isalt)%dry / 365.  !kg/ha
           !add both to soil profile  
-          cs_soil(j)%ly(1)%salt(isalt) = cs_soil(j)%ly(1)%salt(isalt) + (hsaltb_d(j)%salt(isalt)%rain + hsaltb_d(j)%salt(isalt)%dryd)
+          cs_soil(j)%ly(1)%salt(isalt) = cs_soil(j)%ly(1)%salt(isalt) + (hsaltb_d(j)%salt(isalt)%rain +  &
+             hsaltb_d(j)%salt(isalt)%dryd)
 				enddo
       endif
 		
       endif
-      
-      
+       
       return
       end subroutine salt_rain

@@ -28,13 +28,15 @@
       use soil_module
       use basin_module
       use gwflow_module, only : gwflow_percsol,gw_solute_flag,hru_soil
+      
+      implicit none
 
-      integer :: j,jj
+      integer :: j,jj,gw_soil_flag
       integer :: ics
       integer :: sol_index
       real :: cocs,cosurfcs,perccslyr(3),ssfcslyr,vcs
       real :: hru_area_m2,water_volume,cs_mass_kg
-      real :: ro_mass
+      real :: ro_mass,sro,vv,ww
 
 
       j = 0
@@ -42,7 +44,7 @@
 
       
       !rtb gwflow: add constituent mass transferred to soil profile from the aquifer; store for cs balance
-      if(gw_soil_flag == 1 .and. gw_solute_flag) then
+      if(gw_soil_flag == 1 .and. gw_solute_flag == 1) then
         do jj = 1, soil(j)%nly
           sol_index = 2 + cs_db%num_salts
           do ics=1,cs_db%num_cs
@@ -128,7 +130,7 @@
         perccs(j,ics) = perccslyr(ics)
         
         !! if gwflow: store in array for use input_file_module gwflow_rech
-        if(bsn_cc%gwflow .and. gw_solute_flag) then
+        if(bsn_cc%gwflow == 1 .and. gw_solute_flag == 1) then
           gwflow_percsol(j,sol_index) = perccslyr(ics)
         endif
         

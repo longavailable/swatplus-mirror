@@ -303,9 +303,10 @@
       type (cs_irrigation_concentrations), dimension(:),allocatable:: cs_water_irr
       
       !daily output for constituents                
-      logical :: cs_obs_file                               !                |flag: file for channels with daily output
-      integer :: cs_str_nobs                               !                |number of channels for daily output
-      integer, dimension (:), allocatable :: cs_str_obs    !                |list of channels for daily output
+      !logical :: cs_obs_file                               !               |flag: file for channels with daily output
+      integer :: cs_obs_file                                !               |flag: file for channels with daily output      
+      integer :: cs_str_nobs                                !                |number of channels for daily output
+      integer, dimension (:), allocatable :: cs_str_obs     !                |list of channels for daily output
       
       
       !header for routing unit salt balance output

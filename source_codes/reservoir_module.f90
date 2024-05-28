@@ -1,4 +1,6 @@
       module reservoir_module
+    
+      implicit none
 
       real :: reactw                  !mg pst        |amount of pesticide in reach that is lost through reactions
       real :: volatpst                !mg pst        |amount of pesticide lost from reach by volatilization

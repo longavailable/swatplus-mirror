@@ -17,7 +17,7 @@
       
       
       !print out daily conc and loads for specified channels (in cs_streamobs file)
-      if(cs_obs_file) then
+      if(cs_obs_file == 1) then
       
         !prepare daily data
         line_array = 0.

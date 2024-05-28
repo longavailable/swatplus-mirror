@@ -4,13 +4,14 @@
       use hydrograph_module
       use maximum_data_module
       use calibration_data_module
+      use hru_module
 
       implicit none
       
       integer :: date_time(8)           !              |
       character*10 b(3)                 !              |
     
-      prog = " SWAT+ Feb 26 2024        MODULAR Rev 2024.61.0"
+      prog = " SWAT+ May 28 2024        MODULAR Rev 2024.61.0"
 
       write (*,1000)
       open (9003,file='simulation.out')
@@ -84,12 +85,18 @@
       call wet_read
       call wet_read_salt_cs
       if (db_mx%wet_dat > 0) call wet_all_initial
-      if (bsn_cc%i_fpwet == 2) call wet_fp_init
+      call wet_fp_init
       
       call proc_cal
       
       call proc_open
       
+      !! initialize carbon and nutrient contents for each hru
+      do ihru = 1, sp_ob%hru
+        isol = hru(ihru)%dbs%soil
+        call soil_nutcarb_init(isol)
+      end do
+        
       ! compute unit hydrograph parameters for subdaily runoff
       call unit_hyd_ru_hru
 
@@ -108,7 +115,6 @@
       else
         call time_control
       end if
-      
       
       if (cal_soft == "y") call calsoft_control
       

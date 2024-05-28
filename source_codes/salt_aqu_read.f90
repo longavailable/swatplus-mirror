@@ -4,6 +4,8 @@
       use constituent_mass_module
       use input_file_module
       use maximum_data_module
+      
+      implicit none
  
       character (len=80) :: titldum
       character (len=80) :: header
@@ -64,7 +66,6 @@
           exit
         end do
       end if
-      
 
       return
       end subroutine salt_aqu_read

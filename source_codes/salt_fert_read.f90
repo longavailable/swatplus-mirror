@@ -7,6 +7,8 @@
       use input_file_module
       use maximum_data_module
       use salt_module
+      
+      implicit none
  
       character (len=80) :: titldum
       character (len=80) :: header

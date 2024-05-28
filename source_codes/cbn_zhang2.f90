@@ -358,7 +358,7 @@
           !end if
           
           if (org_con%sut >= bsn_prm%sdnco) then
-            wdn = soil1(j)%mn(k)%no3 * (1.-Exp(-bsn_prm%cdn * cdg * soil1(j)%cbn(k) / 100.))
+            wdn = soil1(j)%mn(k)%no3 * (1.-Exp(-bsn_prm%cdn * org_con%cdg * soil1(j)%cbn(k) / 100.))
           else
             wdn = 0.
           endif
@@ -888,8 +888,10 @@
               
               !!update other vairables used in swat
               !!==================================
-              soil1(j)%tot(k)%m = soil1(j)%str(k)%m + soil1(j)%meta(k)%m            
-              soil1(j)%tot(k)%c = 100. * (soil1(j)%hs(k)%c + soil1(j)%hp(k)%c + soil1(j)%microb(k)%c) / sol_mass 
+              !soil1(j)%tot(k)%m = soil1(j)%str(k)%m + soil1(j)%meta(k)%m
+              !soil1(j)%tot(k)%c = 100. * (soil1(j)%hs(k)%c + soil1(j)%hp(k)%c + soil1(j)%microb(k)%c) / sol_mass 
+              soil1(j)%tot(k)%c = soil1(j)%hs(k)%c + soil1(j)%hp(k)%c + soil1(j)%microb(k)%c +      &
+                                       soil1(j)%meta(k)%c + soil1(j)%str(k)%c + soil1(j)%lig(k)%c
         end if  !soil temp and soil water > 0.
 
       end do      !soil layer loop

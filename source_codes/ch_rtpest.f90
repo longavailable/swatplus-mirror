@@ -160,7 +160,7 @@
           !! calculate amount of pesticide that undergoes chemical or biological degradation on day in reach
           pest_init = chpstmass
           if (pest_init > 1.e-12) then
-            pest_end = chpstmass * pestcp(jpst)%decay_a * tday
+            pest_end = chpstmass * (pestcp(jpst)%decay_a * tday)
             chpstmass = pest_end
             chpst%pest(ipest)%react = pest_init - pest_end
             !! add decay to daughter pesticides
@@ -272,7 +272,8 @@
         ch_benthic(jrch)%pest(ipest) = sedpstmass
 
         !! calculate outflow and storage in water column
-        rto_out = ht2%flo / (ht2%flo + ch_stor(jrch)%flo)
+        rto_out = ht2%flo / (1.e-6 + ht2%flo + ch_stor(jrch)%flo)
+        rto_out = Min (1., rto_out)
         hcs2%pest(ipest) = rto_out * chpstmass
         ch_water(jrch)%pest(ipest) = (1. - rto_out) * chpstmass
         

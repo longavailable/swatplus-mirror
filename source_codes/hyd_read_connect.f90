@@ -305,7 +305,7 @@
                       endif
                     enddo
                   endif
-                  if(aqu_found.eq.1 .and. nat_model) then
+                  if(aqu_found.eq.1 .and. nat_model == 1) then
                     ob(i)%src_tot = ob(i)%src_tot - 1
                   endif
                   

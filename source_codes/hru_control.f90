@@ -42,7 +42,7 @@
 
       integer :: j                  !none          |same as ihru (hru number)
       integer :: j1                 !none          |counter (rtb)
-      real :: ulu                   !              | 
+      integer :: ulu                !              | 
       integer :: iob                !              |
       integer :: ith                !              |
       integer :: iwgn               !              |
@@ -134,7 +134,8 @@
       !! zero pesticide balance variables
       if (cs_db%num_pests > 0) then
         do ipest = 1, cs_db%num_pests
-          hpestb_d(j)%pest(ipest) = pestbz
+          !! zero all variables except pest in soil and in/on plant
+          hpestb_d(j)%pest(ipest) = hpestb_d(j)%pest(ipest) * 0.
         end do
       end if
         
@@ -236,7 +237,8 @@
           !!route incoming surface runoff
           if (ires > 0) then
             !! add surface runon to wetland
-            wet(j) = wet(j) + ob(icmd)%hin_sur + tile_fr_surf * ob(icmd)%hin_til
+            ht1 = ob(icmd)%hin_sur + tile_fr_surf * ob(icmd)%hin_til
+            wet(j) = wet(j) + ht1
           else
             !! route across hru - infiltrate and deposit sediment
             call rls_routesurf (icmd, tile_fr_surf)
@@ -293,6 +295,8 @@
         endif
         
         !! wetland/paddy processes
+        ht2 = hz
+        wet_outflow = 0.
         if (ires > 0) then
           call wetland_control
         else
@@ -351,8 +355,13 @@
 	      call cbn_zhang2
 	    end if
 
-        call nut_nitvol  
-        call nut_pminrl
+        call nut_nitvol
+
+	    if (bsn_cc%sol_P_model == 1) then  
+          call nut_pminrl2
+        else
+          call nut_pminrl
+        end if
         
         !! compute biozone processes in septic HRUs
         !! if 1) current is septic hru and 2) soil temperature is above zero
@@ -512,7 +521,7 @@
 
         !rtb salt
         if (cs_db%num_salts > 0) then
-          if(salt_atmo) then
+          if(salt_atmo == "y") then
             call salt_rain !add salt in atmospheric deposition to soil profile
           endif
           call salt_roadsalt !add salt in applied road salt to soil profile
@@ -521,7 +530,7 @@
         
         !rtb cs
         if (cs_db%num_cs > 0) then
-          if(cs_atmo) then
+          if(cs_atmo == "y") then
             call cs_rain
           endif
           call cs_lch
@@ -786,7 +795,7 @@
         hpw_d(j)%nplnt = pl_mass(j)%tot_com%n
         hpw_d(j)%percn = percn(j)
         !rtb gwflow: store nitrate leaching concentration for gwflow module
-        if(bsn_cc%gwflow .and. gw_solute_flag) then
+        if(bsn_cc%gwflow == 1  .and. gw_solute_flag == 1) then
           gwflow_percsol(j,1) = percn(j)
         endif
         hpw_d(j)%pplnt = pl_mass(j)%tot_com%p
