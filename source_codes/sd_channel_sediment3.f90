@@ -24,8 +24,9 @@
       real :: pk_rto                !ratio          |peak to mean flow rate ratio
       real :: bd_fac                !               |bulk density factor for critical velocity calculation
       real :: cohes_fac             !               |cohesion factor for critical velocity calculation
-      !real :: qman                 !m^3/s or m/s   |flow rate or flow velocity
+      !real :: qman                  !m^3/s or m/s   |flow rate or flow velocity
       real :: vel, veg, vel_cr, rad_curv, vel_bend, vel_rch, arc_len, prot_len, h_rad
+      real :: fp_m2, exp_co, florate_ob
       
       ich = isdch
       iob = sp_ob1%chandeg + jrch - 1
@@ -62,16 +63,21 @@
       
       sd_ch(ich)%chn = 0.39 * sd_ch(ich)%chs ** 0.38 * h_rad ** -0.16
       sd_ch(ich)%chn = Min (0.15, sd_ch(ich)%chn)
-      sd_ch(ich)%chn = Max (0.03, sd_ch(ich)%chn)
+      sd_ch(ich)%chn = Max (0.02, sd_ch(ich)%chn)
       vel = h_rad ** .6666 * Sqrt(sd_ch(ich)%chs) / (sd_ch(ich)%chn + .001)
       !vel = peakrate / rcurv%xsec_area
       
       !! compute flood plain deposition
-      sd_ch(ich)%bankfull_flo = 1.75
+      sd_ch(ich)%bankfull_flo = 1.0
       bf_flow = sd_ch(ich)%bankfull_flo * ch_rcurv(ich)%elev(2)%flo_rate
-      if (peakrate > bf_flow) then
-        trap_eff = 0.24 * log(sd_ch(ich)%fp_inun_days) + 0.1
-        fp_dep%sed = trap_eff * ht1%sed 
+      florate_ob = peakrate - bf_flow
+      if (florate_ob > 0.) then
+        trap_eff = 0.12 * log(sd_ch(ich)%fp_inun_days) + 0.1
+        fp_m2 = 3. * sd_ch(ich)%chw * sd_ch(ich)%chl * 1000.
+        exp_co = 0.0007 * fp_m2 / florate_ob
+        trap_eff = (florate_ob / peakrate) * (1. - exp(-exp_co))
+        fp_dep%sed = trap_eff * ht1%sed
+        
         !! deposit Particulate P and N in the floodplain
         fp_dep%orgn = trap_eff * sd_ch(ich)%n_dep_enr * ht1%orgn
         fp_dep%sedp = trap_eff * sd_ch(ich)%p_dep_enr * ht1%sedp
@@ -79,6 +85,7 @@
         fp_dep%no3 = trap_eff * ht1%no3
         fp_dep%solp = trap_eff * ht1%solp
       end if
+      !fp_dep = hz !***jga
       ch_morph(ich)%fp_mm = ch_morph(ich)%fp_mm + fp_dep%sed
       
       ht2 = ht1 - fp_dep
@@ -142,7 +149,10 @@
       arc_len = 0.33 *  (12. * sd_ch(ich)%chw) * sd_ch(ich)%sinu
       prot_len = arc_len * sd_ch(ich)%arc_len_fr
       prot_len = 0.2 * sd_ch(ich)%chl * 1000.
-      ebank_t = ebank_m * sd_ch(ich)%chd * prot_len * sd_ch(ich)%ch_bd
+      !rad_curv = (12. * sd_ch(ich)%chw * sd_ch(ich)%sinu ** 1.5) /        &
+      !                                 (13. * (sd_ch(ich)%sinu - 0.999) ** 0.5)
+      !cutbank_adj = 2.57 - 0.36 * log(rad_curv / sd_ch(ich)%chw)
+      ebank_t = ebank_m * sd_ch(ich)%chd * sd_ch(ich)%arc_len_fr * prot_len * sd_ch(ich)%ch_bd
       ebank_t = 0.8 * ebank_t     !assume 80% wash load and 20% bed deposition
       ebank_t = max (0., ebank_t)
         

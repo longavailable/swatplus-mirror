@@ -1,5 +1,5 @@
 cal_parms.cal: master
- 216
+ 223
 name                       obj_typ       abs_min       abs_max             units  
 cn2                            hru      35.00000      95.00000              null  
 cn3_swf                        hru       0.00000       1.00000              null  
@@ -217,3 +217,10 @@ lai_pot                        plt       0.01000      12.00000               m/m
 harv_idx                       plt       0.01000       0.95000              null
 drawdown_days                  rdt       0.05000      5000.000              days
 withdraw_rate                  rdt       0.00000    100000.000              m3/s
+aquifer_K                      gwf        0.0001        40.0                m/day
+aquifer_Sy                     gwf        0.001         0.60                m3/m3
+aquifer_delay                  hru        0             1000                days
+aquifer_exdp                   gwf        0             4.0                 m
+stream_K                       gwf_riv    0.0000001     0.01                m/day
+stream_thk                     gwf_riv    0.01          2.0                 m 
+stream_bed                     gwf_sgl    0             20.0                m
