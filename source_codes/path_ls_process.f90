@@ -33,7 +33,6 @@
         isp_ini = hru(ihru)%dbs%soil_plant_init
         ipath_db = sol_plt_ini(isp_ini)%path
         hpath_bal(j)%path(ipath)%wash = 0.
-        bacdiegroplt_out = 0.
         
       do ipl = 1, pcom(j)%npl
         !! compute pathogen wash off
@@ -53,7 +52,6 @@
         cs_pl(j)%pl_on(ipl)%path(ipath) = Max(0., cs_pl(j)%pl_on(ipl)%path(ipath))
         if (cs_pl(j)%pl_on(ipl)%path(ipath) < path_db(ipath_db)%conc_min)                                   &
                                          cs_pl(j)%pl_on(ipl)%path(ipath) = path_db(ipath_db)%conc_min
-        bacdiegroplt_out = bacdiegroplt_out + (pl_ini - cs_pl(j)%pl_on(ipl)%path(ipath))
       end do
       
         !! compute pathogen die-off and re-growth in surface soil layer
@@ -65,6 +63,7 @@
         if (cs_soil(j)%ly(1)%path(ipath) < path_db(ipath_db)%conc_min) cs_soil(j)%ly(1)%path(ipath) = path_db(ipath_db)%conc_min
 
         bacdiegrosol_out = sol_ini - cs_soil(j)%ly(1)%path(ipath)
+        bacdiegroplt_out = pl_ini - cs_pl(j)%pl_on(ipl)%path(ipath)
         !! net die_off - negative is regrowth
         hpath_bal(j)%path(ipath)%die_off = bacdiegrosol_out + bacdiegroplt_out
         
