@@ -201,7 +201,8 @@
       real, dimension (:), allocatable :: hru_pump_yr       !           |
       real, dimension (:,:), allocatable :: hru_pump_mo_all !           |
       real, dimension (:,:), allocatable :: hru_pump_yr_all !           |
-      logical :: hru_pump_flag                              !           |
+      !logical :: hru_pump_flag !           |
+      integer :: hru_pump_flag
       integer :: in_hru_pump_obs                            !           |
       integer :: num_hru_pump_obs                           !           |
       integer, dimension (:), allocatable :: hru_pump_ids   !           |
@@ -327,7 +328,8 @@
       real, dimension (:), allocatable :: gw_obs_head           !     |
       integer :: gw_cell_obs_ss                                 !     |
       real, dimension (:), allocatable :: gw_cell_obs_ss_vals   !     |
-      logical :: usgs_obs                                       !     |
+      !logical :: usgs_obs!     |
+      integer :: usgs_obs
       real(8), dimension (:), allocatable :: usgs_id            !     |
       real, dimension (:,:), allocatable :: usgs_head_vals      !     |
       real, dimension (:,:), allocatable :: gw_obs_head_annual  !     |
@@ -337,7 +339,8 @@
       
       
       !variables for streamflow testing and output --------------------------------------------------------------------
-      logical stream_obs                                        !     |
+      !logical stream_obs!     |
+      integer :: stream_obs
       integer :: gw_num_obs_chan                                !     |
       integer :: num_months                                     !     |
       integer :: sim_month                                      !     |
@@ -493,7 +496,8 @@
                                           
       
       !variables specific to national model (NAM) ---------------------------------------------------------------------
-      logical  nat_model                                           !         |
+      !logical  nat_model!         |
+      integer :: nat_model
       integer, dimension (:), allocatable :: huc12_nhru            !         |
       integer, dimension (:), allocatable :: huc12_ncell           !         |
       integer, dimension (:), allocatable :: hrus_connected        !         |

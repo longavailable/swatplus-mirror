@@ -986,7 +986,7 @@
         read(in_gw,*) gw_tile_K
         read(in_gw,*) gw_tile_group_flag
         !read in tile cell groups (if any)
-        if(gw_tile_group_flag.eq.1) then
+        if(gw_tile_group_flag == 1) then
           read(in_gw,*) gw_tile_num_group
           allocate(gw_tile_groups(gw_tile_num_group,5000))
           do i=1,gw_tile_num_group
@@ -1430,7 +1430,7 @@
         endif
         !if salts active: read in salt mineral data (if provided)
         if(gwsol_salt == 1) then
-          inquire(file='gwflow.solutes.minerals',exist=gwsol_minl)
+          inquire(file='gwflow.solutes.minerals',exist=i_exist)
           if(gwsol_minl == 1) then
             open(in_gw_minl,file='gwflow.solutes.minerals')
             read(in_gw_minl,*) header
@@ -1593,7 +1593,7 @@
         open(out_sol_gwsw,file='gwflow_mass_gwsw')
         write(out_sol_gwsw,*) 'Annual gw-channel exchange mass (kg/day)'
         !ground-->soil transfer
-        if(gw_soil_flag.eq.1) then
+        if(gw_soil_flag == 1) then
           open(out_sol_soil,file='gwflow_mass_soil')
           write(out_sol_soil,*) 'Annual groundwater-->soil mass transfer (kg/day)'
         endif
@@ -1925,9 +1925,9 @@
         write(out_gwbal,*) 'wtdep:        m    average depth to water table for watershed'
         write(out_gwbal,*) 'ppdf:         mm   groundwater demand not satisfied for irrigation'
         write(out_gwbal,*)
-        gwflow_hdr_day = (/"year","day","ts","vbef","vaft","rech","gwet","gwsw","swgw","satx","soil", &
+        gwflow_hdr_day = [character(len=24) :: "year","day","ts","vbef","vaft","rech","gwet","gwsw","swgw","satx","soil", &
                                              "latl","bndr","ppag","ppex","tile","resv","wetl","canl", &
-                                             "fpln","error","satfr","wtdepth","ppdf"/)
+                                             "fpln","error","satfr","wtdepth","ppdf"]
         write(out_gwbal,119) (gwflow_hdr_day(j),j=1,24)
       endif
 
@@ -1959,8 +1959,8 @@
         write(out_gwbal_yr,*) 'fpln:      mm   floodplain exchange'
         write(out_gwbal_yr,*) 'ppdf:      mm   groundwater demand not satisfied for irrigation'
         write(out_gwbal_yr,*)
-        gwflow_hdr_yr = (/"  year","dvol","rech","gwet","gwsw","swgw","satx","soil","latl","bndr","ppag","ppex", &
-                                   "tile","resv","wetl","canl","fpln","ppdf"/)
+        gwflow_hdr_yr = [character(len=18) :: "  year","dvol","rech","gwet","gwsw","swgw","satx","soil","latl","bndr",  &
+              "ppag","ppex","tile","resv","wetl","canl","fpln","ppdf"]
         write(out_gwbal_yr,120) (gwflow_hdr_yr(j),j=1,18)
       endif
       
@@ -1992,8 +1992,8 @@
         write(out_gwbal_aa,*) 'fpln:      mm   floodplain exchange'
         write(out_gwbal_aa,*) 'ppdf:      mm   groundwater demand not satisfied for irrigation'
         write(out_gwbal_aa,*)
-        gwflow_hdr_aa = (/"  year","dvol","rech","gwet","gwsw","swgw","satx","soil","latl","bndr","ppag","ppex", &
-                                   "tile","resv","wetl","canl","fpln","ppdf"/)
+        gwflow_hdr_aa = [character(len=18) :: "  year","dvol","rech","gwet","gwsw","swgw","satx","soil",  &
+                     "latl","bndr","ppag","ppex","tile","resv","wetl","canl","fpln","ppdf"]
         write(out_gwbal_aa,120) (gwflow_hdr_aa(j),j=1,18)
       endif
       
@@ -2022,7 +2022,8 @@
       write(out_huc12wb,*) 'fplain:        mm   floodplain exchange'
       write(out_huc12wb,*) 'pump_def:      mm   groundwater demand not satisfied for irrigation'
       write(out_huc12wb,*)
-      gwflow_hdr_huc12 = (/"  HUC12","rech","gwet","gwsw","swgw","satex","gwsoil","lateral","pump_ag","pump_ex","tile","res","wet","canal","fplain","pump_def"/)
+      gwflow_hdr_huc12 = [character(len=16) :: "  HUC12","rech","gwet","gwsw","swgw","satex","gwsoil","lateral","pump_ag",  &
+              "pump_ex","tile","res","wet","canal","fplain","pump_def"]
       write(out_huc12wb,122) (gwflow_hdr_huc12(j),j=1,16)
       allocate(gw_huc12_wb(15,sp_ob%outlet))
       gw_huc12_wb = 0.
@@ -2049,7 +2050,8 @@
       write(out_huc12wb_mo,*) 'canal:         mm   canal seepage to groundwater'
       write(out_huc12wb_mo,*) 'fplain:        mm   floodplain exchange'
       write(out_huc12wb_mo,*)
-      gwflow_hdr_huc12_mo = (/"year","month","  HUC12","rech","gwet","gwsw","swgw","satex","gwsoil","lateral","pump_ag","pump_ex","tile","res","wet","canal","fplain","pump_def"/)
+      gwflow_hdr_huc12_mo = [character(len=18) :: "year","month","  HUC12","rech","gwet","gwsw","swgw","satex",  &
+          "gwsoil","lateral","pump_ag","pump_ex","tile","res","wet","canal","fplain","pump_def"]
       write(out_huc12wb_mo,122) (gwflow_hdr_huc12_mo(j),j=1,18)
       allocate(gw_huc12_wb_mo(15,sp_ob%outlet))
       gw_huc12_wb_mo = 0.
@@ -2135,8 +2137,8 @@
             write(out_solbal_dy+n,*) 'fpln:      kg   solute mass in floodplain exchange'
             write(out_solbal_dy+n,*) 'error:     --   mass balance error for aquifer'
             write(out_solbal_dy+n,*)
-            sol_hdr_day = (/"  year","   day","ts","mbef","maft","rech","gwsw","swgw","satx","soil","advn", &
-                            "disp","rcti","rcto","minl","sorb","ppag","ppex","tile","resv","wetl","canl","fpln","error"/)
+            sol_hdr_day = [character(len=24) :: "  year","   day","ts","mbef","maft","rech","gwsw","swgw","satx","soil","advn", &
+                            "disp","rcti","rcto","minl","sorb","ppag","ppex","tile","resv","wetl","canl","fpln","error"]
             write(out_solbal_dy+n,119) (sol_hdr_day(j),j=1,24)
           endif
 
@@ -2170,8 +2172,8 @@
             write(out_solbal_yr+n,*) 'canl:     kg   solute mass loaded to groundwater from canal seepage'
             write(out_solbal_yr+n,*) 'fpln:     kg   solute mass in floodplain exchange'
             write(out_solbal_yr+n,*)
-            sol_hdr_yr = (/"  year","delm","rech","gwsw","swgw","satx","soil","advn","disp","rcti","rcto","minl", &
-                           "sorb","ppag","ppex","tile","resv","wetl","canl","fpln"/)
+            sol_hdr_yr = [character(len=20) :: "  year","delm","rech","gwsw","swgw","satx","soil","advn","disp",  &
+                "rcti","rcto","minl","sorb","ppag","ppex","tile","resv","wetl","canl","fpln"]
             write(out_solbal_yr+n,120) (sol_hdr_yr(j),j=1,20)
             !zero out yearly arrays
             sol_grid_chng_yr(n) = 0.
@@ -2225,8 +2227,8 @@
             write(out_solbal_aa+n,*) 'canl:      kg   solute mass loaded to groundwater from canal seepage'
             write(out_solbal_aa+n,*) 'fpln:      kg   solute mass in floodplain exchange'
             write(out_solbal_aa+n,*)
-            sol_hdr_aa = (/"  year","delm","rech","gwsw","swgw","satx","soil","advn","disp","rcti","rcto","minl", &
-                               "sorb","ppag","ppex","tile","resv","wetl","canl","fpln"/)
+            sol_hdr_aa = [character(len=20) :: "  year","delm","rech","gwsw","swgw","satx","soil","advn","disp",  &
+                "rcti","rcto","minl","sorb","ppag","ppex","tile","resv","wetl","canl","fpln"]
             write(out_solbal_aa+n,120) (sol_hdr_aa(j),j=1,20)
             !zero out yearly arrays
             sol_grid_chng_tt(n) = 0.
@@ -2413,7 +2415,8 @@
       write(out_hyd_sep,*) 'chan_satexsw:  channel flow contributed from saturation excess runoff' 
       write(out_hyd_sep,*) 'chan_tile:     channel flow contributed from tile drain flow' 
       write(out_hyd_sep,*)
-      hydsep_hdr = (/"  year","   day","channel","chan_surf","chan_lat","chan_gwsw","chan_swgw","chan_satexgw","chan_satexsw","chan_tile"/)
+      hydsep_hdr = [character(len=10) :: "  year","   day","channel","chan_surf","chan_lat","chan_gwsw","chan_swgw",  &
+               "chan_satexgw","chan_satexsw","chan_tile"]
       write(out_hyd_sep,121) (hydsep_hdr(j),j=1,10)      
       
       !gwflow record file (skip line)

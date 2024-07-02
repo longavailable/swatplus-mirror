@@ -84,7 +84,7 @@
             cell_rech_volume = rech_volume * lsu_cells_fract(k,i)
             gw_ss(cell_id)%rech = gw_ss(cell_id)%rech + cell_rech_volume
             gw_ss_sum(cell_id)%rech = gw_ss_sum(cell_id)%rech + cell_rech_volume
-            if(gw_solute_flag.eq.1) then
+            if(gw_solute_flag == 1) then
               do s=1,gw_nsolute !loop through the solutes
                 cell_rech_solmass(s) = rech_solmass(s) * lsu_cells_fract(k,i)  
                 gwsol_ss(cell_id)%solute(s)%rech = gwsol_ss(cell_id)%solute(s)%rech + cell_rech_solmass(s)

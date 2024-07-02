@@ -40,6 +40,7 @@
       use mgt_operations_module
       use hru_module, only : hru, ihru, ipl, phubase, yr_skip
       use plant_module
+      use soil_module
       use time_module
       use climate_module
       use basin_module
@@ -75,7 +76,6 @@
       integer :: mo                  !              |
       integer :: day_mo              !              |
       integer :: iwallo, imallo
-      
       time%yrc = time%yrc_start
       
       !! generate precip for the first day - %precip_next

@@ -148,7 +148,7 @@
       !retrieve information for tile cell groups
       if (gw_tile_flag == 1) then
         !computer flow rate and solute concentration for the tile cell groups
-        if(gw_tile_group_flag.eq.1) then
+        if(gw_tile_group_flag == 1) then
           do i=1,gw_tile_num_group
             sum_tile(i) = 0.
             do j=1,num_tile_cells(i)
@@ -410,7 +410,8 @@
                   area = min(area1,area2) !smaller of the two
                   conn_length = sqrt(area)
                   do s=1,gw_nsolute !loop through the solutes
-                    mass_dsp(s) = mass_dsp(s) + (gw_long_disp * ((gwsol_state(cell_id)%solute(s)%conc - gwsol_state(i)%solute(s)%conc)/conn_length) * face_sat) !g
+                    mass_dsp(s) = mass_dsp(s) + (gw_long_disp * ((gwsol_state(cell_id)%solute(s)%conc -   &
+                       gwsol_state(i)%solute(s)%conc)/conn_length) * face_sat) !g
                   enddo
                 enddo !go to next connected cell
                 
@@ -422,12 +423,14 @@
                 
                 !calculate change in mass (g)
                 do s=1,gw_nsolute !loop through the solutes
-                  m_change(s) = (mass_adv(s) + mass_dsp(s) + mass_rct(s) + mass_min(s) + gwsol_ss(i)%solute(s)%totl) * (gw_trans_time_step/gwsol_sorb(s))    
+                  m_change(s) = (mass_adv(s) + mass_dsp(s) + mass_rct(s) + mass_min(s) + gwsol_ss(i)%solute(s)%totl) * &
+                     (gw_trans_time_step/gwsol_sorb(s))    
                 enddo
                   
                 !calculate mass removed due to sorption (g)
                 do s=1,gw_nsolute !loop through the solutes
-                  del_no_sorp = (mass_adv(s) + mass_dsp(s) + mass_rct(s) + mass_min(s) + gwsol_ss(i)%solute(s)%totl) * gw_trans_time_step
+                  del_no_sorp = (mass_adv(s) + mass_dsp(s) + mass_rct(s) + mass_min(s) + gwsol_ss(i)%solute(s)%totl) * &
+                     gw_trans_time_step
                   mass_sorb(s) = del_no_sorp - m_change(s)     
                 enddo
                   
@@ -470,11 +473,14 @@
                 !track for annual write-out
                 do s=1,gw_nsolute !loop through the solutes
                   if(mass_rct(s) > 0) then
-                    gwsol_ss_sum(i)%solute(s)%rcti = gwsol_ss_sum(i)%solute(s)%rcti + (mass_rct(s)*(gw_trans_time_step/gwsol_sorb(s))) !produced
+                    gwsol_ss_sum(i)%solute(s)%rcti = gwsol_ss_sum(i)%solute(s)%rcti + &
+                       (mass_rct(s)*(gw_trans_time_step/gwsol_sorb(s))) !produced
                   else
-                    gwsol_ss_sum(i)%solute(s)%rcto = gwsol_ss_sum(i)%solute(s)%rcto + (mass_rct(s)*(gw_trans_time_step/gwsol_sorb(s))) !consumed
+                    gwsol_ss_sum(i)%solute(s)%rcto = gwsol_ss_sum(i)%solute(s)%rcto + &
+                       (mass_rct(s)*(gw_trans_time_step/gwsol_sorb(s))) !consumed
                   endif
-                  gwsol_ss_sum(i)%solute(s)%minl = gwsol_ss_sum(i)%solute(s)%minl + (mass_min(s)*(gw_trans_time_step/gwsol_sorb(s)))
+                  gwsol_ss_sum(i)%solute(s)%minl = gwsol_ss_sum(i)%solute(s)%minl + &
+                     (mass_min(s)*(gw_trans_time_step/gwsol_sorb(s)))
                   gwsol_ss_sum(i)%solute(s)%sorb = gwsol_ss_sum(i)%solute(s)%sorb + mass_sorb(s)
                 enddo
 
@@ -1317,7 +1323,7 @@
         endif
         write(out_lateral,*)
         !tile drain flow
-        if(gw_tile_flag.eq.1) then
+        if(gw_tile_flag == 1) then
         write(out_gw_tile,*) 'Tile Drain Outflow Volumes for:',time%yrc
         if(grid_type == "structured") then
           grid_val = 0.
@@ -1647,7 +1653,7 @@
           enddo
         endif
         !chemical reaction (consumed = negative values)
-        if(gw_solute_flag) then !solute mass flux
+        if(gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_rcto,*) gwsol_nm(s),'chem. reaction flux for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1669,7 +1675,7 @@
           enddo
         endif
         !precipitation-dissolution
-        if(gw_solute_flag) then !solute mass flux
+        if(gw_solute_flag == 1) then !solute mass flux
           do s=1,gw_nsolute
             write(out_sol_minl,*) gwsol_nm(s),'mineral dissolved mass for year (kg/day):',time%yrc
             if(grid_type == "structured") then
@@ -1896,11 +1902,11 @@
             sol_grid_fpln_tt(s) = sol_grid_fpln_tt(s) / time%nbyr
             if(gwflag_aa.eq.1) then
               write(out_solbal_aa+s,105) time%yrc, &
-                                        sol_grid_chng_tt(s),sol_grid_rech_tt(s),sol_grid_gwsw_tt(s),sol_grid_swgw_tt(s),sol_grid_satx_tt(s), &
-                                        sol_grid_soil_tt(s),sol_grid_advn_tt(s),sol_grid_disp_tt(s), &
-                                        sol_grid_rcti_tt(s),sol_grid_rcto_tt(s),sol_grid_minl_tt(s),sol_grid_sorb_tt(s), &
-                                        sol_grid_ppag_tt(s),sol_grid_ppex_tt(s),sol_grid_tile_tt(s),sol_grid_resv_tt(s),sol_grid_wetl_tt(s), &
-                                        sol_grid_canl_tt(s),sol_grid_fpln_tt(s)
+                                        sol_grid_chng_tt(s),sol_grid_rech_tt(s),sol_grid_gwsw_tt(s),sol_grid_swgw_tt(s),  &
+                                        sol_grid_satx_tt(s),sol_grid_soil_tt(s),sol_grid_advn_tt(s),sol_grid_disp_tt(s),  &
+                                        sol_grid_rcti_tt(s),sol_grid_rcto_tt(s),sol_grid_minl_tt(s),sol_grid_sorb_tt(s),  &
+                                        sol_grid_ppag_tt(s),sol_grid_ppex_tt(s),sol_grid_tile_tt(s),sol_grid_resv_tt(s),  &
+                                        sol_grid_wetl_tt(s),sol_grid_canl_tt(s),sol_grid_fpln_tt(s)
             endif
           enddo !next solute
         endif
@@ -2048,7 +2054,8 @@
             write(out_gwobs_usgs,*) 'MAE (m), SAT/MAE per well, #Meas per well'
             write(out_gwobs_usgs,*) 'Observed values - Simulated values'
             do k=1,gw_num_obs_wells
-              write(out_gwobs_usgs,116) usgs_id(k),head_mae_well(k,1),head_mae_well(k,2),sat_div_well(k,1),sat_div_well(k,2),num_gw_meas_well(k,1),num_gw_meas_well(k,2)
+              write(out_gwobs_usgs,116) usgs_id(k),head_mae_well(k,1),head_mae_well(k,2),sat_div_well(k,1),sat_div_well(k,2),  &
+                 num_gw_meas_well(k,1),num_gw_meas_well(k,2)
             enddo
           endif
           write(out_gwobs_usgs,*)
@@ -2057,7 +2064,8 @@
             write_yr = time%yrc_start
             usgs_yr = time%yrc_start - 1920 + 1 !get the right year from the USGS data set
             do j=1,time%nbyr
-              write(out_gwobs_usgs,110) write_yr,usgs_id(k),gw_obs_cells(k),usgs_head_vals(k,usgs_yr),sim_head_vals(k,j),sim_sat_vals(k,j)
+              write(out_gwobs_usgs,110) write_yr,usgs_id(k),gw_obs_cells(k),usgs_head_vals(k,usgs_yr),  &
+                 sim_head_vals(k,j),sim_sat_vals(k,j)
               write_yr = write_yr + 1
               usgs_yr = usgs_yr + 1
             enddo
@@ -2155,7 +2163,8 @@
             write(out_strobs,*) 'Statistics for specified channels'
             write(out_strobs,*) 'Channel, count, NSE, NSE1, NNSE, PBIAS, KGE'
             do i=1,gw_num_obs_chan
-              write(out_strobs,114) obs_channels(i),month_count,stream_nse(i,1),stream_nse1(i,1),stream_nnse(i,1),stream_pbias(i,1),stream_kg(i,1)
+              write(out_strobs,114) obs_channels(i),month_count,stream_nse(i,1),stream_nse1(i,1),stream_nnse(i,1),  &
+                 stream_pbias(i,1),stream_kg(i,1)
             enddo
           else !calculate statistics for calibration and testing periods
             num_months_calb = 12 * gw_flow_cal_yrs
@@ -2283,7 +2292,8 @@
                 sum_den2 = 0.
                 do j=1,num_months
                   if(obs_flow_vals(i,j+num_months_calb).gt.0) then
-                    sum_num = sum_num + ((obs_flow_vals(i,j+num_months_calb)-mean_obs_flow)*(sim_flow_vals(i,j+num_months_calb)-mean_sim_flow))
+                    sum_num = sum_num + ((obs_flow_vals(i,j+num_months_calb)-mean_obs_flow)*  &
+                       (sim_flow_vals(i,j+num_months_calb)-mean_sim_flow))
                     sum_den1 = sum_den1 + (obs_flow_vals(i,j+num_months_calb) - mean_obs_flow)**2
                     sum_den2 = sum_den2 + (sim_flow_vals(i,j+num_months_calb) - mean_sim_flow)**2
                   endif
@@ -2308,8 +2318,10 @@
             write(out_strobs,*) 'Statistics for specified channels (calib/testing)'
             write(out_strobs,*) 'Channel, count, NSE, NSE1, NNSE, PBIAS, KGE'
             do i=1,gw_num_obs_chan
-              write(out_strobs,114) obs_channels(i),month_count_calb,stream_nse(i,1),stream_nse1(i,1),stream_nnse(i,1),stream_pbias(i,1),stream_kg(i,1)
-              write(out_strobs,114) obs_channels(i),month_count_test,stream_nse(i,2),stream_nse1(i,2),stream_nnse(i,2),stream_pbias(i,2),stream_kg(i,2)
+              write(out_strobs,114) obs_channels(i),month_count_calb,stream_nse(i,1),stream_nse1(i,1),stream_nnse(i,1),  &
+                 stream_pbias(i,1),stream_kg(i,1)
+              write(out_strobs,114) obs_channels(i),month_count_test,stream_nse(i,2),stream_nse1(i,2),stream_nnse(i,2),  &
+                 stream_pbias(i,2),stream_kg(i,2)
             enddo         
           endif
           write(out_strobs,*)
@@ -2334,7 +2346,7 @@
         
         !if soft calibration, prepare for next simulation 
         sim_month = 1
-        if(stream_obs) then
+        if(stream_obs == 1) then
           deallocate(stream_nse)
           deallocate(stream_nse1)
           deallocate(stream_nnse)

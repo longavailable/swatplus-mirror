@@ -18,9 +18,11 @@
       use ch_salt_module, only : chsalt_d
       use gwflow_module, only : gw_solute_flag,gwsol_ss,ncell,gw_state,gwsol_state
 
-      integer :: i,m,ob_ctr,num_days
+      implicit none
+      
+      integer :: i,m,ob_ctr,num_days,jj
       real :: saltsum,hru_area_m2,sol_thick,soil_volume,soil_mass, &
-              aquifer_thickness,aquifer_volume,aquifer_mass, sub_ha
+              aquifer_thickness,aquifer_volume,aquifer_mass, sub_ha, soil_thick
       real :: sum_conc,avg_conc(cs_db%num_salts),sum_load,avg_load(11)
       real :: salt_basin(28)
 
